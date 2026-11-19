@@ -20,9 +20,9 @@ class Boundary extends React.Component {
   render() {
     return this.state.error ? (
       <div className="fatal-error">
-        <h1>工作台暂时无法打开</h1>
+        <h1>Could not open the workspace</h1>
         <p>{this.state.error.message}</p>
-        <button onClick={() => location.reload()}>重新加载</button>
+        <button onClick={() => location.reload()}>Reload</button>
       </div>
     ) : (
       this.props.children

@@ -87,7 +87,7 @@ func injectBuildCommit(html string) string {
 	// The CSP allows style-src 'unsafe-inline' and forbids inline scripts.
 	label := fmt.Sprintf(
 		`<style>.loopforge-build{position:fixed;right:12px;bottom:8px;z-index:35;margin:0;font:11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.02em;color:#7c7c82;user-select:text}</style><span class="loopforge-build" title="%s">%s</span></body>`,
-		htmlpkg.EscapeString("镜像版本 "+full),
+		htmlpkg.EscapeString("Build "+full),
 		htmlpkg.EscapeString(short),
 	)
 	return strings.Replace(html, "</body>", label, 1)

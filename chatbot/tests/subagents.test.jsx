@@ -26,7 +26,7 @@ describe("dispatched subagents", () => {
     expect(dispatch.agentId).toBe("agent-aaa");
     expect(dispatch.children.map((step) => step.kind)).toEqual(["thinking", "tool", "text"]);
     expect(dispatch.children[2].text).toBe("已补 3 个用例");
-    expect(activityFace(dispatch).done).toBe("「测试工程师」已完成");
+    expect(activityFace(dispatch).done).toBe("“测试工程师” finished");
   });
 
   test("a resumed agent keeps one entry across turns", () => {
@@ -70,15 +70,15 @@ describe("dispatched subagents", () => {
     );
     const view = render(panel());
     // No tab of its own: subagents are a section of the artifacts list.
-    expect(screen.queryByRole("tab", { name: /子 Agent/ })).toBeNull();
-    expect(screen.getByRole("heading", { name: "子 Agent" })).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: /Subagent/ })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Subagent" })).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: /测试工程师/ }));
     view.rerender(panel());
     // Like an SOP node: the task it was given, then its report, once.
-    expect(screen.getByRole("tab", { name: /会话过程/ })).toBeTruthy();
-    expect(screen.getByLabelText("收到的任务").textContent).toContain("给 a.go 补单测");
+    expect(screen.getByRole("tab", { name: /Conversation activity/ })).toBeTruthy();
+    expect(screen.getByLabelText("Assigned task").textContent).toContain("给 a.go 补单测");
     expect(screen.getAllByText("用例都通过了")).toHaveLength(1);
-    await userEvent.click(screen.getByRole("tab", { name: /产物 1/ }));
+    await userEvent.click(screen.getByRole("tab", { name: /Artifacts 1/ }));
     await userEvent.click(screen.getByRole("button", { name: /测试报告/ }));
     expect(setSelected).toHaveBeenLastCalledWith(report);
   });
@@ -149,7 +149,7 @@ describe("dispatched subagents", () => {
         <ArtifactPanel artifacts={[]} runs={[]} selected={null} setSelected={vi.fn()} chat={chat} onClose={vi.fn()} open />
       </div>,
     );
-    await userEvent.type(screen.getByRole("searchbox", { name: "搜索产物" }), "hy4flash");
+    await userEvent.type(screen.getByRole("searchbox", { name: "Search artifacts" }), "hy4flash");
     expect(screen.getByRole("button", { name: /测试工程师/ })).toBeTruthy();
   });
 
@@ -175,11 +175,11 @@ describe("dispatched subagents", () => {
     );
     const view = render(panel());
     const card = screen.getByRole("button", { name: /测试工程师/ });
-    expect(card.textContent).toContain("已完成 · 模型 claude-opus-4-5");
+    expect(card.textContent).toContain("Completed · Model claude-opus-4-5");
     await userEvent.click(card);
     view.rerender(panel());
-    expect(screen.getByLabelText("运行模型").textContent).toBe("模型 · claude-opus-4-5");
-    expect(screen.getByText("已完成 · claude-opus-4-5")).toBeTruthy();
+    expect(screen.getByLabelText("Model").textContent).toBe("Model · claude-opus-4-5");
+    expect(screen.getByText("Completed · claude-opus-4-5")).toBeTruthy();
   });
 });
 
@@ -212,9 +212,9 @@ describe("role deliverables", () => {
     const view = render(panel());
     await userEvent.click(screen.getByRole("button", { name: /前端归档/ }));
     view.rerender(panel());
-    const tabs = screen.getAllByRole("tab", { name: /产物 2/ });
+    const tabs = screen.getAllByRole("tab", { name: /Artifacts 2/ });
     await userEvent.click(tabs[tabs.length - 1]);
-    expect(screen.getByText("缺少必需交付物")).toBeTruthy();
+    expect(screen.getByText("Required deliverable missing")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: /archive\.md/ }));
     expect(setSelected).toHaveBeenLastCalledWith(archive);
   });
@@ -252,11 +252,11 @@ describe("a resumed role's deliverable", () => {
       projects: [],
     };
     render2(chat, [first]);
-    const tabs = screen.getAllByRole("tab", { name: /产物 1/ });
+    const tabs = screen.getAllByRole("tab", { name: /Artifacts 1/ });
     await userEvent.click(tabs[tabs.length - 1]);
     // One row for the file, the latest dispatch's, not openable yet.
     expect(screen.getAllByText("archive.md")).toHaveLength(1);
-    expect(screen.getByText("交付物 · 回复完成后可打开")).toBeTruthy();
+    expect(screen.getByText("Deliverable · available after the reply")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /archive\.md/ })).toBeNull();
   });
 
@@ -272,7 +272,7 @@ describe("a resumed role's deliverable", () => {
       projects: [],
     };
     const setSelected = render2(chat, [first, second]);
-    const tabs = screen.getAllByRole("tab", { name: /产物 1/ });
+    const tabs = screen.getAllByRole("tab", { name: /Artifacts 1/ });
     await userEvent.click(tabs[tabs.length - 1]);
     await userEvent.click(screen.getByRole("button", { name: /archive\.md/ }));
     expect(setSelected).toHaveBeenLastCalledWith(second);
@@ -317,12 +317,12 @@ describe("a resume that did not take", () => {
       </div>
     );
     const view = render(panel(chat([start])));
-    expect(screen.getAllByLabelText("收到的任务").map((el) => el.textContent).join("|")).toContain("再补一行");
+    expect(screen.getAllByLabelText("Assigned task").map((el) => el.textContent).join("|")).toContain("再补一行");
     view.rerender(panel(chat([start, { kind: "toolDone", id: "c2", agentId: "agent-new", output: "补好了", at }])));
     expect(setSelected).toHaveBeenLastCalledWith(expect.objectContaining({ agentKey: "agent-new", dispatchId: "c2" }));
     view.rerender(panel(chat([start, { kind: "toolDone", id: "c2", agentId: "agent-new", output: "补好了", at }])));
-    expect(screen.getByRole("note").textContent).toContain("复用未生效");
-    expect(screen.getByLabelText("收到的任务").textContent).toContain("再补一行");
+    expect(screen.getByRole("note").textContent).toContain("Could not resume");
+    expect(screen.getByLabelText("Assigned task").textContent).toContain("再补一行");
   });
 });
 
@@ -368,7 +368,7 @@ describe("an opened new subagent", () => {
     const view = render(panel(running));
     await userEvent.click(screen.getByRole("button", { name: /前端/ }));
     view.rerender(panel(running));
-    expect(screen.getByLabelText("收到的任务").textContent).toContain("看 chatbot 入口");
+    expect(screen.getByLabelText("Assigned task").textContent).toContain("看 chatbot 入口");
     const finished = {
       ...running,
       busy: false,
@@ -382,7 +382,7 @@ describe("an opened new subagent", () => {
       },
     };
     view.rerender(panel(finished));
-    expect(screen.queryByText("正在加载…")).toBeNull();
+    expect(screen.queryByText("Loading…")).toBeNull();
     expect(screen.getByText("入口在 main.jsx")).toBeTruthy();
   });
 });

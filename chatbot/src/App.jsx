@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import React, {
   useCallback,
   useEffect,
@@ -91,9 +92,9 @@ import {
 } from "./theme.js";
 
 const THEME_OPTIONS = [
-  { value: "light", label: "浅色" },
-  { value: "dark", label: "深色" },
-  { value: "system", label: "跟随系统" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "Match system" },
 ];
 const environmentVisibilityKey = "agentflow.native-chat.environmentVisibility.v1";
 const sidebarWidthKey = "agentflow.sidebarWidth";
@@ -153,9 +154,9 @@ const homeStarters = [
     id: "quick-access",
     icon: "sparkles",
     tone: "blue",
-    title: "快速接入",
-    description: "提供最低限度的鉴权与仓库，用默认角色与 SOP 立即开始。",
-    steps: ["鉴权", "仓库", "默认 SOP"],
+    title: "Quick setup",
+    description: "Connect your credentials and repository to get started with the default roles and SOPs.",
+    steps: ["Auth", "Repository", "Default SOP"],
   },
   // New users asked how to hook up a test environment and how roles and SOPs
   // work; these two cards start a guided conversation instead of dropping them
@@ -164,21 +165,21 @@ const homeStarters = [
     id: "environment",
     icon: "terminal",
     tone: "violet",
-    title: "接入测试环境",
-    description: "助手先查执行机器、镜像和沙箱，再按缺口一步步带你配好。",
-    steps: ["执行机器", "镜像", "沙箱"],
+    title: "Connect a test environment",
+    description: "The assistant checks your runners, images, and sandboxes and guides you through any missing setup.",
+    steps: ["Runners", "Image", "Sandboxes"],
     prompt:
-      "带我一步步接入测试环境：先查看当前项目已有的执行机器、容器镜像、环境脚本和沙箱，告诉我还缺什么、按什么顺序配、每一步在哪里操作；能由你提交的配置，直接起草出来给我。",
+      "Help me connect a test environment. Check this project's runners, container images, setup scripts, and sandboxes. List what is missing and where to configure it, in order. Draft any settings you can prepare.",
   },
   {
     id: "sop",
     icon: "workflow",
     tone: "green",
-    title: "选用 SOP 与角色",
-    description: "了解产品、前端、后端三套交付 SOP 和其中的角色，按需求推荐一套。",
-    steps: ["产品", "前端", "后端"],
+    title: "Choose an SOP and roles",
+    description: "Compare the product, frontend, and backend delivery SOPs and recommend one for this requirement.",
+    steps: ["Product", "Frontend", "Backend"],
     prompt:
-      "我准备写需求了。平台内置的产品、前端、后端交付 SOP 分别适合什么场景、好在哪里、里面有哪些角色？请结合当前项目推荐一套，并告诉我怎么绑定和派发第一条需求。我的需求是：",
+      "Which built-in product, frontend, or backend delivery SOP fits this project? Explain its roles and how to link and dispatch my first requirement. My requirement is: ",
   },
 ];
 
@@ -241,9 +242,9 @@ function AssistantTurn({ message, steps, assets, projectId, sessionId, local, re
       {message.failure && message.generationId && !local ? (
         <GenerationDiagnostics sessionId={sessionId} generationId={message.generationId} failure={message.failure} onCLIInstall={onCLIInstall} readOnly={readOnly} />
       ) : message.unfinished ? (
-        <p className="reply-stopped">本轮未完成 · {message.unfinished}</p>
+        <p className="reply-stopped">Turn incomplete · {message.unfinished}</p>
       ) : reply.stopped ? (
-        <p className="reply-stopped">已停止，以上是停止前的内容。</p>
+        <p className="reply-stopped">Stopped. The partial reply is shown above.</p>
       ) : null}
     </>
   );
@@ -289,8 +290,8 @@ function LiveMessage({ live, generation, finished = false, local = false, readOn
       {finished ? (
         <p className="reply-stopped">
           {generation?.status === "failed" && generation?.error
-            ? generation.error
-            : "已停止，以上是停止前的内容。"}
+            ? englishMessage(generation.error)
+            : "Stopped. The partial reply is shown above."}
         </p>
       ) : null}
     </div>
@@ -306,7 +307,7 @@ function readIssueMention() {
 export default function App() {
   const realChat = useChat();
   const chat = useLocalConversations(realChat);
-  const sessionTitle = chat.session?.displayTitle || chat.session?.title || "新对话";
+  const sessionTitle = chat.session?.displayTitle || chat.session?.title || "New chat";
   const titleReveal = useTitleReveal(
     chat.session?.id,
     sessionTitle,
@@ -463,10 +464,10 @@ export default function App() {
   const projectName =
     chat.projects.find((p) => p.id === chat.projectId)?.name ||
     (chat.projectId && (chat.session?.projectName || chat.projectId)) ||
-    "个人对话";
+    "Personal chat";
   const selectedModel = chat.models.find((m) => m.id === chat.model) || (!chat.local ? chat.modelDetails : null);
   const modelLabel =
-    selectedModel?.name?.replace(/^Claude-/, "").replace(/^GPT-/, "") || "模型";
+    selectedModel?.name?.replace(/^Claude-/, "").replace(/^GPT-/, "") || "Model";
   // The CLI switch is only for a conversation that has not started. A reply
   // in flight, or one already saved, keeps that CLI; another CLI needs a new chat.
   const lockedExecutorId = chat.session
@@ -484,7 +485,7 @@ export default function App() {
   const projectActions = [
     {
       id: "new-project",
-      label: "新建项目",
+      label: "New project",
       icon: "plus",
       onSelect: () => setQuickAccessOpen(true),
     },
@@ -493,7 +494,7 @@ export default function App() {
     const project = chat.projects.find((p) => p.id === id);
     if (project && !canChatInProject(project, chat.user)) {
       chat.setError(
-        `你还不是「${project.name}」的成员，不能在这个项目里对话。请项目 Owner 把你加入项目，或先用「个人对话」。`,
+        `You are not a member of “${project.name}”. Ask the project owner to add you, or use Personal chat.`,
       );
       return;
     }
@@ -577,7 +578,7 @@ export default function App() {
         JSON.stringify({ text, attachments, references }),
       );
     } catch {
-      chat.setError("浏览器存储空间不足，草稿仍保留在当前页面。请移除较大的附件后重试。");
+      chat.setError("Browser storage is full. Your draft is still on this page. Remove a large attachment and try again.");
     }
   }, [text, attachments, references, draftKey, chat.user?.id]);
   // A requirement handed over by the workbench ("创建并去对话澄清") opens a
@@ -824,14 +825,14 @@ export default function App() {
   async function upload(files) {
     if (!files.length) return;
     if (files.length + attachments.length > 8) {
-      chat.setError("每轮最多上传 8 个文件。");
+      chat.setError("You can upload up to 8 files per turn.");
       return;
     }
     setUploading(true);
     try {
       const results = [];
       for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) throw Error("单个附件不能超过 10 MB");
+        if (file.size > 10 * 1024 * 1024) throw Error("Each attachment must be 10 MB or smaller.");
         // Show the picture as soon as it is pasted or dropped. A filename
         // chip alone leaves people unable to tell which screenshot is queued.
         const previewURL =
@@ -841,7 +842,7 @@ export default function App() {
         const slot = previewURL
           ? {
               id: localId("pending"),
-              name: file.name || "粘贴的图片",
+              name: file.name || "Pasted image",
               mimeType: file.type,
               size: file.size,
               previewURL,
@@ -854,7 +855,7 @@ export default function App() {
               const reader = new FileReader();
               reader.onload = () => resolve(reader.result);
               reader.onerror = () =>
-                reject(Error("文件读取失败，请重新选择。"));
+                reject(Error("Could not read the file. Select it again."));
               reader.readAsDataURL(file);
             });
             results.push({
@@ -908,7 +909,7 @@ export default function App() {
   // rides along as a reference chip, without a token in the text.
   function addElementReference(ref) {
     if (references.length >= 12) {
-      chat.setError("每轮最多引用 12 个对象。");
+      chat.setError("You can reference up to 12 items per turn.");
       return;
     }
     setReferences((old) => [...old, ref]);
@@ -919,7 +920,7 @@ export default function App() {
       references.length >= 12 &&
       !references.some((x) => x.type === ref.type && x.id === ref.id)
     ) {
-      chat.setError("每轮最多引用 12 个对象。");
+      chat.setError("You can reference up to 12 items per turn.");
       return;
     }
     const value = insertMention(text, mention, ref);
@@ -1065,10 +1066,10 @@ export default function App() {
           if (innerWidth < 850) setSidebar(false);
         }}
       >
-        <span>{s.displayTitle || s.title || "新对话"}</span>
+        <span>{s.displayTitle || s.title || "New chat"}</span>
         {scheduledSession(s) ? (
-          <span className="session-project-tag session-source-tag" title="定时任务产生的会话">
-            定时
+          <span className="session-project-tag session-source-tag" title="Conversation started by a scheduled task">
+            Scheduled
           </span>
         ) : null}
         {options.projectName ? (
@@ -1078,7 +1079,7 @@ export default function App() {
           <span
             className="session-run"
             data-run-state={runState.state}
-            title={`运行状态：${runState.label}`}
+            title={`Run status: ${runState.label}`}
           >
             {runState.label}
           </span>
@@ -1108,7 +1109,7 @@ export default function App() {
         >
           <button role="menuitem" onClick={() => togglePin(s.id)}>
             <HarnessIcon name="pin" size={15} />
-            {pinned.includes(s.id) ? "取消置顶" : "置顶"}
+            {pinned.includes(s.id) ? "Unpin" : "Pin"}
           </button>
           <button
             role="menuitem"
@@ -1118,7 +1119,7 @@ export default function App() {
             }}
           >
             <HarnessIcon name="edit" size={15} />
-            重命名
+            Rename
           </button>
           {!s.shared ? (
             <>
@@ -1130,7 +1131,7 @@ export default function App() {
                 }}
               >
                 <HarnessIcon name="history" size={15} />
-                {archived ? "恢复会话" : "归档"}
+                {archived ? "Restore conversation" : "Archive"}
               </button>
               <button
                 role="menuitem"
@@ -1141,7 +1142,7 @@ export default function App() {
                 }}
               >
                 <HarnessIcon name="trash" size={15} />
-                删除
+                Delete
               </button>
             </>
           ) : null}
@@ -1174,7 +1175,7 @@ export default function App() {
         <button
           className="brand-home"
           onClick={startNewChat}
-          aria-label="LoopForge 首页"
+          aria-label="LoopForge home"
           inert={!sidebar}
           aria-hidden={!sidebar || undefined}
         >
@@ -1186,7 +1187,7 @@ export default function App() {
         <IconButton
           className="sidebar-toggle"
           data-hover-ink-control=""
-          label={sidebar ? "隐藏会话侧边栏" : "显示会话侧边栏"}
+          label={sidebar ? "Hide conversation sidebar" : "Show conversation sidebar"}
           aria-expanded={sidebar}
           aria-controls="conversation-navigation"
           onClick={() => setSidebar(!sidebar)}
@@ -1240,7 +1241,7 @@ export default function App() {
               </button>
               {!chat.readOnly ? (
                 <IconButton
-                  label="重命名会话"
+                  label="Rename conversation"
                   onClick={() =>
                     setDialog({
                       type: "rename",
@@ -1255,7 +1256,7 @@ export default function App() {
               {pinnedExecutor ? (
                 <span
                   className="conversation-engine"
-                  title={`本对话使用 ${pinnedExecutor.label}，对话开始后不能切换 CLI；换 CLI 请新建对话`}
+                  title={`This conversation uses  ${pinnedExecutor.label}. Start a new conversation to change the CLI.`}
                 >
                   <ModelProviderIcon
                     brand={engineBrand(pinnedExecutor.id)}
@@ -1264,7 +1265,7 @@ export default function App() {
                   {pinnedExecutor.label}
                 </span>
               ) : null}
-              {chat.local ? <span className="preview-badge">示例</span> : null}
+              {chat.local ? <span className="preview-badge">Example</span> : null}
             </>
           ) : null}
         </div>
@@ -1280,8 +1281,8 @@ export default function App() {
                     ref={headerProjectPicker}
                     type="button"
                     className="conversation-project"
-                    title={`当前项目：${projectName}，点击切换项目`}
-                    aria-label={`当前项目：${projectName}，切换项目`}
+                    title={`Current project: ${projectName}. Click to switch projects`}
+                    aria-label={`Current project: ${projectName}. Switch project`}
                     aria-haspopup="listbox"
                     aria-expanded={menu?.type === "header-project"}
                     onClick={() =>
@@ -1298,14 +1299,14 @@ export default function App() {
                   </button>
                   <SelectMenu
                     open={menu?.type === "header-project"}
-                    label="切换项目"
+                    label="Switch project"
                     value={chat.projectId}
                     options={projectOptions}
                     onSelect={chooseProject}
                     onClose={closeMenu}
                     anchorRef={headerProjectPicker}
                     searchable
-                    emptyText="没有匹配的项目"
+                    emptyText="No matching projects"
                     actions={projectActions}
                   />
                 </div>
@@ -1318,8 +1319,8 @@ export default function App() {
             <button
               type="button"
               className={`panel-toggle changes-toggle ${panel && panelView === "changes" ? "active" : ""}`}
-              title="查看本次会话的代码改动"
-              aria-label={`查看改动，共 ${workspaceChanges.files.length} 个文件`}
+              title="View code changes from this conversation"
+              aria-label={`View changes:  ${workspaceChanges.files.length} files`}
               aria-expanded={panel && panelView === "changes"}
               aria-controls="conversation-artifacts"
               onClick={() => {
@@ -1332,7 +1333,7 @@ export default function App() {
               }}
             >
               <HarnessIcon name="edit" size={15} />
-              <span className="changes-toggle-label">改动</span>
+              <span className="changes-toggle-label">Changes</span>
               {workspaceChanges.files.length ? (
                 <span className="changes-toggle-count">
                   {workspaceChanges.files.length > 99
@@ -1346,11 +1347,11 @@ export default function App() {
             type="button"
             className={`panel-toggle ${panel ? "active" : ""}`}
             data-hover-ink-control=""
-            aria-label="查看会话产物"
+            aria-label="View conversation artifacts"
             aria-expanded={panel}
             aria-controls="conversation-artifacts"
             aria-describedby={!panel && artifactUnread ? "artifact-unread-description" : undefined}
-            title="查看会话产物"
+            title="View conversation artifacts"
             onClick={() => {
               setArtifactUnread(0);
               if (panel && panelView === "artifacts") {
@@ -1370,7 +1371,7 @@ export default function App() {
               ) : null}
             </span>
             {!panel && artifactUnread ? (
-              <span className="sr-only" id="artifact-unread-description">{artifactUnread} 个新产物</span>
+              <span className="sr-only" id="artifact-unread-description">{artifactUnread}  new artifacts</span>
             ) : null}
           </button> : null}
         </div>
@@ -1379,17 +1380,17 @@ export default function App() {
         <aside
           id="conversation-navigation"
           className="conversation-sidebar"
-          aria-label="会话导航"
+          aria-label="Conversation navigation"
           inert={!sidebar}
           aria-hidden={!sidebar || undefined}
         >
           <div className="sidebar-create-row">
-            <button className="new-chat-button" onClick={startNewChat} title="新对话 · Ctrl/⌘ ⇧ O">
+            <button className="new-chat-button" onClick={startNewChat} title="New chat · Ctrl/⌘ ⇧ O">
               <HarnessIcon name="edit" size={17} />
-              <span>新对话</span>
+              <span>New chat</span>
             </button>
             <IconButton
-              label="搜索会话"
+              label="Search conversations"
               onClick={() => {
                 setDialog({ type: "search" });
                 setQuery("");
@@ -1399,7 +1400,7 @@ export default function App() {
             </IconButton>
             <div className="menu-anchor">
               <IconButton
-                label="筛选会话"
+                label="Filter conversations"
                 aria-haspopup="menu"
                 aria-expanded={menu?.type === "filter"}
                 onClick={() =>
@@ -1409,7 +1410,7 @@ export default function App() {
                 <HarnessIcon name="filter" size={14} />
               </IconButton>
               {menu?.type === "filter" ? (
-                <Menu label="筛选会话" className="sidebar-filter-menu" onClose={closeMenu}>
+                <Menu label="Filter conversations" className="sidebar-filter-menu" onClose={closeMenu}>
                   <button
                     role="menuitemradio"
                     aria-checked={!archived && !mineOnly}
@@ -1419,7 +1420,7 @@ export default function App() {
                       closeMenu();
                     }}
                   >
-                    最近的会话
+                    Recent conversations
                     {!archived && !mineOnly ? <HarnessIcon name="check" size={14} /> : null}
                   </button>
                   <button
@@ -1431,7 +1432,7 @@ export default function App() {
                       closeMenu();
                     }}
                   >
-                    已归档
+                    Archived
                     {archived ? <HarnessIcon name="check" size={14} /> : null}
                   </button>
                   <button
@@ -1443,7 +1444,7 @@ export default function App() {
                       closeMenu();
                     }}
                   >
-                    仅我参与的对话
+                    My conversations
                     {mineOnly ? <HarnessIcon name="check" size={14} /> : null}
                   </button>
                 </Menu>
@@ -1451,11 +1452,11 @@ export default function App() {
             </div>
           </div>
           <div className="session-list">
-            {archived ? <div className="section-label">已归档</div> : null}
+            {archived ? <div className="section-label">Archived</div> : null}
             {!archived && sidebarSections.pinnedSessions.length ? (
               <SidebarSection
                 className="sidebar-pinned"
-                title="置顶"
+                title="Pin"
                 icon="pin"
                 count={sidebarSections.pinnedSessions.length}
                 expanded={!!query || pinnedOpen}
@@ -1515,7 +1516,7 @@ export default function App() {
                             }))
                           }
                         >
-                          展开其余 {hidden} 条
+                          Show more {hidden} runs
                         </button>
                       ) : null}
                       {showAll && group.sessions.length > PROJECT_PREVIEW_LIMIT ? (
@@ -1529,7 +1530,7 @@ export default function App() {
                             }))
                           }
                         >
-                          收起
+                          Collapse
                         </button>
                       ) : null}
                     </SidebarSection>
@@ -1543,11 +1544,11 @@ export default function App() {
                 <p className="end-label">
                   {chat.ready
                     ? archived
-                      ? "还没有归档会话"
+                      ? "No archived conversations"
                       : mineOnly
-                        ? "还没有你参与的会话"
-                        : "还没有会话"
-                    : "正在连接…"}
+                        ? "You have not participated in any conversations yet"
+                        : "No conversations yet"
+                    : "Connecting…"}
                 </p>
               </div>
             ) : null}
@@ -1569,7 +1570,7 @@ export default function App() {
           >
             <div className="message-column">
               {!chat.session && !chat.error ? (
-                <div className="loading-session">正在恢复对话…</div>
+                <div className="loading-session">Restoring conversation…</div>
               ) : null}
               {messages.map((message, index) =>
                 isProposalTimeout(message, messages[index - 1]) ? null : confirmationCaption(message, messages[index - 1]) ? (
@@ -1644,7 +1645,7 @@ export default function App() {
                             {!chat.readOnly ? (
                               <>
                                 <IconButton
-                                  label="编辑消息"
+                                  label="Edit message"
                                   disabled={chat.busy}
                                   onClick={() =>
                                     setDialog({
@@ -1658,7 +1659,7 @@ export default function App() {
                                   <HarnessIcon name="edit" size={14} />
                                 </IconButton>
                                 <IconButton
-                                  label="从此处创建分支"
+                                  label="Branch from here"
                                   disabled={chat.busy}
                                   onClick={() =>
                                     setDialog({
@@ -1675,7 +1676,7 @@ export default function App() {
                             ) : null}
                             <CopyButton
                               value={message.content}
-                              label="复制消息"
+                              label="Copy message"
                             />
                           </div>
                         </>
@@ -1722,7 +1723,7 @@ export default function App() {
                               chat.generation,
                               chat.live.activity,
                             )}
-                            label="复制回复"
+                            label="Copy reply"
                           />
                           <MessageInfo message={message} />
                           {!chat.local && !chat.readOnly && message.generationId && !message.failure ? <GenerationDiagnostics sessionId={chat.session.id} generationId={message.generationId} compact /> : null}
@@ -1766,16 +1767,16 @@ export default function App() {
                     kind: "run",
                     id: run.id,
                     runId: run.id,
-                    name: run.workflowSnapshot?.name || "SOP 运行",
+                    name: run.workflowSnapshot?.name || "SOP run",
                     nodeId,
                   })
                 }
                 onAsk={(item) => {
                   setText(
-                    `运行 ${item.runId} 的「${item.nodeName}」节点${item.kind === "failed" ? "失败了" : "在等待人工确认"}，帮我分析具体卡在哪里、原因是什么、需要谁做什么。`,
+                    `Runs ${item.runId} , step “${item.nodeName}”${item.kind === "failed" ? " failed" : " is awaiting approval"}. Identify the blocker, explain the cause, and say who needs to act.`,
                   );
                   document
-                    .querySelector('textarea[aria-label="消息"]')
+                    .querySelector("textarea[aria-label=\"Message\"]")
                     ?.focus();
                 }}
               />
@@ -1788,10 +1789,10 @@ export default function App() {
           <div className="composer-column">
             {chat.error && !(chat.generation?.failure && chat.error === chat.generation.error) ? (
               <div role="alert" className="chat-error">
-                <span>{chat.error}</span>
+                <span>{englishMessage(chat.error)}</span>
                 <CredentialAction text={chat.error} />
                 <CLIInstallAction text={chat.error} onResult={chat.adoptCLIInstall} />
-                <IconButton label="关闭提示" onClick={() => chat.setError("")}>
+                <IconButton label="Dismiss" onClick={() => chat.setError("")}>
                   <HarnessIcon name="close" size={15} />
                 </IconButton>
               </div>
@@ -1808,17 +1809,17 @@ export default function App() {
               <div className="credential-notice" role="status">
                 <HarnessIcon name="key" size={15} aria-hidden="true" />
                 <span>
-                  当前执行器 CodeBuddy 需要先配置 CodeBuddy API Key。
+                  Add a CodeBuddy API key to use this executor.
                   {chat.user.codexApiKeyConfigured ||
                   chat.user.claudeCodeApiKeyConfigured
-                    ? "你已配置 Codex / Claude Code Key，也可以在输入框下方把执行器切换过去。"
+                    ? "You can also switch to your configured Codex or Claude Code executor below the message box."
                     : ""}
                 </span>
                 <button
                   type="button"
                   onClick={() => openCredentialSettings("codeBuddyApiKey")}
                 >
-                  去配置
+                  Configure
                 </button>
               </div>
             ) : null}
@@ -1826,8 +1827,8 @@ export default function App() {
               <div className="readonly-notice" role="status">
                 <HarnessIcon name="eye" size={16} aria-hidden="true" />
                 <span>
-                  你不是「{projectName}
-                  」的成员，只能查看这个会话。加入项目后可以继续聊。
+                  You are not a member of “{projectName}
+                  ”. Join the project to send messages here.
                 </span>
               </div>
             ) : (
@@ -1847,8 +1848,8 @@ export default function App() {
                     <button
                       ref={projectPicker}
                       className={`context-pill project-picker${chat.projectId ? "" : " is-unset"}`}
-                      title="对话所属的项目：需求、仓库、角色和 SOP 都按项目区分"
-                      aria-label="选择项目"
+                      title="This conversation’s project determines its requirements, repositories, roles, and SOPs."
+                      aria-label="Select project"
                       aria-haspopup="listbox"
                       aria-expanded={menu?.type === "project"}
                       onClick={() =>
@@ -1862,21 +1863,21 @@ export default function App() {
                         {chat.projectId
                           ? projectName
                           : chat.activeId
-                            ? "绑定项目"
-                            : "选择项目"}
+                            ? "Link project"
+                            : "Select project"}
                       </span>
                       <HarnessIcon name="chevron-down" size={12} />
                     </button>
                     <SelectMenu
                       open={menu?.type === "project"}
-                      label="项目"
+                      label="Project"
                       value={chat.projectId}
                       options={projectOptions}
                       onSelect={chooseProject}
                       onClose={closeMenu}
                       anchorRef={projectPicker}
                       searchable
-                      emptyText="没有匹配的项目"
+                      emptyText="No matching projects"
                       actions={projectActions}
                     />
                   </div>
@@ -1917,7 +1918,7 @@ export default function App() {
                         <span
                           key={a.id}
                           className="composer-attachment-thumb is-uploading"
-                          title={`正在上传 ${a.name}`}
+                          title={`Uploading ${a.name}`}
                         >
                           <span className="composer-attachment-preview">
                             <img src={a.previewURL} alt={a.name} />
@@ -1933,8 +1934,8 @@ export default function App() {
                             <button
                               type="button"
                               className="composer-attachment-preview"
-                              title={`${a.name} · 点击查看大图`}
-                              aria-label={`查看图片 ${a.name}`}
+                              title={`${a.name} · Click to enlarge`}
+                              aria-label={`View image ${a.name}`}
                               onClick={() =>
                                 setImagePreview({ src: url, name: a.name })
                               }
@@ -1944,8 +1945,8 @@ export default function App() {
                             <button
                               type="button"
                               className="composer-attachment-remove"
-                              aria-label={`移除 ${a.name}`}
-                              title={`移除 ${a.name}`}
+                              aria-label={`Remove ${a.name}`}
+                              title={`Remove ${a.name}`}
                               onClick={() => removeAttachment(a)}
                             >
                               <HarnessIcon name="close" size={11} />
@@ -1964,7 +1965,7 @@ export default function App() {
                               <small>{formatFileSize(a.size)}</small>
                             ) : null}
                             <button
-                              aria-label={`移除 ${a.name}`}
+                              aria-label={`Remove ${a.name}`}
                               onClick={() => removeAttachment(a)}
                             >
                               <HarnessIcon name="close" size={13} />
@@ -1985,7 +1986,7 @@ export default function App() {
                           )}
                           {ref.name || ref.id}
                           <button
-                            aria-label={`移除引用 ${ref.name || ref.id}`}
+                            aria-label={`Remove reference ${ref.name || ref.id}`}
                             onClick={() => {
                               setReferences((old) =>
                                 old.filter(
@@ -2006,12 +2007,12 @@ export default function App() {
                   ) : null}
                   <textarea
                     ref={input}
-                    aria-label="消息"
+                    aria-label="Message"
                     rows={2}
                     placeholder={
                       chat.activeId
-                        ? "告诉我接下来想做点什么"
-                        : "聊聊你的想法，或交给我一件事"
+                        ? "What would you like to do next?"
+                        : "Share an idea or describe a task"
                     }
                     value={text}
                     aria-expanded={!!mention}
@@ -2080,7 +2081,7 @@ export default function App() {
                   <footer className="composer-toolbar">
                     <div className="menu-anchor">
                       <IconButton
-                        label="添加"
+                        label="Add"
                         disabled={uploading}
                         aria-haspopup="menu"
                         aria-expanded={menu?.type === "add"}
@@ -2092,7 +2093,7 @@ export default function App() {
                       </IconButton>
                       {menu?.type === "add" ? (
                         <Menu
-                          label="添加到消息"
+                          label="Add to message"
                           className="above"
                           onClose={closeMenu}
                         >
@@ -2104,18 +2105,18 @@ export default function App() {
                             }}
                           >
                             <HarnessIcon name="paperclip" size={15} />
-                            上传图片或文件
+                            Upload images or files
                           </button>
                           <button role="menuitem" onClick={openReferences}>
                             <HarnessIcon name="connector" size={15} />
-                            引用项目资产
+                            Reference project assets
                           </button>
                           <button role="menuitem" onClick={() => {
                             closeMenu();
                             setDialog({ type: "advanced" });
                           }}>
                             <HarnessIcon name="settings" size={15} />
-                            高级设置
+                            Advanced settings
                           </button>
                         </Menu>
                       ) : null}
@@ -2163,7 +2164,7 @@ export default function App() {
                       }}
                     />
                     <PermissionPicker
-                      label="思考强度"
+                      label="Reasoning effort"
                       options={effortOptions(selectedModel)}
                       value={chat.effort}
                       onSelect={chat.setEffort}
@@ -2178,13 +2179,13 @@ export default function App() {
                     />
                     <span className="toolbar-spacer" />
                     {uploading ? (
-                      <span className="upload-status">上传中…</span>
+                      <span className="upload-status">Uploading…</span>
                     ) : null}
                     {chat.busy ? (
                       <button
                         className="send-button stop"
-                        aria-label="停止生成"
-                        title="停止并保留已经生成的内容；排队的消息会暂停发送"
+                        aria-label="Stop generating"
+                        title="Stop and keep the partial reply. Queued messages will be paused."
                         disabled={
                           chat.submitting || chat.stopping || chat.generation?.status !== "running"
                         }
@@ -2196,8 +2197,8 @@ export default function App() {
                     {!chat.busy || text.trim() || attachments.length ? (
                       <button
                         className="send-button"
-                        aria-label={chat.busy ? "排队发送" : "发送消息"}
-                        title={chat.busy ? "当前回复结束后自动发送" : undefined}
+                        aria-label={chat.busy ? "Queue message" : "Send message"}
+                        title={chat.busy ? "Send when the current reply finishes" : undefined}
                         disabled={
                           !chat.ready ||
                           chat.submitting ||
@@ -2218,7 +2219,7 @@ export default function App() {
           </div>
         </div>
         {!chat.activeId && !chat.readOnly ? (
-          <section className="home-starters" aria-label="可以这样开始">
+          <section className="home-starters" aria-label="Try a starting point">
             <div className="home-starter-grid">
               {homeStarters.map((starter, index) => (
                 <button
@@ -2292,12 +2293,12 @@ export default function App() {
         <Dialog
           title={
             {
-              search: "搜索会话",
-              rename: "重命名会话",
-              delete: "删除会话",
-              edit: dialog.fork ? "创建分支" : "编辑消息",
-              settings: "设置",
-              advanced: "高级设置",
+              search: "Search conversations",
+              rename: "Rename conversation",
+              delete: "Delete conversation",
+              edit: dialog.fork ? "Create branch" : "Edit message",
+              settings: "Settings",
+              advanced: "Advanced settings",
             }[dialog.type]
           }
           onClose={closeDialog}
@@ -2305,7 +2306,7 @@ export default function App() {
             ["rename", "edit", "delete"].includes(dialog.type) ? (
               <>
                 <button className="quiet-button" onClick={closeDialog}>
-                  取消
+                  Cancel
                 </button>
                 <button
                   className={
@@ -2340,16 +2341,16 @@ export default function App() {
                   disabled={dialog.type !== "delete" && !dialog.value?.trim()}
                 >
                   {dialog.type === "delete"
-                    ? "删除"
+                    ? "Delete"
                     : dialog.type === "rename"
-                      ? "保存"
+                      ? "Save"
                       : dialog.fork
-                        ? "创建并继续"
-                        : "保存并重新生成"}
+                        ? "Create and continue"
+                        : "Save and regenerate"}
                 </button>
               </>
             ) : dialog.type === "advanced" ? (
-              <button className="primary-button" onClick={closeDialog}>完成</button>
+              <button className="primary-button" onClick={closeDialog}>Done</button>
             ) : null
           }
         >
@@ -2359,8 +2360,8 @@ export default function App() {
                 <HarnessIcon name="search" size={17} />
                 <input
                   autoFocus
-                  aria-label="搜索会话名称"
-                  placeholder="搜索会话名称或项目"
+                  aria-label="Search conversation names"
+                  placeholder="Search by conversation or project"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -2369,7 +2370,7 @@ export default function App() {
                 {searchGroups.map((group) => (
                   <section
                     key={group.projectId}
-                    aria-label={`${group.name}的搜索结果`}
+                    aria-label={`${group.name} search results`}
                   >
                     <div className="date-label">{group.name}</div>
                     {group.sessions.map((s) => (
@@ -2386,7 +2387,7 @@ export default function App() {
                           {s.displayTitle || s.title}
                           <small>
                             {sessionProjectName(s.projectId, chat.projects)}
-                            {s.archived ? " · 已归档" : ""}
+                            {s.archived ? " · Archived" : ""}
                           </small>
                         </span>
                       </button>
@@ -2394,13 +2395,13 @@ export default function App() {
                   </section>
                 ))}
                 {!searchGroups.length ? (
-                  <p className="end-label">没有匹配的会话</p>
+                  <p className="end-label">No matching conversations</p>
                 ) : null}
               </div>
             </>
           ) : dialog.type === "rename" ? (
             <label className="field">
-              会话名称
+              Conversation name
               <input
                 autoFocus
                 value={dialog.value}
@@ -2419,8 +2420,8 @@ export default function App() {
             </label>
           ) : dialog.type === "delete" ? (
             <p>
-              删除“{dialog.session.title}”的聊天记录？本对话里还没提交 MR
-              的需求单会一并删除，已提交 MR 的需求和已保存的 SOP 会保留。
+              Delete “{dialog.session.title}” and its chat history? Requirements in this conversation without a submitted MR
+               will also be deleted. Requirements with submitted MRs and saved SOPs will be kept.
             </p>
           ) : dialog.type === "edit" ? (
             <>
@@ -2434,31 +2435,31 @@ export default function App() {
               />
               <p className="muted">
                 {dialog.fork
-                  ? "创建独立分支，保留原会话。"
-                  : "这条消息之后的对话会重新生成，已执行的平台操作不会因此撤回。"}
+                  ? "Create a separate branch and keep the original conversation."
+                  : "Replies after this message will be regenerated. Platform actions already performed stay in effect."}
               </p>
             </>
           ) : dialog.type === "advanced" ? (
             <>
-              <p className="muted">默认自动使用项目配置的环境，无需选择。以下设置只影响你的界面。</p>
+              <p className="muted">The project environment is selected automatically. These settings apply to your interface.</p>
               <label className="settings-row">
-                <span>显示运行环境选择</span>
+                <span>Show environment selector</span>
                 <HarnessSelect
-                  ariaLabel="高级环境选项"
+                  ariaLabel="Advanced environment options"
                   value={showEnvironmentPicker ? "show" : "hide"}
                   onChange={(e) => changeEnvironmentVisibility(e.target.value === "show")}
-                  options={[{ value: "hide", label: "隐藏（默认）" }, { value: "show", label: "显示" }]}
+                  options={[{ value: "hide", label: "Hidden (default)" }, { value: "show", label: "Show" }]}
                 />
               </label>
-              <p className="muted">开启后，可在项目旁调整对话的运行环境。隐藏入口不会改变已选环境或已有工作区。</p>
+              <p className="muted">Show the environment picker beside the project. Hiding it preserves the selected environment and workspace.</p>
             </>
           ) : dialog.type === "settings" ? (
             <>
               <label className="settings-row">
-                <span>外观</span>
+                <span>Appearance</span>
                 <HarnessSelect
                   value={theme}
-                  ariaLabel="外观"
+                  ariaLabel="Appearance"
                   onChange={(e) => setTheme(e.target.value)}
                   options={THEME_OPTIONS}
                 />
@@ -2467,14 +2468,14 @@ export default function App() {
                 className="settings-row"
                 onClick={() => navigate("settings")}
               >
-                <span>个人配置与模型凭据</span>
+                <span>Personal settings and model credentials</span>
                 <ChevronRightSmall />
               </button>
               <button
                 className="settings-row"
                 onClick={() => navigate("runners")}
               >
-                <span>执行机器</span>
+                <span>Runners</span>
                 <ChevronRightSmall />
               </button>
               <small className="muted">

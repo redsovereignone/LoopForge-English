@@ -6,8 +6,8 @@ export const CREDENTIALS = {
   codexApiKey: "Codex API Key",
   claudeCodeApiKey: "Claude Code API Key",
   gitToken: "GitHub Git Token",
-  gitSshKey: "Git SSH 密钥",
-  gitHttpCredentials: "Git 访问令牌",
+  gitSshKey: "Git SSH keys",
+  gitHttpCredentials: "Git access tokens",
 };
 
 // A CodeBuddy key only works on the edition that issued it, and the CLI
@@ -17,13 +17,13 @@ export const CREDENTIALS = {
 export const CODEBUDDY_ENVIRONMENTS = [
   {
     value: "",
-    label: "国际站",
+    label: "International",
     site: "codebuddy.ai",
     keyUrl: "https://www.codebuddy.ai/profile/keys",
   },
   {
     value: "internal",
-    label: "国内站",
+    label: "China",
     site: "copilot.tencent.com",
     keyUrl: "https://copilot.tencent.com/profile/",
   },
@@ -80,8 +80,8 @@ export function codeBuddyKeyWarning(key) {
   const text = String(key || "").trim();
   if (!text || text.startsWith("ck_")) return "";
   return /^sk-/i.test(text)
-    ? "这像是 DeepSeek、OpenAI 等第三方模型的 Key，CodeBuddy 会拒绝；第三方 Key 请在个人配置中改填到 Claude Code 或 Codex 凭证并设置 Base URL"
-    : "CodeBuddy API Key 通常以 ck_ 开头，请确认复制的是 CodeBuddy 的 Key";
+    ? "CodeBuddy rejects keys from providers such as DeepSeek or OpenAI. Under personal settings, enter the key and base URL for Claude Code or Codex instead."
+    : "CodeBuddy API keys usually start with ck_; make sure you copied a CodeBuddy key";
 }
 
 // Where and how to get each credential. Keep in sync with
@@ -89,47 +89,47 @@ export function codeBuddyKeyWarning(key) {
 export const CREDENTIAL_GUIDES = {
   gitSshKey: {
     steps: [
-      "把专用公钥添加到代码托管账号，并按需授予仓库写权限",
-      "到「个人配置 → Git SSH 密钥」为该主机添加无口令私钥，同一主机的仓库自动共用；请管理员信任该 SSH 主机",
-      "回到这里重试",
+      "Add the dedicated public key to your Git host account and grant repository write access if needed.",
+      "Under Personal settings → Git SSH keys, add a passphrase-free private key for this host. Repositories on this host share the key. Ask your administrator to trust the SSH host.",
+      "Return here and retry",
     ],
   },
   gitHttpCredentials: {
     steps: [
-      "在代码托管平台创建仓库级、最小权限的个人访问令牌",
-      "到「个人配置 → Git 访问令牌」为该 HTTPS 主机添加令牌，并开启「提供给工作区」",
-      "回到这里重试",
+      "Create a least-privilege, repository-scoped access token on your Git host.",
+      "Under Personal settings → Git access tokens, add a token for this HTTPS host and enable “Provide to workspace”.",
+      "Return here and retry",
     ],
   },
   gitToken: {
     url: "/#/settings",
-    link: "连接 GitHub",
+    link: "Connect GitHub",
     steps: [
-      "到「个人配置」点击「连接 GitHub」，复制设备码后前往 GitHub 授权",
-      "添加仓库时点击「选择我的 GitHub 仓库」，选择仓库与主分支",
-      "管理员尚未配置 GitHub 授权时，也可以手动填写有 Contents 和 Pull requests 读写权限的 PAT",
-      "回到这里点「重试节点」",
+      "In personal settings, click Connect GitHub. Copy the device code and authorize the connection on GitHub.",
+      "When adding a repository, choose Select my GitHub repository and select the repository and main branch.",
+      "If GitHub authorization is unavailable, enter a PAT with read/write access to Contents and Pull requests.",
+      "Return here and click Retry step",
     ],
   },
   codeBuddyApiKey: {
     url: CODEBUDDY_ENVIRONMENTS[0].keyUrl,
-    link: "打开 CodeBuddy 创建 Key",
+    link: "Create a CodeBuddy key",
     steps: [
-      "在 CodeBuddy 账号所在站点（国际站、国内站或 iOA）创建 API Key 并复制",
-      "到「个人配置 → CodeBuddy API Key」选择同一网络环境，粘贴 Key 并保存；DeepSeek 等第三方模型的 Key 不能用在这里",
-      "回到这里点「重试节点」",
+      "Create and copy an API key on the site that hosts your CodeBuddy account (International, China or iOA).",
+      "Under Personal settings → CodeBuddy API Key, choose the same site, paste the key and save. Third-party model keys such as DeepSeek are unsupported here.",
+      "Return here and click Retry step",
     ],
   },
   codexApiKey: {
     steps: [
-      "到「个人配置 → Codex API Key」填写 Key（及 Base URL）并保存，或把执行机器的认证方式切回本机登录",
-      "回到这里点「重试节点」",
+      "Under Personal settings → Codex API Key, enter and save the key and optional base URL, or switch the runner back to local login.",
+      "Return here and click Retry step",
     ],
   },
   claudeCodeApiKey: {
     steps: [
-      "到「个人配置 → Claude Code API Key」填写 Key（及 Base URL）并保存，或把执行机器的认证方式切回本机登录",
-      "回到这里点「重试节点」",
+      "Under Personal settings → Claude Code API Key, enter and save the key and optional base URL, or switch the runner back to local login.",
+      "Return here and click Retry step",
     ],
   },
 };
@@ -142,7 +142,7 @@ export function credentialGuide(field, owner) {
   const env =
     codeBuddyEnvironmentIntent(owner?.codeBuddyInternetEnvironment) ||
     CODEBUDDY_ENVIRONMENTS[0];
-  return { ...guide, url: env.keyUrl, link: `打开 CodeBuddy ${env.label}创建 Key` };
+  return { ...guide, url: env.keyUrl, link: `Open CodeBuddy ${env.label}Create key` };
 }
 
 const RULES = [

@@ -88,7 +88,7 @@ function DefinitionPreview({ artifact }) {
         {error}
       </p>
     );
-  if (!data) return <p className="muted">正在读取…</p>;
+  if (!data) return <p className="muted">Loading…</p>;
   const target = definitionTarget(artifact);
   if (target)
     return (
@@ -110,16 +110,16 @@ function DefinitionPreview({ artifact }) {
     <section className="definition-preview">
       <div className="definition-summary">
         <span className="artifact-type-label">
-          {artifact.kind === "sop" ? "SOP" : "角色"}
+          {artifact.kind === "sop" ? "SOP" : "Role"}
         </span>
         <h2>{data.name || artifact.name}</h2>
         <p>{data.description}</p>
         <small>
           {artifact.draft && !artifact.draft.saved
-            ? "待确认"
+            ? "Needs review"
             : data.status === "published"
-              ? "已发布"
-              : "已保存"}
+              ? "Published"
+              : "Saved"}
         </small>
       </div>
       {artifact.kind === "sop" ? (
@@ -131,14 +131,14 @@ function DefinitionPreview({ artifact }) {
                 <strong>{node.name || node.id}</strong>
                 <small>
                   {node.type === "approval"
-                    ? "人工确认"
+                    ? "Human approval"
                     : node.type === "script"
-                      ? "脚本"
-                      : "角色执行"}
+                      ? "Script"
+                      : "Role execution"}
                 </small>
                 {node.type === "approval" && node.taskPrompt ? (
                   <details>
-                    <summary>确认要求</summary>
+                    <summary>Approval criteria</summary>
                     <RichContent message={node.taskPrompt} />
                   </details>
                 ) : null}
@@ -148,12 +148,12 @@ function DefinitionPreview({ artifact }) {
         </ol>
       ) : (
         <>
-          <h3>工作说明</h3>
+          <h3>Instructions</h3>
           <RichContent
-            message={data.prompt || data.description || "暂无说明"}
+            message={data.prompt || data.description || "No description"}
           />
           {data.model ? (
-            <small className="muted">模型 · {data.model}</small>
+            <small className="muted">Model · {data.model}</small>
           ) : null}
         </>
       )}
@@ -170,7 +170,7 @@ function OperationPreview({ artifact, runs }) {
     <section className="operation-preview">
       {run ? (
         <p>
-          {run.workflowSnapshot?.name || "SOP 运行"}
+          {run.workflowSnapshot?.name || "SOP run"}
           {node ? ` · ${node.name || node.id}` : ""}
         </p>
       ) : null}
@@ -317,16 +317,16 @@ export default function ArtifactPanel({
       group,
     );
   const visibleItems = items.filter((artifact) =>
-    matchesArtifact(artifact, "文件"),
+    matchesArtifact(artifact, "Files"),
   );
   const visibleDefinitions = definitions.filter((artifact) =>
-    matchesArtifact(artifact, "SOP 与角色"),
+    matchesArtifact(artifact, "SOPs and roles"),
   );
   const visibleOperations = operations.filter((artifact) =>
-    matchesArtifact(artifact, "待确认操作"),
+    matchesArtifact(artifact, "Pending actions"),
   );
   const visibleMergeRequests = mergeRequests.filter((artifact) =>
-    matches(artifact.name, artifact.source, artifact.url, "合并请求"),
+    matches(artifact.name, artifact.source, artifact.url, "Merge request"),
   );
   const visibleRuns = runs.filter((run) =>
     matches(
@@ -337,7 +337,7 @@ export default function ArtifactPanel({
         item.id,
         item.name,
       ]),
-      "SOP 运行",
+      "SOP run",
     ),
   );
   const visibleSubagents = subagents.filter((agent) =>
@@ -350,7 +350,7 @@ export default function ArtifactPanel({
       agent.model,
       subagentStatus(agent, live).label,
       ...agent.dispatches.map((step) => step.detail),
-      "子 Agent",
+      "Subagent",
     ),
   );
   const matchCount =
@@ -370,7 +370,7 @@ export default function ArtifactPanel({
     const title = target
       ? `${artifact.name} · ${target.label}`
       : artifact.external
-        ? `${artifact.name} · 在代码仓库打开`
+        ? `${artifact.name} · Open in repository`
         : artifact.name;
     return (
       <Row
@@ -389,7 +389,7 @@ export default function ArtifactPanel({
           <strong>{artifact.name}</strong>
           <small>
             {target
-              ? `${artifact.kind === "sop" ? "SOP" : "角色"} · ${artifact.asset?.status === "published" ? "已发布" : "已保存"}`
+              ? `${artifact.kind === "sop" ? "SOP" : "Role"} · ${artifact.asset?.status === "published" ? "Published" : "Saved"}`
               : artifact.source}
             {artifact.size
               ? ` · ${artifact.size < 1024 ? `${artifact.size} B` : `${Math.ceil(artifact.size / 1024)} KB`}`
@@ -413,7 +413,7 @@ export default function ArtifactPanel({
           aria-valuemin={0}
           aria-valuemax={layout.maxWidth}
           aria-valuenow={layout.width}
-          aria-label="调整产物侧栏宽度"
+          aria-label="Resize artifact sidebar"
           tabIndex={open ? 0 : -1}
           aria-hidden={!open || undefined}
           inert={!open}
@@ -432,7 +432,7 @@ export default function ArtifactPanel({
         id="conversation-artifacts"
         role={layout.compact ? "dialog" : "complementary"}
         aria-modal={layout.compact && open ? "true" : undefined}
-        aria-label={view === "changes" ? "会话改动" : browsing ? "Agent 浏览器" : coding ? "工作区 IDE" : "会话产物"}
+        aria-label={view === "changes" ? "Conversation changes" : browsing ? "Agent browser" : coding ? "Workspace IDE" : "Conversation artifacts"}
         aria-hidden={!open || undefined}
         inert={!open}
         data-compact={layout.compact || undefined}
@@ -440,7 +440,7 @@ export default function ArtifactPanel({
         data-resizing={layout.dragging || undefined}
       >
         <header className="artifact-panel-header">
-          <div className="artifact-panel-tabs" role="tablist" aria-label="侧栏内容">
+          <div className="artifact-panel-tabs" role="tablist" aria-label="Sidebar content">
             <button
               type="button"
               role="tab"
@@ -449,7 +449,7 @@ export default function ArtifactPanel({
               onClick={() => onViewChange("artifacts")}
             >
               <HarnessIcon name="artifact" size={14} />
-              <span>产物</span>
+              <span>Artifacts</span>
               <small>{count}</small>
             </button>
             <button
@@ -461,12 +461,12 @@ export default function ArtifactPanel({
               disabled={!workspaceRunId}
               title={
                 workspaceRunId
-                  ? "查看本次会话写入工作区的改动"
-                  : "本次会话还没有工作区"
+                  ? "View workspace changes from this conversation"
+                  : "This conversation has no workspace yet"
               }
             >
               <HarnessIcon name="edit" size={14} />
-              <span>改动</span>
+              <span>Changes</span>
               <small>{workspaceChanges?.files?.length || 0}</small>
             </button>
             <button
@@ -478,12 +478,12 @@ export default function ArtifactPanel({
               disabled={!workspaceRunId}
               title={
                 workspaceRunId
-                  ? "实时查看并操作 Agent 正在用的浏览器"
-                  : "本次会话还没有工作区"
+                  ? "View and control the agent browser live"
+                  : "This conversation has no workspace yet"
               }
             >
               <HarnessIcon name="stage-browser" size={14} />
-              <span>浏览器</span>
+              <span>Browser</span>
             </button>
             <button
               type="button"
@@ -494,8 +494,8 @@ export default function ArtifactPanel({
               disabled={!workspaceRunId}
               title={
                 workspaceRunId
-                  ? "在 VS Code 里浏览、编辑本次会话的工作区"
-                  : "本次会话还没有工作区"
+                  ? "Browse and edit the workspace in VS Code"
+                  : "This conversation has no workspace yet"
               }
             >
               <HarnessIcon name="stage-ide" size={14} />
@@ -507,14 +507,14 @@ export default function ArtifactPanel({
               <button
                 type="button"
                 className="artifact-panel-back-to-chat"
-                aria-label="返回聊天"
+                aria-label="Back to chat"
                 onClick={onClose}
               >
                 <HarnessIcon name="arrow-left" size={16} />
-                <span>返回聊天</span>
+                <span>Back to chat</span>
               </button>
             ) : (
-              <IconButton label="关闭产物侧栏" onClick={onClose}>
+              <IconButton label="Close artifact sidebar" onClick={onClose}>
                 <X size={16} />
               </IconButton>
             )}
@@ -528,7 +528,7 @@ export default function ArtifactPanel({
               onClick={() => (nodeId ? setNodeId(null) : setSelected(null))}
             >
               <ChevronLeft size={14} />
-              <span>{nodeId ? "返回流程节点" : "返回产物列表"}</span>
+              <span>{nodeId ? "Back to workflow step" : "Back to artifacts"}</span>
             </button>
             {nodeId ? <span className="artifact-node-title">{nodeDefinition?.name || nodeId}</span> : null}
             {selectedAgent ? (
@@ -557,8 +557,8 @@ export default function ArtifactPanel({
               <input
                 ref={searchInput}
                 type="search"
-                aria-label="搜索产物"
-                placeholder="搜索产物"
+                aria-label="Search artifacts"
+                placeholder="Search artifacts"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 onKeyDown={(event) => {
@@ -571,7 +571,7 @@ export default function ArtifactPanel({
               />
               {search ? (
                 <IconButton
-                  label="清空产物搜索"
+                  label="Clear artifact search"
                   onClick={() => {
                     setSearch("");
                     searchInput.current?.focus();
@@ -583,7 +583,7 @@ export default function ArtifactPanel({
             </label>
             {query ? (
               <span className="artifact-search-count" role="status">
-                {matchCount} 项
+                {matchCount}  items
               </span>
             ) : null}
           </div>
@@ -604,7 +604,7 @@ export default function ArtifactPanel({
             ) : (
               <div className="agent-browser-empty" role="status">
                 <HarnessIcon name="stage-ide" size={28} />
-                <p>本次会话还没有工作区。让助手打开工作区后，可以在这里用 VS Code 浏览和编辑它的代码。</p>
+                <p>Ask the assistant to open a workspace to browse and edit its code in VS Code.</p>
               </div>
             )}
           </div>
@@ -630,7 +630,7 @@ export default function ArtifactPanel({
             ) : (
               <div className="agent-browser-empty" role="status">
                 <HarnessIcon name="stage-browser" size={28} />
-                <p>本次会话还没有工作区。让助手打开工作区或网页后，可以在这里实时查看和操作它用的浏览器。</p>
+                <p>Ask the assistant to open a workspace or web page to view and control its browser.</p>
               </div>
             )}
           </div>
@@ -656,7 +656,7 @@ export default function ArtifactPanel({
           ) : selected?.kind === "subagent" ? (
             <div className="artifact-panel-empty" role="status">
               <HarnessIcon name="user" size={28} />
-              <p>这个子 Agent 的记录已不在当前对话里。</p>
+              <p>This subagent’s record is no longer in the conversation.</p>
             </div>
           ) : selected ? (
             <div className="artifact-panel-preview">
@@ -689,25 +689,25 @@ export default function ArtifactPanel({
             <>
               {visibleMergeRequests.length ? (
                 <section className="artifact-section">
-                  <h3>合并请求</h3>
+                  <h3>Merge request</h3>
                   {visibleMergeRequests.map(row)}
                 </section>
               ) : null}
               {visibleItems.length ? (
                 <section className="artifact-section">
-                  <h3>文件</h3>
+                  <h3>Files</h3>
                   {visibleItems.map(row)}
                 </section>
               ) : null}
               {visibleDefinitions.length ? (
                 <section className="artifact-section">
-                  <h3>SOP 与角色</h3>
+                  <h3>SOPs and roles</h3>
                   {visibleDefinitions.map(row)}
                 </section>
               ) : null}
               {visibleRuns.length ? (
                 <section className="artifact-section">
-                  <h3>SOP 运行</h3>
+                  <h3>SOP run</h3>
                   {visibleRuns.map((run) => (
                     <button
                       type="button"
@@ -718,7 +718,7 @@ export default function ArtifactPanel({
                           kind: "run",
                           id: run.id,
                           runId: run.id,
-                          name: run.workflowSnapshot?.name || "SOP 运行",
+                          name: run.workflowSnapshot?.name || "SOP run",
                         })
                       }
                     >
@@ -727,7 +727,7 @@ export default function ArtifactPanel({
                       </span>
                       <span className="artifact-file-copy">
                         <strong>
-                          {run.workflowSnapshot?.name || "SOP 运行"}
+                          {run.workflowSnapshot?.name || "SOP run"}
                         </strong>
                         <small>
                           <i
@@ -739,7 +739,7 @@ export default function ArtifactPanel({
                               (item) => item.status === "succeeded",
                             ).length
                           }
-                          /{run.workflowSnapshot?.nodes?.length || 0} 节点
+                          /{run.workflowSnapshot?.nodes?.length || 0} Step
                         </small>
                       </span>
                       <ChevronRight className="artifact-row-action" size={13} />
@@ -749,7 +749,7 @@ export default function ArtifactPanel({
               ) : null}
               {visibleSubagents.length ? (
                 <section className="artifact-section">
-                  <h3>子 Agent</h3>
+                  <h3>Subagent</h3>
                   {visibleSubagents.map((agent) => {
                     const status = subagentStatus(agent, live);
                     const count = agent.dispatches.length;
@@ -780,8 +780,8 @@ export default function ArtifactPanel({
                           <small>
                             <i className={`artifact-run-dot status-${{ done: "succeeded", running: "running", failed: "failed" }[status.tone] || "canceled"}`} />
                             {status.label}
-                            {agent.model ? ` · 模型 ${agent.model}` : ""}
-                            {count > 1 ? ` · 派发 ${count} 次` : ""}
+                            {agent.model ? ` · Model ${agent.model}` : ""}
+                            {count > 1 ? ` · Dispatched ${count}  times` : ""}
                             {agent.dispatches.at(-1)?.detail
                               ? ` · ${agent.dispatches.at(-1).detail}`
                               : ""}
@@ -795,14 +795,14 @@ export default function ArtifactPanel({
               ) : null}
               {visibleOperations.length ? (
                 <section className="artifact-section">
-                  <h3>待确认操作</h3>
+                  <h3>Pending actions</h3>
                   {visibleOperations.map(row)}
                 </section>
               ) : null}
               {!matchCount ? (
                 <div className="artifact-panel-empty" role="status">
                   <HarnessIcon name="artifact" size={28} />
-                  <p>{query ? "没有匹配的产物。" : "此会话还没有产物。"}</p>
+                  <p>{query ? "No matching artifacts." : "No artifacts yet."}</p>
                 </div>
               ) : null}
             </>

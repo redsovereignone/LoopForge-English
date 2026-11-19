@@ -5,7 +5,7 @@ const BASE_STEP = 16,
 
 /** Per-character cadence for the header title; long titles compress the step so the whole reveal stays under ~0.9s. */
 export function titleRevealTiming(title) {
-  const chars = Array.from(title || "新对话");
+  const chars = Array.from(title || "New chat");
   const gaps = Math.max(1, chars.length - 1);
   const step = Math.max(
     MIN_STEP,

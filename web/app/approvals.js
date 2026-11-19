@@ -521,7 +521,7 @@ async function renderApprovals(background=false){
     return summary;
   }))).filter(r=>r.status==='waiting');
   $('#approvalLiveState').classList.toggle('active',items.length>0);
-  const updated=$('#approvalLiveState [data-updated]');if(updated)updated.textContent=`更新于 ${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}`;
+  const updated=$('#approvalLiveState [data-updated]');if(updated)updated.textContent=`更新于 ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
   updateApprovalBadge();
   $('#approvalStats').innerHTML=`<span class="issue-stat"><b>${items.length}</b> 条待确认</span>`;
   state.approvalItems=items;pruneApprovalSelection(items);

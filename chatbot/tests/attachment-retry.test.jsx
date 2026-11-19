@@ -30,19 +30,19 @@ describe("message image attachments", () => {
     expect(source()).toBe("/api/assistant/attachments/a1?sessionId=s1");
 
     fireEvent.error(screen.getByAltText("shot.png"));
-    expect(screen.queryByText("图片加载失败")).toBeNull();
+    expect(screen.queryByText("Could not load image")).toBeNull();
     act(() => vi.advanceTimersByTime(imageRetryDelay(0) - 1));
     expect(source()).not.toContain("_retry=");
     waitRetry(0);
     expect(source()).toContain("_retry=1");
 
     fireEvent.error(screen.getByAltText("shot.png"));
-    expect(screen.queryByText("图片加载失败")).toBeNull();
+    expect(screen.queryByText("Could not load image")).toBeNull();
     waitRetry(1);
     expect(source()).toContain("_retry=2");
 
     fireEvent.error(screen.getByAltText("shot.png"));
-    expect(screen.getByText("图片加载失败")).toBeInTheDocument();
+    expect(screen.getByText("Could not load image")).toBeInTheDocument();
   });
 
   test("a late load clears the failure instead of waiting for a refresh", () => {
@@ -51,7 +51,7 @@ describe("message image attachments", () => {
     waitRetry(0);
     expect(source()).toContain("_retry=1");
     fireEvent.load(screen.getByAltText("shot.png"));
-    expect(screen.queryByText("图片加载失败")).toBeNull();
+    expect(screen.queryByText("Could not load image")).toBeNull();
   });
 
   test("renders no filename caption bar under the image", () => {
@@ -61,13 +61,13 @@ describe("message image attachments", () => {
     expect(container.querySelector(".image-caption")).toBeNull();
     // The file name moves to the hover title.
     expect(container.querySelector(".message-image").getAttribute("title")).toBe(
-      "shot.png\n单击在产物栏打开，双击查看大图",
+      "shot.png\nClick to open in the artifact panel, double-click to view full image",
     );
     // The image itself stays accessible; double-click still opens the viewer.
     expect(screen.getByAltText("shot.png")).toBeInTheDocument();
     fireEvent.doubleClick(screen.getByAltText("shot.png"));
     expect(
-      screen.getByRole("dialog", { name: "查看大图 shot.png" }),
+      screen.getByRole("dialog", { name: "View Full Image shot.png" }),
     ).toBeInTheDocument();
   });
 });

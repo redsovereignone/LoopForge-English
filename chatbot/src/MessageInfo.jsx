@@ -43,7 +43,7 @@ function InfoCard({ id, message, cardRef, onPointerEnter, onPointerLeave }) {
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
     >
-      <strong className="message-info-title">统计信息</strong>
+      <strong className="message-info-title">Statistics</strong>
       <dl className="message-info-rows">
         {info.rows.map((row) => (
           <div key={row.key} data-key={row.key}>
@@ -154,7 +154,7 @@ export default function MessageInfo({ message }) {
         ref={trigger}
         type="button"
         className="icon-button message-info-trigger"
-        aria-label="统计信息"
+        aria-label="Statistics"
         aria-expanded={open}
         aria-describedby={open ? id.current : undefined}
         onPointerEnter={(e) => {

@@ -79,12 +79,12 @@ describe("App", () => {
     try {
       view = render(<App />);
       expect(screen.queryByText(/正在停止/)).not.toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "停止生成" })).toBeDisabled();
-      expect(screen.queryByRole("button", { name: "发送消息" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Stop generating" })).toBeDisabled();
+      expect(screen.queryByRole("button", { name: "Send message" })).not.toBeInTheDocument();
       Object.assign(chat, { busy: false, stopping: false, generation: { id: "g-stop", status: "cancelled" } });
       view.rerender(<App />);
       expect(screen.queryByText("正在停止…")).not.toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "发送消息" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Send message" })).toBeInTheDocument();
     } finally {
       view?.unmount();
       for (const key of Object.keys(chat)) if (!(key in previous)) delete chat[key];
@@ -94,36 +94,36 @@ describe("App", () => {
   test("keeps the picked approval mode after a reload", async () => {
     const user = userEvent.setup();
     const first = render(<App />);
-    await user.click(screen.getByRole("button", { name: "操作确认方式" }));
-    await user.click(screen.getByRole("menuitemradio", { name: "帮我批准" }));
-    expect(screen.getByRole("button", { name: "操作确认方式" })).toHaveTextContent("帮我批准");
+    await user.click(screen.getByRole("button", { name: "Approval mode" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Review for me" }));
+    expect(screen.getByRole("button", { name: "Approval mode" })).toHaveTextContent("Review for me");
     first.unmount();
     render(<App />);
-    expect(screen.getByRole("button", { name: "操作确认方式" })).toHaveTextContent("帮我批准");
-    await user.type(screen.getByRole("textbox", { name: /消息|输入/ }), "你好");
-    await user.click(screen.getByRole("button", { name: "发送消息" }));
+    expect(screen.getByRole("button", { name: "Approval mode" })).toHaveTextContent("Review for me");
+    await user.type(screen.getByRole("textbox", { name: /Message|Input/ }), "你好");
+    await user.click(screen.getByRole("button", { name: "Send message" }));
     expect(chat.send).toHaveBeenLastCalledWith(expect.objectContaining({ approvalMode: "assisted" }));
   });
   test("restores full permission after a reload and resets it for another account", async () => {
     const user = userEvent.setup();
     const first = render(<App />);
-    await user.click(screen.getByRole("button", { name: "操作确认方式" }));
-    await user.click(screen.getByRole("menuitemradio", { name: "完全权限" }));
+    await user.click(screen.getByRole("button", { name: "Approval mode" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Full access" }));
     first.unmount();
     const reloaded = render(<App />);
     fireEvent.keyDown(window, { key: "O", ctrlKey: true, shiftKey: true });
     expect(chat.newChat).toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "操作确认方式" })).toHaveTextContent("完全权限");
-    await user.type(screen.getByRole("textbox", { name: /消息|输入/ }), "你好");
-    await user.click(screen.getByRole("button", { name: "发送消息" }));
+    expect(screen.getByRole("button", { name: "Approval mode" })).toHaveTextContent("Full access");
+    await user.type(screen.getByRole("textbox", { name: /Message|Input/ }), "你好");
+    await user.click(screen.getByRole("button", { name: "Send message" }));
     expect(chat.send).toHaveBeenLastCalledWith(expect.objectContaining({ approvalMode: "auto" }));
     const originalUser = chat.user;
     try {
       chat.user = { id: "u2", loginName: "another-user" };
       reloaded.rerender(<App />);
-      expect(screen.getByRole("button", { name: "操作确认方式" })).toHaveTextContent("请求批准");
-      await user.type(screen.getByRole("textbox", { name: "消息" }), "新账号");
-      await user.click(screen.getByRole("button", { name: "发送消息" }));
+      expect(screen.getByRole("button", { name: "Approval mode" })).toHaveTextContent("Ask for approval");
+      await user.type(screen.getByRole("textbox", { name: "Message" }), "新账号");
+      await user.click(screen.getByRole("button", { name: "Send message" }));
       expect(chat.send).toHaveBeenLastCalledWith(expect.objectContaining({ approvalMode: "confirm" }));
     } finally {
       chat.user = originalUser;
@@ -149,19 +149,19 @@ describe("App", () => {
     let view;
     try {
       view = render(<App />);
-      let trigger = screen.getByRole("button", { name: "执行机器：开发 Mac" });
+      let trigger = screen.getByRole("button", { name: "Runner: 开发 Mac" });
       expect(trigger.closest(".composer-context")).not.toBeNull();
       trigger.getBoundingClientRect = () => ({ top: 500, bottom: 528, left: 200, right: 400, width: 200, height: 28 });
       await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: /LoopForge 云端/ }));
+      await user.click(screen.getByRole("option", { name: /LoopForge cloud/ }));
       expect(selectMachine).toHaveBeenCalledWith("");
       Object.assign(chat, { activeId: "s1", session: { id: "s1", messages: [] } });
       view.rerender(<App />);
-      expect(screen.getAllByRole("button", { name: "执行机器：开发 Mac" })).toHaveLength(1);
+      expect(screen.getAllByRole("button", { name: "Runner: 开发 Mac" })).toHaveLength(1);
       chat.session.messages = [{ role: "user", content: "检查项目" }];
       chat.session.executionTarget = {pool:"runner",runnerId:"mac"};
       view.rerender(<App />);
-      expect(screen.queryByRole("button", { name: "执行机器：开发 Mac" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Runner: 开发 Mac" })).not.toBeInTheDocument();
       expect(screen.getByText("开发 Mac").closest(".header-actions")).not.toBeNull();
     } finally {
       view?.unmount();
@@ -176,22 +176,22 @@ describe("App", () => {
     Object.assign(chat, { projectId: "p1", sandboxProfileId: "business", sandboxes: [], selectSandbox });
     const user = userEvent.setup();
     let view = render(<App />);
-    expect(screen.queryByRole("button", { name: /^运行环境/ })).not.toBeInTheDocument();
-    await user.click(screen.getByLabelText("添加"));
-    await user.click(screen.getByRole("menuitem", { name: "高级设置" }));
-    await user.click(screen.getByRole("button", { name: /^高级环境选项/ }));
-    await user.click(screen.getByRole("option", { name: "显示", exact: true }));
-    await user.click(screen.getByRole("button", { name: "完成", exact: true }));
-    const environment = screen.getByRole("button", { name: /^运行环境/ });
-    expect(environment.closest(".composer-context")).toContainElement(screen.getByLabelText("选择项目"));
+    expect(screen.queryByRole("button", { name: /^Environment/ })).not.toBeInTheDocument();
+    await user.click(screen.getByLabelText("Add"));
+    await user.click(screen.getByRole("menuitem", { name: "Advanced settings" }));
+    await user.click(screen.getByRole("button", { name: /^Advanced environment options/ }));
+    await user.click(screen.getByRole("option", { name: "Show", exact: true }));
+    await user.click(screen.getByRole("button", { name: "Done", exact: true }));
+    const environment = screen.getByRole("button", { name: /^Environment/ });
+    expect(environment.closest(".composer-context")).toContainElement(screen.getByLabelText("Select project"));
     expect(environment.closest(".composer-toolbar")).toBeNull();
     view.unmount();
     view = render(<App />);
-    expect(screen.getByRole("button", { name: /^运行环境/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Environment/ })).toBeInTheDocument();
     view.unmount();
     Object.assign(chat, { user: { ...chat.user, id: "another-user" } });
     view = render(<App />);
-    expect(screen.queryByRole("button", { name: /^运行环境/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Environment/ })).not.toBeInTheDocument();
     expect(selectSandbox).not.toHaveBeenCalled();
     expect(chat.sandboxProfileId).toBe("business");
     view.unmount();
@@ -222,7 +222,7 @@ describe("App", () => {
       view = render(<App />);
       const box = screen.getByRole("textbox");
       await waitFor(() => expect(box.value).toBe("@个人主页徽章 "));
-      expect(screen.getByLabelText("移除引用 个人主页徽章")).toBeInTheDocument();
+      expect(screen.getByLabelText("Remove reference 个人主页徽章")).toBeInTheDocument();
       expect(globalThis.fetch).toHaveBeenCalledWith("/api/issues/i1", expect.anything());
       expect(new URLSearchParams(location.search).has("mentionIssue")).toBe(false);
 
@@ -233,8 +233,8 @@ describe("App", () => {
       }));
       expect(chat.startProjectDraft).toHaveBeenCalledWith("p1");
       await waitFor(() => expect(box.value).toBe("@导出报表 "));
-      expect(screen.queryByLabelText("移除引用 个人主页徽章")).not.toBeInTheDocument();
-      expect(screen.getByLabelText("移除引用 导出报表")).toBeInTheDocument();
+      expect(screen.queryByLabelText("Remove reference 个人主页徽章")).not.toBeInTheDocument();
+      expect(screen.getByLabelText("Remove reference 导出报表")).toBeInTheDocument();
     } finally {
       view?.unmount();
       globalThis.fetch = originalFetch;
@@ -336,21 +336,21 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    expect(screen.getByText("快速接入")).toBeInTheDocument();
-    const settings = screen.queryByLabelText("设置");
+    expect(screen.getByText("Quick setup")).toBeInTheDocument();
+    const settings = screen.queryByLabelText("Settings");
     if (settings) await user.click(settings);
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
-    await user.click(screen.getByLabelText("选择项目"));
-    expect(screen.getByRole("listbox", { name: "项目" })).toBeInTheDocument();
+    await user.click(screen.getByLabelText("Select project"));
+    expect(screen.getByRole("listbox", { name: "Project" })).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
     // With no project the picker is highlighted so newcomers notice it.
-    expect(screen.getByLabelText("选择项目")).toHaveClass("is-unset");
-    await user.click(screen.getByText("接入测试环境"));
-    expect(screen.getByRole("textbox").value).toMatch(/^带我一步步接入测试环境/);
-    await user.click(screen.getByText("选用 SOP 与角色"));
-    expect(screen.getByRole("textbox").value).toMatch(/产品、前端、后端交付 SOP/);
+    expect(screen.getByLabelText("Select project")).toHaveClass("is-unset");
+    await user.click(screen.getByText("Connect a test environment"));
+    expect(screen.getByRole("textbox").value).toMatch(/^Help me connect a test environment/);
+    await user.click(screen.getByText("Choose an SOP and roles"));
+    expect(screen.getByRole("textbox").value).toMatch(/product, frontend, or backend delivery SOP/);
   });
 
   test("questions and replies show when they were sent, and the header switches project", async () => {
@@ -385,13 +385,13 @@ describe("App", () => {
     expect(document.querySelectorAll(".message-author time.message-time")).toHaveLength(2);
     expect(document.querySelectorAll(".message-actions time.message-time")).toHaveLength(2);
 
-    const switcher = screen.getByRole("button", { name: "当前项目：示例项目，切换项目" });
+    const switcher = screen.getByRole("button", { name: "Current project: 示例项目. Switch project" });
     // jsdom has no layout; give the anchor a box so the menu stays open.
     switcher.getBoundingClientRect = () => ({ top: 10, bottom: 30, left: 600, right: 700, width: 100, height: 20 });
     await user.click(switcher);
-    const list = screen.getByRole("listbox", { name: "切换项目" });
+    const list = screen.getByRole("listbox", { name: "Switch project" });
     expect(list).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("option", { name: /个人对话/ }));
+    fireEvent.click(screen.getByRole("option", { name: /Personal chat/ }));
     expect(chat.selectProject).toHaveBeenCalledWith("");
     view.unmount();
     Object.assign(chat, previous);
@@ -434,49 +434,49 @@ describe("App", () => {
     expect(screen.getAllByText("已有会话").length).toBeGreaterThan(0);
     const textbox = screen.getByRole("textbox");
     await user.type(textbox, "继续");
-    const send = screen.queryByLabelText(/发送/);
+    const send = screen.queryByLabelText(/Send/);
     if (send) await user.click(send);
     expect(chat.send).toHaveBeenCalled();
 
-    await user.click(screen.getByLabelText("编辑消息"));
+    await user.click(screen.getByLabelText("Edit message"));
     const edit = screen.getByRole("dialog");
     await user.clear(edit.querySelector("textarea"));
     await user.type(edit.querySelector("textarea"), "修改后的消息");
     chat.edit.mockResolvedValueOnce({ id: "s1", messages: [] });
-    await user.click(screen.getByText("保存并重新生成"));
+    await user.click(screen.getByText("Save and regenerate"));
     expect(chat.edit).toHaveBeenCalled();
 
-    await user.click(screen.getByLabelText("重命名会话"));
+    await user.click(screen.getByLabelText("Rename conversation"));
     const rename = screen.getByRole("dialog").querySelector("input");
     await user.clear(rename);
     await user.type(rename, "新会话名");
     chat.rename.mockResolvedValueOnce(true);
-    await user.click(screen.getByText("保存"));
+    await user.click(screen.getByText("Save"));
 
-    const showSidebar = screen.queryByLabelText("显示会话侧边栏");
+    const showSidebar = screen.queryByLabelText("Show conversation sidebar");
     if (showSidebar) await user.click(showSidebar);
     // Pinning moves the row to another section; query the live row each time.
     const openSessionMenu = async () => {
       const sessionLink = document.querySelector(".session-link");
       expect(sessionLink).toBeInTheDocument();
       fireEvent.contextMenu(sessionLink, { clientX: 20, clientY: 20 });
-      return screen.findByRole("menu", { name: "会话操作" });
+      return screen.findByRole("menu", { name: "Conversation actions" });
     };
-    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "置顶" }));
-    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "归档" }));
+    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "Pin" }));
+    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "Archive" }));
     expect(chat.archive).toHaveBeenCalled();
-    await waitFor(() => expect(screen.queryByRole("menu", { name: "会话操作" })).not.toBeInTheDocument());
-    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "删除" }));
-    const deleteDialog = await screen.findByRole("dialog", { name: "删除会话" });
-    await user.click(within(deleteDialog).getByRole("button", { name: "删除" }));
+    await waitFor(() => expect(screen.queryByRole("menu", { name: "Conversation actions" })).not.toBeInTheDocument());
+    await user.click(within(await openSessionMenu()).getByRole("menuitem", { name: "Delete" }));
+    const deleteDialog = await screen.findByRole("dialog", { name: "Delete conversation" });
+    await user.click(within(deleteDialog).getByRole("button", { name: "Delete" }));
     expect(chat.remove).toHaveBeenCalled();
-    await user.click(await screen.findByLabelText("筛选会话"));
-    await user.click(screen.getByText("已归档"));
-    await user.click(screen.getByLabelText("搜索会话"));
-    await user.type(screen.getByLabelText("搜索会话名称"), "已有");
+    await user.click(await screen.findByLabelText("Filter conversations"));
+    await user.click(screen.getByText("Archived"));
+    await user.click(screen.getByLabelText("Search conversations"));
+    await user.type(screen.getByLabelText("Search conversation names"), "已有");
     fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.keyDown(document, { key: ",", ctrlKey: true });
-    expect(screen.getByText("个人配置与模型凭据")).toBeInTheDocument();
+    expect(screen.getByText("Personal settings and model credentials")).toBeInTheDocument();
     view.unmount();
     Object.assign(chat, previous);
   });
@@ -520,13 +520,13 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByText("流式回答")).toBeInTheDocument();
     expect(screen.getByText("出现测试错误")).toBeInTheDocument();
-    await user.click(screen.getByLabelText("查看会话产物"));
-    expect(screen.getByLabelText("会话产物")).toBeInTheDocument();
-    const add = screen.queryByLabelText("添加");
+    await user.click(screen.getByLabelText("View conversation artifacts"));
+    expect(screen.getByLabelText("Conversation artifacts")).toBeInTheDocument();
+    const add = screen.queryByLabelText("Add");
     if (add) await user.click(add);
-    const project = screen.queryByLabelText("选择项目");
+    const project = screen.queryByLabelText("Select project");
     if (project) await user.click(project);
-    const stop = screen.queryByLabelText("停止生成");
+    const stop = screen.queryByLabelText("Stop generating");
     if (stop) await user.click(stop);
     expect(chat.stop).toHaveBeenCalled();
     Object.assign(chat, previous);
@@ -546,10 +546,10 @@ describe("App", () => {
     expect(pi.querySelector('[data-model-provider="pi"] svg')).not.toBeNull();
     await user.click(await screen.findByRole("menuitemradio", { name: "Codex" }));
     expect(chat.setExecutor).toHaveBeenCalledWith("codex");
-    expect(screen.getByRole("button", { name: "思考强度" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reasoning effort" })).toBeInTheDocument();
     chat.executor = "codex";
     view.rerender(<App />);
-    expect(screen.getByRole("button", { name: "思考强度" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reasoning effort" })).toBeInTheDocument();
     // A saved reply locks the CLI: the switch leaves the composer and the
     // title shows which CLI this conversation uses.
     Object.assign(chat, {
@@ -591,11 +591,11 @@ describe("App", () => {
       error: "",
     });
     const view = render(<App />);
-    expect(screen.getByText(/当前执行器 CodeBuddy 需要先配置 CodeBuddy API Key/)).toBeInTheDocument();
-    expect(screen.getByText(/也可以在输入框下方把执行器切换过去/)).toBeInTheDocument();
+    expect(screen.getByText(/Add a CodeBuddy API key/)).toBeInTheDocument();
+    expect(screen.getByText(/executor below the message box/)).toBeInTheDocument();
     chat.executor = "codex";
     view.rerender(<App />);
-    expect(screen.queryByText(/当前执行器 CodeBuddy/)).toBeNull();
+    expect(screen.queryByText(/Add a CodeBuddy API key/)).toBeNull();
     chat.executor = "codebuddy";
     chat.local = true;
     view.rerender(<App />);
@@ -629,7 +629,7 @@ describe("App", () => {
       readOnly: true,
     });
     view.rerender(<App />);
-    expect(document.querySelector(".readonly-notice")?.textContent).toContain("只能查看这个会话");
+    expect(document.querySelector(".readonly-notice")?.textContent).toContain("Join the project to send messages here.");
 
     Object.assign(chat, {
       session: { ...chat.session, readOnly: false },
@@ -666,7 +666,7 @@ describe("App", () => {
       readOnly: false,
     });
     const view = render(<App />);
-    fireEvent.paste(screen.getByLabelText("消息"), {
+    fireEvent.paste(screen.getByLabelText("Message"), {
       clipboardData: {
         items: [
           {
@@ -679,8 +679,8 @@ describe("App", () => {
     const thumb = await screen.findByAltText("shot.png");
     expect(thumb.getAttribute("src")).toBe("blob:composer-preview");
     expect(thumb.closest(".composer-attachment-thumb")).toBeTruthy();
-    fireEvent.click(screen.getByLabelText("查看图片 shot.png"));
-    expect(screen.getByLabelText("查看大图 shot.png")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("View image shot.png"));
+    expect(screen.getByLabelText("View Full Image shot.png")).toBeInTheDocument();
     view.unmount();
     globalThis.fetch = originalFetch;
     if (originalCreate) globalThis.URL.createObjectURL = originalCreate;
@@ -713,7 +713,7 @@ describe("App", () => {
     });
     try {
       const view = render(<App />);
-      fireEvent.paste(screen.getByLabelText("消息"), {
+      fireEvent.paste(screen.getByLabelText("Message"), {
         clipboardData: {
           items: [
             {
@@ -723,7 +723,7 @@ describe("App", () => {
           ],
         },
       });
-      await screen.findByLabelText("查看图片 http.png");
+      await screen.findByLabelText("View image http.png");
       expect(chat.setError).not.toHaveBeenCalledWith(
         expect.stringContaining("randomUUID"),
       );
@@ -810,7 +810,7 @@ describe("App", () => {
       ]),
     });
     const view = render(<App />);
-    expect(screen.getByLabelText("查看会话产物")).toBeInTheDocument();
+    expect(screen.getByLabelText("View conversation artifacts")).toBeInTheDocument();
     await new Promise((resolve) => setTimeout(resolve, 320));
     expect(document.getElementById("conversation-artifacts")).toBeNull();
     view.unmount();
@@ -889,21 +889,21 @@ describe("sidebar conversation filter", () => {
     });
     const view = render(<App />);
     try {
-      const showSidebar = screen.queryByLabelText("显示会话侧边栏");
+      const showSidebar = screen.queryByLabelText("Show conversation sidebar");
       if (showSidebar) await user.click(showSidebar);
       expect(screen.getAllByText("同事独自发起的会话").length).toBeGreaterThan(0);
 
-      await user.click(screen.getByLabelText("筛选会话"));
-      await user.click(screen.getByText("仅我参与的对话"));
+      await user.click(screen.getByLabelText("Filter conversations"));
+      await user.click(screen.getByText("My conversations"));
 
       expect(screen.queryByText("同事独自发起的会话")).not.toBeInTheDocument();
       expect(screen.getAllByText("我参与的项目会话").length).toBeGreaterThan(0);
 
-      await user.click(screen.getByLabelText("筛选会话"));
+      await user.click(screen.getByLabelText("Filter conversations"));
       expect(
-        screen.getByText("仅我参与的对话").closest("[role=menuitemradio]"),
+        screen.getByText("My conversations").closest("[role=menuitemradio]"),
       ).toHaveAttribute("aria-checked", "true");
-      await user.click(screen.getByText("最近的会话"));
+      await user.click(screen.getByText("Recent conversations"));
       expect(screen.getAllByText("同事独自发起的会话").length).toBeGreaterThan(0);
     } finally {
       view.unmount();
@@ -935,12 +935,12 @@ describe("sidebar reply status", () => {
     });
     const view = render(<App />);
     try {
-      const showSidebar = screen.queryByLabelText("显示会话侧边栏");
+      const showSidebar = screen.queryByLabelText("Show conversation sidebar");
       if (showSidebar) await user.click(showSidebar);
       const status = (title) =>
         screen.getAllByText(title)[0].closest(".session-link").querySelector(".session-status");
       await waitFor(() => expect(status("完成未读")).toHaveAttribute("data-session-status", "unread"));
-      expect(status("完成未读")).toHaveAccessibleName("有新回复未读");
+      expect(status("完成未读")).toHaveAccessibleName("New unread reply");
       expect(status("完成未读").querySelector(".session-unread-dot")).not.toBeNull();
       expect(status("完成已读")).toBeNull();
       expect(status("正在生成").querySelector('[data-icon="arc-spinner"]')).not.toBeNull();

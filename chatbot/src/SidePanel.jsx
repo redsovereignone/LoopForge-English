@@ -162,19 +162,19 @@ export function DraftCard({
               : ""}
             {declined
               ? draft.decision === "muted"
-                ? "未采纳，本会话不再建议"
+                ? "Declined. Stop suggesting this in this conversation."
                 : draft.decision === "expired"
-                  ? "已超时"
-                  : "未采纳"
+                  ? "Timed out"
+                  : "Declined"
               : draft.saved
-              ? "已执行"
+              ? "Executed"
               : draft.resolved
-                ? "已完成"
+                ? "Completed"
                 : draft.inherited
-                  ? "继承的历史记录"
+                  ? "Inherited history"
                   : draft.proposal
-                    ? "AI 助手的建议"
-                    : "待确认"}
+                    ? "Assistant suggestion"
+                    : "Needs review"}
           </small>
         </span>
         {target ? <ExternalLink size={16} /> : <ChevronRight size={16} />}
@@ -183,20 +183,20 @@ export function DraftCard({
         {draft.proposal?.reason ? (
           <p className="proposal-reason">
             {draft.proposal.timing !== "start"
-              ? "可选的后续工作"
-              : "建议整件事走 SOP"}
-            ：{draft.proposal.reason}
+              ? "Possible next steps"
+              : "Use an SOP for this task"}
+            : {draft.proposal.reason}
           </p>
         ) : null}
         {remaining !== null ? (
           <p className="proposal-countdown" role="timer">
             {remaining > 0
-              ? `${formatCountdown(remaining)} 后未确认，AI 助手将直接执行`
-              : "已超时，AI 助手即将直接执行"}
+              ? `${formatCountdown(remaining)}  until the assistant proceeds automatically`
+              : "Timed out. The assistant will proceed automatically."}
           </p>
         ) : null}
         {draft.review ? (
-          <p className="muted">帮我批准 · {draft.review.model || "AI 审查"}：{draft.review.rationale}</p>
+          <p className="muted">Review for me · {draft.review.model || "AI review"}: {draft.review.rationale}</p>
         ) : null}
         <p>{summary.effect}</p>
         {summary.fields.length ? (
@@ -211,7 +211,7 @@ export function DraftCard({
         ) : null}
         {isImport ? (
           <fieldset className="operation-repositories">
-            <legend>关联代码仓库（必选）</legend>
+            <legend>Linked repositories (required)</legend>
             {repositories.map((repository) => (
               <label key={repository.id}>
                 <input
@@ -237,9 +237,9 @@ export function DraftCard({
             {!repositories.length ? (
               <p className="muted">
                 {loadingRepositories
-                  ? "正在读取代码仓库…"
+                  ? "Loading repositories…"
                   : repositoryError ||
-                    "尚无可选仓库，请检查目标项目的仓库配置。"}
+                    "No repositories available. Check the target project’s repository settings."}
               </p>
             ) : null}
           </fieldset>
@@ -250,7 +250,7 @@ export function DraftCard({
           </p>
         ) : null}
         <details className="operation-parameters">
-          <summary>查看完整操作参数</summary>
+          <summary>View action parameters</summary>
           <pre className="artifact-source">
             {JSON.stringify(
               {
@@ -278,7 +278,7 @@ export function DraftCard({
       {error ? <p className="error">{error}</p> : null}
       {draft.decision === "expired" && !draft.inherited ? (
         <button type="button" className="quiet-button" disabled>
-          已超时，AI 助手直接执行
+          Timed out. The assistant proceeded automatically.
         </button>
       ) : null}
       {!draft.inherited && !target && onApply && !declined ? (
@@ -309,18 +309,18 @@ export function DraftCard({
           }}
         >
           {draft.resolved ? (
-            "已完成"
+            "Completed"
           ) : draft.saved ? (
             <>
               <Check size={14} />
-              已执行
+              Executed
             </>
           ) : busy ? (
-            "执行中…"
+            "Running…"
           ) : draft.proposal ? (
-            draft.tool === "issues_save" ? "建需求并走 SOP" : "走 SOP"
+            draft.tool === "issues_save" ? "Create requirement and run SOP" : "Run SOP"
           ) : (
-            `确认${summary.title}`
+            `Approve${summary.title}`
           )}
         </button>
       ) : null}
@@ -332,7 +332,7 @@ export function DraftCard({
             disabled={busy}
             onClick={() => decide("declined")}
           >
-            {draft.proposal.timing === "start" ? "让 AI 助手自己做" : "不需要"}
+            {draft.proposal.timing === "start" ? "Let the assistant handle it" : "No thanks"}
           </button>
           <button
             type="button"
@@ -340,7 +340,7 @@ export function DraftCard({
             disabled={busy}
             onClick={() => decide("muted")}
           >
-            本会话不再建议
+            Stop suggesting in this conversation
           </button>
         </div>
       ) : null}
@@ -362,8 +362,8 @@ export function DraftCard({
           }}
         >
           {context.issueId === savedIssue.id
-            ? "已关联到当前会话"
-            : "关联到当前会话"}
+            ? "Linked to this conversation"
+            : "Link to this conversation"}
         </button>
       ) : null}
     </div>
@@ -430,11 +430,11 @@ export default function SidePanel({
   async function action(kind) {
     setError("");
     if (!projectId) {
-      setError("请先点右上角的项目名称选择或绑定项目。");
+      setError("Select or link a project in the top right first.");
       return;
     }
     if (!workflowId || !name.trim()) {
-      setError("请填写名称并选择流程模板。");
+      setError("Enter a name and select a workflow template.");
       return;
     }
     setBusy(true);
@@ -458,7 +458,7 @@ export default function SidePanel({
           throw Error(
             response.error?.message ||
               response.result?.content?.[0]?.text ||
-              "创建失败",
+              "Creation failed",
           );
         setWorkflowId(id);
       } else {
@@ -482,14 +482,14 @@ export default function SidePanel({
     }
   }
   const status = {
-    succeeded: "已完成",
-    running: "进行中",
-    waiting: "等待审批",
-    pending: "排队中",
-    queued: "排队中",
-    failed: "失败",
-    canceled: "已取消",
-    cancelled: "已取消",
+    succeeded: "Completed",
+    running: "In progress",
+    waiting: "Awaiting approval",
+    pending: "Queued",
+    queued: "Queued",
+    failed: "Failed",
+    canceled: "Cancelled",
+    cancelled: "Cancelled",
   };
   async function selectRun(run) {
     try {
@@ -500,9 +500,9 @@ export default function SidePanel({
     }
   }
   return (
-    <aside className="side-panel" aria-label="产物与 SOP">
+    <aside className="side-panel" aria-label="Artifacts and SOPs">
       <header className="panel-tabs">
-        <SlidingTabs aria-label="右侧面板">
+        <SlidingTabs aria-label="Right panel">
           <button
             role="tab"
             aria-selected={tab === "files"}
@@ -512,7 +512,7 @@ export default function SidePanel({
             }}
           >
             <Folder size={14} />
-            产物
+            Artifacts
             {artifacts.length ? (
               <span className="count">{artifacts.length}</span>
             ) : null}
@@ -529,7 +529,7 @@ export default function SidePanel({
             SOP
           </button>
         </SlidingTabs>
-        <IconButton label="关闭侧边栏" onClick={onClose}>
+        <IconButton label="Close sidebar" onClick={onClose}>
           <X size={17} />
         </IconButton>
       </header>
@@ -537,7 +537,7 @@ export default function SidePanel({
         {selected ? (
           <>
             <button className="back-link" onClick={() => setSelected(null)}>
-              ← 所有产物
+              ← All artifacts
             </button>
             <ArtifactPreview artifact={selected} />
             {selected.draft ? (
@@ -551,19 +551,19 @@ export default function SidePanel({
         ) : tab === "files" ? (
           <>
             <div className="panel-heading">
-              <h2>会话产物</h2>
+              <h2>Conversation artifacts</h2>
               <small>
                 {chat.projects.find((p) => p.id === projectId)?.name ||
-                  "个人对话"}
+                  "Personal chat"}
               </small>
             </div>
             {!artifacts.length ? (
               <div className="panel-empty">
                 <File size={28} />
-                <h3>产物会显示在这里</h3>
+                <h3>Artifacts appear here</h3>
                 <p>
-                  对话中的图片、文件、图表、代码和 SOP
-                  草稿会自动汇集，点击即可查看。
+                  Images, files, diagrams, code, and SOP
+                   drafts from the conversation appear here. Click an item to view it.
                 </p>
               </div>
             ) : (
@@ -600,40 +600,40 @@ export default function SidePanel({
           <>
             <div className="panel-heading">
               <h2>SOP</h2>
-              <IconButton label="刷新 SOP 与运行" onClick={() => void load()}>
+              <IconButton label="Refresh SOPs and runs" onClick={() => void load()}>
                 <RefreshCw size={16} />
               </IconButton>
             </div>
             <label className="field">
-              项目
+              Project
               <div className="project-static">
                 <Folder size={14} />
                 {chat.projects.find((p) => p.id === projectId)?.name ||
-                  "尚未绑定项目"}
+                  "No project linked"}
               </div>
             </label>
             <label className="field">
-              名称
+              Name
               <input
-                placeholder="新流程或这次要做的事"
+                placeholder="New workflow or task"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </label>
             <label className="field">
-              说明
+              Description
               <textarea
                 rows={3}
-                placeholder="派发时会成为需求说明"
+                placeholder="Used as the requirement description when dispatched"
                 value={detail}
                 onChange={(e) => setDetail(e.target.value)}
               />
             </label>
             <label className="field">
-              流程模板
+              Templates
               <HarnessSelect
                 value={workflowId}
-                ariaLabel="流程模板"
+                ariaLabel="Templates"
                 onChange={(e) => setWorkflowId(e.target.value)}
                 options={workflows.map((w) => ({ value: w.id, label: w.name }))}
               />
@@ -646,19 +646,19 @@ export default function SidePanel({
                     id: "workflow-" + workflowId,
                     name:
                       workflows.find((w) => w.id === workflowId)?.name ||
-                      "SOP 定义",
+                      "SOP definition",
                     kind: "sop",
                     content: JSON.stringify(
                       workflows.find((w) => w.id === workflowId),
                       null,
                       2,
                     ),
-                    source: "项目 SOP",
+                    source: "Project SOP",
                   })
                 }
               >
                 <ChevronRight size={14} />
-                查看 SOP 定义
+                View SOP definition
               </button>
             ) : null}
             <div className="button-row">
@@ -667,7 +667,7 @@ export default function SidePanel({
                 className="quiet-button"
                 onClick={() => action("clone")}
               >
-                创建 SOP
+                Create SOP
               </button>
               <button
                 disabled={busy}
@@ -675,7 +675,7 @@ export default function SidePanel({
                 onClick={() => action("dispatch")}
               >
                 <Play size={13} />
-                {busy ? "处理中…" : "派发 SOP"}
+                {busy ? "Processing…" : "Dispatch SOP"}
               </button>
             </div>
             {error ? (
@@ -684,7 +684,7 @@ export default function SidePanel({
               </p>
             ) : null}
             <section className="panel-section">
-              <h3>聊天生成的操作草稿</h3>
+              <h3>Action drafts from chat</h3>
               {artifacts
                 .filter((a) => a.kind === "sop")
                 .map((a) => (
@@ -701,12 +701,12 @@ export default function SidePanel({
                 ))}
               {!artifacts.some((a) => a.kind === "sop") ? (
                 <p className="muted">
-                  在聊天中描述要创建或派发的 SOP，草稿将在这里等待确认。
+                  Describe an SOP to create or dispatch in chat. Its draft will appear here for approval.
                 </p>
               ) : null}
             </section>
             <section className="panel-section">
-              <h3>项目运行</h3>
+              <h3>Project runs</h3>
               {runs.map((run) => (
                 <button
                   className="run-row"
@@ -724,7 +724,7 @@ export default function SidePanel({
                 </button>
               ))}
               {!runs.length ? (
-                <p className="muted">这个项目暂时没有运行。</p>
+                <p className="muted">No runs in this project yet.</p>
               ) : null}
             </section>
             {openRun ? (
@@ -738,7 +738,7 @@ export default function SidePanel({
                         ?.name || id}
                       <small>{status[node.status] || node.status}</small>
                     </summary>
-                    <pre>{node.output || "暂无输出"}</pre>
+                    <pre>{node.output || "No output yet"}</pre>
                   </details>
                 ))}
                 {openRun.artifacts?.map((a) => (
@@ -750,7 +750,7 @@ export default function SidePanel({
                         ...a,
                         mimeType: a.mediaType,
                         kind: a.mediaType === "image/svg+xml" ? "svg" : "code",
-                        source: "SOP 运行产物",
+                        source: "SOP run artifacts",
                         url: `/api/runs/${encodeURIComponent(openRun.id)}/artifacts/${encodeURIComponent(a.id)}`,
                       })
                     }

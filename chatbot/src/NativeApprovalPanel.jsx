@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import React, { useEffect, useState } from "react";
 import { api, write, sessionPath } from "./api";
 import HarnessIcon from "./HarnessIcon";
@@ -56,26 +57,26 @@ export default function NativeApprovalPanel({ chat, onChange }) {
   }, [pendingIds]);
   if (!mine.length) return null;
   return (
-    <section className="native-approvals" aria-label="待批准的外部写入" aria-live="polite">
+    <section className="native-approvals" aria-label="External write awaiting approval" aria-live="polite">
       {mine.map((item) => (
         <div className="native-approval" key={item.id}>
           <div className="native-approval-title">
             <HarnessIcon name="warning" size={15} aria-hidden="true" />
-            <strong>批准外部写入{item.summary ? `：${item.summary}` : ""}</strong>
+            <strong>Approve external write{item.summary ? `: ${item.summary}` : ""}</strong>
           </div>
           <pre>{commandText(item.input)}</pre>
-          <p>这项操作会写入外部系统。仅批准这一次。停止回复、调用取消或等待超时后，审批会失效。</p>
+          <p>This action writes to an external system. Approval applies once and expires if the reply stops, the call is canceled, or the request times out.</p>
           <div className="native-approval-actions">
             <button type="button" disabled={!!saving} onClick={() => decide(item, "deny")}>
-              拒绝
+              Deny
             </button>
             <button type="button" className="primary" disabled={!!saving} onClick={() => decide(item, "allow")}>
-              批准本次操作
+              Approve this action
             </button>
           </div>
         </div>
       ))}
-      {error ? <p role="alert">{error}</p> : null}
+      {error ? <p role="alert">{englishMessage(error)}</p> : null}
     </section>
   );
 }

@@ -44,8 +44,8 @@ func TestDecodeAssistantTitleSummary(t *testing.T) {
 	if err != nil || got != "梳理积分商城需求" {
 		t.Fatalf("decoded %q %v", got, err)
 	}
-	long, err := decodeAssistantTitleSummary(`{"title":"` + strings.Repeat("题", 30) + `"}`)
-	if err != nil || long != strings.Repeat("题", 16) {
+	long, err := decodeAssistantTitleSummary(`{"title":"` + strings.Repeat("A", 80) + `"}`)
+	if err != nil || long != strings.Repeat("A", 64) {
 		t.Fatalf("truncated %q %v", long, err)
 	}
 	if _, err := decodeAssistantTitleSummary(`{"title":""}`); err == nil {

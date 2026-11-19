@@ -61,17 +61,17 @@ describe("generation diagnostics", () => {
         failure={failure}
       />,
     );
-    expect(screen.getByText(failure.message)).toBeInTheDocument();
+    expect(screen.getByText("The model provider rate limit was reached (429).")).toBeInTheDocument();
     expect(read).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "View details" }));
     expect(await screen.findByText("request-example")).toBeInTheDocument();
     expect(screen.getByText("trace-example")).toBeInTheDocument();
-    expect(screen.getByText("退出码 7")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "下载诊断" })).toHaveAttribute(
+    expect(screen.getByText("Exit code 7")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Download diagnostics" })).toHaveAttribute(
       "href",
       "/api/assistant/sessions/session-one/generations/turn-one/diagnostics?download=1",
     );
-    expect(screen.getByRole("button", { name: "查看详情" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "View details" })).toHaveAttribute(
       "aria-expanded",
       "true",
     );
@@ -89,9 +89,9 @@ describe("generation diagnostics", () => {
         failure={failure}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "复制诊断" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy diagnostics" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "已复制诊断信息",
+      "Diagnostics copied",
     );
     expect(read).toHaveBeenCalledWith(
       "/api/assistant/sessions/session-one/generations/turn-one/diagnostics",
@@ -111,8 +111,8 @@ describe("generation diagnostics", () => {
       screen.queryByText(/没有.*进展|已运行|90 秒/),
     ).not.toBeInTheDocument();
     expect(read).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "诊断信息" }));
-    fireEvent.click(await screen.findByRole("button", { name: "刷新诊断" }));
+    fireEvent.click(screen.getByRole("button", { name: "Diagnostics" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Refresh diagnostics" }));
     await waitFor(() => expect(read).toHaveBeenCalledTimes(2));
   });
   test("shows retrieval errors and ignores a late response from another turn", async () => {
@@ -129,7 +129,7 @@ describe("generation diagnostics", () => {
         failure={failure}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "View details" }));
     rerender(
       <GenerationDiagnostics
         sessionId="session-two"
@@ -142,11 +142,11 @@ describe("generation diagnostics", () => {
       expect(screen.queryByText("request-example")).not.toBeInTheDocument(),
     );
     read.mockRejectedValueOnce(new Error("该轮次没有可用的诊断记录"));
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "View details" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "该轮次没有可用的诊断记录",
     );
-    expect(screen.getByRole("link", { name: "下载诊断" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Download diagnostics" })).toHaveAttribute(
       "href",
       expect.stringContaining("session-two/generations/turn-two"),
     );
@@ -199,11 +199,11 @@ describe("generation diagnostics", () => {
         failure={failure}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "View details" }));
     expect(await screen.findByText("api-prod-1")).toBeInTheDocument();
     expect(screen.getByText("CHECKPOINT_LOST")).toBeInTheDocument();
     expect(screen.getByText("tapd__stories_list")).toBeInTheDocument();
-    expect(screen.getByText(/执行时间线 · 1 条记录/)).toBeInTheDocument();
+    expect(screen.getByText(/Execution timeline · 1 records/)).toBeInTheDocument();
   });
   test("read-only viewers see the failure without detail actions", () => {
     const { container, rerender } = render(
@@ -214,9 +214,9 @@ describe("generation diagnostics", () => {
         readOnly
       />,
     );
-    expect(screen.getByText(failure.message)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "查看详情" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "下载诊断" })).toBeNull();
+    expect(screen.getByText("The model provider rate limit was reached (429).")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "View details" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Download diagnostics" })).toBeNull();
     rerender(
       <GenerationDiagnostics
         sessionId="session-one"

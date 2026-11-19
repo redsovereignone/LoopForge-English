@@ -6,9 +6,9 @@ import { usePanelPresence } from "./usePanelPresence";
 import "./permission-picker.css";
 
 const modes = [
-  { id: "confirm", icon: "gate", label: "请求批准", detail: "工作区文件和命令自动执行；平台写入由你确认，外部工具写入需要授权。" },
-  { id: "assisted", icon: "confirmation-check", label: "帮我批准", detail: "工作区文件和命令自动执行；git push 等外部写入命令由 AI 审查直接批准或拒绝；平台写入未通过审查时交给你确认。" },
-  { id: "auto", icon: "priority-bolt", label: "完全权限", tone: "danger", detail: "工作区文件和命令自动执行；平台及外部操作使用当前账号权限直接执行。" },
+  { id: "confirm", icon: "gate", label: "Ask for approval", detail: "Workspace commands and edits run automatically. You approve platform writes and authorize external writes." },
+  { id: "assisted", icon: "confirmation-check", label: "Review for me", detail: "Workspace commands and edits run automatically. AI reviews external writes such as git push. Platform writes that need confirmation are sent to you." },
+  { id: "auto", icon: "priority-bolt", label: "Full access", tone: "danger", detail: "Workspace commands, edits, and platform and external actions run with the current account’s permissions." },
 ];
 
 const validApprovalMode = (value) => modes.some((mode) => mode.id === value);
@@ -24,7 +24,7 @@ export function rememberApprovalMode(userId, value) {
 }
 
 // `glyph` is a rendered brand mark. Options that only set `icon` keep the Harness icon.
-export default function PermissionPicker({ value, onSelect, open, onOpenChange, label = "操作确认方式", icon, options = modes }) {
+export default function PermissionPicker({ value, onSelect, open, onOpenChange, label = "Approval mode", icon, options = modes }) {
   const trigger = useRef(null);
   const panel = useRef(null);
   const initialFocus = useRef(null);

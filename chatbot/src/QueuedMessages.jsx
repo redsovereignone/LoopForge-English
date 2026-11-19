@@ -20,22 +20,22 @@ export default function QueuedMessages({
   // While a steer is in flight the reply is briefly not running; the other
   // rows still belong to the interrupted turn.
   const interrupting = busy || !!steering;
-  const steerLabel = interrupting ? "引导" : "发送";
-  const steerTitle = interrupting ? "打断当前回复，立即发送这条" : "立即发送这条";
+  const steerLabel = interrupting ? "Steer" : "Send";
+  const steerTitle = interrupting ? "Interrupt the reply and send this message now" : "Send this message now";
   return (
     <section
       className={`queued-messages${held ? " is-held" : ""}`}
-      aria-label="排队中的消息"
+      aria-label="Queued messages"
     >
       {held && items.length > 0 && !readOnly ? (
         <div className="queued-messages-note" role="status">
-          <span>已暂停自动发送</span>
+          <span>Automatic sending paused</span>
           <button
             type="button"
             className="queued-messages-resume"
             onClick={onResume}
           >
-            {busy ? "结束后继续发送" : "继续发送"}
+            {busy ? "Resume after this turn" : "Resume sending"}
           </button>
         </div>
       ) : null}
@@ -50,9 +50,9 @@ export default function QueuedMessages({
               aria-hidden="true"
             />
             <span className="queued-message-text" title={steering.text}>
-              {steering.text || "图片与文件"}
+              {steering.text || "Images and files"}
             </span>
-            <span className="queued-message-state">正在引导</span>
+            <span className="queued-message-state">Steering</span>
           </li>
         ) : null}
         {items.map((item) => {
@@ -68,7 +68,7 @@ export default function QueuedMessages({
                 aria-hidden="true"
               />
               <span className="queued-message-text" title={item.text}>
-                {item.text || "图片与文件"}
+                {item.text || "Images and files"}
               </span>
               {extra ? (
                 <span className="queued-message-extra">
@@ -89,14 +89,14 @@ export default function QueuedMessages({
                     <span>{steerLabel}</span>
                   </button>
                   <IconButton
-                    label="编辑消息"
+                    label="Edit message"
                     className="queued-message-action"
                     onClick={() => onEdit?.(item)}
                   >
                     <HarnessIcon name="edit" size={14} />
                   </IconButton>
                   <IconButton
-                    label="删除"
+                    label="Delete"
                     className="queued-message-action"
                     onClick={() => onRemove?.(item.id)}
                   >

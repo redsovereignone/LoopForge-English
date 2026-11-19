@@ -161,7 +161,7 @@ function renderSkillhubGrid(){
   const count=$('#skillhubCount');
   const sortName=(SKILLHUB_SORTS.find(x=>x[0]===s.sortBy)||SKILLHUB_SORTS[0])[1];
   const scopeName=s.keyword?`搜索「${s.keyword}」`:(s.category?skillhubCategoryName(s.category):'全部分类');
-  if(count)count.innerHTML=s.loading&&!s.loaded?'正在加载 SkillHub 技能…':`${escapeHTML(scopeName)} · ${escapeHTML(sortName)}<b>${escapeHTML((Number(s.total)||0).toLocaleString('zh-CN'))}</b>`;
+  if(count)count.innerHTML=s.loading&&!s.loaded?'正在加载 SkillHub 技能…':`${escapeHTML(scopeName)} · ${escapeHTML(sortName)}<b>${escapeHTML((Number(s.total)||0).toLocaleString('en-US'))}</b>`;
   grid.setAttribute('aria-busy',String(!!s.loading));
   if(s.loading)grid.innerHTML=Array.from({length:6},()=>'<div class="skillhub-skel" aria-hidden="true"></div>').join('');
   else if(s.error)grid.innerHTML=`<div class="asset-empty"><b>SkillHub 暂时无法访问</b><p>${escapeHTML(s.error)}</p><button type="button" class="button" data-skillhub-retry>${huiIcon('refresh')}重试</button></div>`;
@@ -181,7 +181,7 @@ function renderSkillhubPager(){
   host.hidden=s.loading||!!s.error||!s.items.length||pages<=1;
   if(host.hidden){host.innerHTML='';return}
   const p=Math.min(s.page,pages);
-  host.innerHTML=`<span>第 ${p} / ${pages.toLocaleString('zh-CN')} 页</span><div class="skillhub-pages"><button type="button" data-skillhub-page="${p-1}" aria-label="上一页"${p<=1?' disabled':''}>${huiIcon('chevron-left')}</button>${skillhubPageList(p,pages).map(x=>x==='…'?'<button type="button" disabled>…</button>':`<button type="button" data-skillhub-page="${x}"${x===p?' class="active" aria-current="page"':''}>${x}</button>`).join('')}<button type="button" data-skillhub-page="${p+1}" aria-label="下一页"${p>=pages?' disabled':''}>${huiIcon('chevron-right')}</button></div>`;
+  host.innerHTML=`<span>第 ${p} / ${pages.toLocaleString('en-US')} 页</span><div class="skillhub-pages"><button type="button" data-skillhub-page="${p-1}" aria-label="上一页"${p<=1?' disabled':''}>${huiIcon('chevron-left')}</button>${skillhubPageList(p,pages).map(x=>x==='…'?'<button type="button" disabled>…</button>':`<button type="button" data-skillhub-page="${x}"${x===p?' class="active" aria-current="page"':''}>${x}</button>`).join('')}<button type="button" data-skillhub-page="${p+1}" aria-label="下一页"${p>=pages?' disabled':''}>${huiIcon('chevron-right')}</button></div>`;
 }
 async function loadSkillhubMarket(){
   const s=skillhubState(),seq=++s.seq;

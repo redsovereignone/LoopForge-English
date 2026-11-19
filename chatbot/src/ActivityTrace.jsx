@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HarnessIcon from "./HarnessIcon";
 import {
@@ -55,13 +56,13 @@ function Step({ step, live, interrupted }) {
   const stopped = interrupted && !step.finishedAt;
   // Like Codex, a command that took a while says so in its row.
   const label = step.failed
-    ? "执行失败"
+    ? "Execution failed"
     : stopped
-      ? "已中断"
+      ? "Interrupted"
       : pending
         ? face.busy
         : face.kind === "command" && duration >= 1
-          ? `已在${formatElapsed(duration)}内运行`
+          ? `Ran in ${formatElapsed(duration)} `
           : face.done;
   return (
     <div
@@ -98,14 +99,14 @@ function Step({ step, live, interrupted }) {
                 {target}
               </span>
             ) : null}
-            {step.failed ? <AlertCircle size={13} aria-label="失败" /> : null}
+            {step.failed ? <AlertCircle size={13} aria-label="Failed" /> : null}
             <ChevronRight className="execution-item-chevron" size={13} />
           </summary>
           {expanded ? (
             <div className="execution-item-expanded">
               {duration !== null ? (
                 <small className="execution-duration">
-                  耗时 {formatElapsed(duration)}
+                  Duration {formatElapsed(duration)}
                 </small>
               ) : null}
               {step.kind === "thinking" && step.text ? (
@@ -117,10 +118,10 @@ function Step({ step, live, interrupted }) {
               ) : (
                 <div className="execution-item-body">
                   {step.tool ? (
-                    <div className="execution-tool-name">{step.tool}</div>
+                    <div className="execution-tool-name">{englishMessage(step.tool)}</div>
                   ) : null}
                   <pre className="execution-detail">
-                    {step.detail || step.text || "未返回更多详情"}
+                    {step.detail || step.text || "No further details"}
                   </pre>
                   {step.output ? (
                     <pre className="execution-detail execution-output">
@@ -146,7 +147,7 @@ function Step({ step, live, interrupted }) {
 export function SubagentProcess({ step, live = false, interrupted = false }) {
   const blocks = processBlocks(step.children || [], { live });
   if (!blocks.length)
-    return <p className="execution-empty">子 Agent 还没有产生过程。</p>;
+    return <p className="execution-empty">The subagent has no activity yet.</p>;
   return (
     <div className="execution-subagent">
       <Narration blocks={blocks} live={live} interrupted={interrupted} expandAll={!live} />
@@ -252,7 +253,7 @@ function ActivityGroup({ block, live, interrupted, expandAll }) {
           </span>
           {failed.length ? (
             <span className="execution-group-failed-count">
-              {failed.length} 步失败
+              {failed.length}  steps failed
             </span>
           ) : null}
           <ChevronRight className="execution-group-chevron" size={13} />
@@ -340,24 +341,24 @@ export default function ActivityTrace({
   const elapsed = seconds !== null ? ` ${formatElapsed(seconds)}` : "";
   const blocks = narration || traceBlocks(steps, { live });
   const divider = (
-    <span className="reply-divider" role="separator" aria-label="回复正文分隔线" />
+    <span className="reply-divider" role="separator" aria-label="Reply divider" />
   );
   if (live) {
     const status = steps.filter((step) => step.kind === "status").at(-1)?.text;
     return (
       <div className="reply-timing execution-trace is-live">
         <div className="execution-summary-row">
-          <span className="live-elapsed">正在处理{elapsed}</span>
+          <span className="live-elapsed">Working{elapsed}</span>
         </div>
         {divider}
-        <div className="execution-body" aria-label="执行过程">
+        <div className="execution-body" aria-label="Progress">
           {blocks.length ? (
             <Narration blocks={blocks} live interrupted={interrupted} />
           ) : (
             <span className="execution-current" data-kind="status">
               <LoaderCircle size={15} strokeWidth={1.7} aria-hidden="true" />
               <span className="execution-current-text">
-                {status || "正在处理…"}
+                {status || "Processing…"}
               </span>
             </span>
           )}
@@ -375,13 +376,13 @@ export default function ActivityTrace({
     >
       <summary>
         <span className="execution-summary-row">
-          <span className="execution-total">已处理{elapsed}</span>
+          <span className="execution-total">Done{elapsed}</span>
           <ChevronRight className="execution-chevron" size={14} />
         </span>
         {divider}
       </summary>
       {expanded ? (
-        <div className="execution-body" aria-label="执行过程">
+        <div className="execution-body" aria-label="Progress">
           {blocks.length ? (
             <Narration
               blocks={blocks}
@@ -390,7 +391,7 @@ export default function ActivityTrace({
               expandAll
             />
           ) : (
-            <p className="execution-empty">这条历史回复未保存执行过程。</p>
+            <p className="execution-empty">Activity was not saved for this reply.</p>
           )}
         </div>
       ) : null}

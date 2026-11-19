@@ -32,7 +32,7 @@
       },
       {
         "command": "agentflow.newTerminal",
-        "title": "新建任务终端",
+        "title": "New task terminal",
         "icon": "$(terminal)"
       }
     ],

@@ -496,7 +496,7 @@ func TestShellAndPythonScriptNodesExecuteInOrder(t *testing.T) {
 	}
 	for _, nodeID := range []string{"shell", "python"} {
 		output := finished.Nodes[nodeID].Output
-		if !strings.Contains(output, "# 脚本执行结果") || !strings.Contains(output, "标准输出：无") {
+		if !strings.Contains(output, "# Script result") || !strings.Contains(output, "Standard output: none") {
 			t.Fatalf("script %s did not retain an execution summary: %q", nodeID, output)
 		}
 	}

@@ -48,12 +48,12 @@ function FileRow({ file, selected, onSelect }) {
       </span>
       <span className="change-copy">
         <strong>{file.name}</strong>
-        <small>{file.dir || file.repository || "工作区根目录"}</small>
+        <small>{file.dir || file.repository || "Workspace root"}</small>
       </span>
       <span className="change-stat">
         {file.additions ? <i className="is-add">+{file.additions}</i> : null}
         {file.deletions ? <i className="is-del">−{file.deletions}</i> : null}
-        {file.untracked ? <i className="is-new">未跟踪</i> : null}
+        {file.untracked ? <i className="is-new">Untracked</i> : null}
       </span>
       <HarnessIcon name="chevron-right" size={13} className="change-row-arrow" />
     </button>
@@ -69,10 +69,10 @@ function BranchEntry({ repository }) {
   return (
     <>
       <small className="changes-branch">
-        工作分支 <code>{repository.workBranch}</code>
+        Working branch <code>{repository.workBranch}</code>
         {repository.baseBranch && repository.baseBranch !== repository.workBranch ? (
           <>
-            ，基线 <code>{repository.baseBranch}</code>
+            , baseline  <code>{repository.baseBranch}</code>
           </>
         ) : null}
       </small>
@@ -84,7 +84,7 @@ function BranchEntry({ repository }) {
           rel="noopener noreferrer"
         >
           <HarnessIcon name="preview-expand" size={13} />
-          在代码仓库查看这个分支的改动
+          View branch changes in the repository
         </a>
       ) : null}
     </>
@@ -95,11 +95,11 @@ function EmptyChanges({ repository }) {
   return (
     <div className="changes-empty">
       <HarnessIcon name="git" size={24} />
-      <p>工作区没有未提交改动。</p>
+      <p>No uncommitted changes.</p>
       {repository?.workBranch ? null : (
-        <small>助手写入或命令修改的文件会出现在这里，相对 HEAD 实时统计。</small>
+        <small>Files changed by the assistant or by commands appear here, compared with HEAD.</small>
       )}
-      <small>已提交或已推送的改动不计入这里。</small>
+      <small>Committed or pushed changes are excluded.</small>
       <BranchEntry repository={repository} />
     </div>
   );
@@ -148,15 +148,15 @@ export default function ChangesPanel({ changes }) {
       <span className="changes-summary">
         {files.length ? (
           <>
-            <strong>{files.length}</strong> 个文件
+            <strong>{files.length}</strong> files
             <i className="is-add">+{changes.additions || 0}</i>
             <i className="is-del">−{changes.deletions || 0}</i>
           </>
         ) : (
-          "相对 HEAD"
+          "Compared with HEAD"
         )}
       </span>
-      <IconButton label="刷新改动" onClick={changes?.refresh}>
+      <IconButton label="Refresh changes" onClick={changes?.refresh}>
         <HarnessIcon name="refresh" size={14} />
       </IconButton>
     </div>
@@ -175,7 +175,7 @@ export default function ChangesPanel({ changes }) {
             onClick={() => setSelectedPath("")}
           >
             <HarnessIcon name="chevron-left" size={13} />
-            <span>返回改动列表</span>
+            <span>Back to changes</span>
           </button>
           <span className="changes-detail-path" title={selected.path}>
             {selected.path}
@@ -183,22 +183,22 @@ export default function ChangesPanel({ changes }) {
         </div>
         <div className="changes-diff">
           {loadingPath === selected.path ? (
-            <p className="changes-note">正在读取改动…</p>
+            <p className="changes-note">Loading changes…</p>
           ) : error ? (
             <p className="changes-note is-error" role="alert">
               {error}
             </p>
           ) : !patch ? (
             <p className="changes-note">
-              这个文件没有可展示的文本改动（可能是二进制文件或内容过大）。
+              No text diff is available. The file may be binary or too large.
             </p>
           ) : patch.binary ? (
-            <p className="changes-note">二进制文件，无法逐行展示。</p>
+            <p className="changes-note">Binary file. No line-by-line diff is available.</p>
           ) : rows.length ? (
             <>
               {selected.untracked ? (
                 <p className="changes-note">
-                  该文件尚未纳入 git，下面是它的完整内容。
+                  This file is untracked. Its full contents are shown below.
                 </p>
               ) : null}
               <div className="diff-body">
@@ -215,12 +215,12 @@ export default function ChangesPanel({ changes }) {
               </div>
               {rows.length > shown.length ? (
                 <p className="changes-note">
-                  改动较大，仅展示前 {MAX_LINES} 行（共 {rows.length} 行）。
+                  Large diff. Showing the first  {MAX_LINES}  lines of  {rows.length} .
                 </p>
               ) : null}
             </>
           ) : (
-            <p className="changes-note">这个文件没有内容差异。</p>
+            <p className="changes-note">The file contents are identical.</p>
           )}
         </div>
       </div>
@@ -236,19 +236,19 @@ export default function ChangesPanel({ changes }) {
         </p>
       ) : null}
       {status === "loading" ? (
-        <p className="changes-note">正在读取工作区改动…</p>
+        <p className="changes-note">Loading workspace changes…</p>
       ) : status === "unavailable" || status === "error" ? (
         <div className="changes-empty">
           <HarnessIcon name="git" size={24} />
-          <p>{changes?.reason || "工作区不可用。"}</p>
-          <small>工作区可用后，这里会显示本次会话的改动。</small>
+          <p>{changes?.reason || "Workspace unavailable."}</p>
+          <small>Changes will appear when the workspace is ready.</small>
           {status === "unavailable" ? <BranchEntry repository={repository} /> : null}
         </div>
       ) : status === "idle" ? (
         <div className="changes-empty">
           <HarnessIcon name="git" size={24} />
-          <p>这个会话还没有工作区。</p>
-          <small>助手开始改代码后，改动会出现在这里。</small>
+          <p>This conversation has no workspace yet.</p>
+          <small>Changes will appear when the assistant edits code.</small>
         </div>
       ) : files.length ? (
         <div className="changes-list" role="list">
@@ -266,11 +266,11 @@ export default function ChangesPanel({ changes }) {
       )}
       {changes?.truncated ? (
         <p className="changes-note">
-          改动内容超过预览上限，部分文件的行数统计可能不完整。
+          The diff exceeds the preview limit. Some line counts may be incomplete.
         </p>
       ) : null}
       <p className="changes-footnote">
-        只统计相对 HEAD 的未提交改动，包含命令修改的文件；提交 MR 前请逐项核对。
+        Review uncommitted changes against HEAD before submitting an MR, including files changed by commands.
       </p>
     </div>
   );

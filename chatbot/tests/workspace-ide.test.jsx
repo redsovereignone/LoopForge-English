@@ -27,7 +27,7 @@ describe("side panel IDE tab", () => {
     fireEvent.click(screen.getByRole("tab", { name: /IDE/ }));
     expect(onViewChange).toHaveBeenCalledWith("ide");
     rerender(panel({ view: "ide", workspaceRunId: "run-9", onViewChange }));
-    expect(screen.getByRole("complementary", { name: "工作区 IDE" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Workspace IDE" })).toBeInTheDocument();
     const frame = screen.getByLabelText("VS Code");
     expect(frame).toHaveAttribute("src", "/vscode.html?run=run-9&embed=1");
     // A title would show a hover tip over the whole editor.

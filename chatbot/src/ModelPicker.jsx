@@ -157,7 +157,7 @@ export default function ModelPicker({ models, value, label, open, onOpenChange, 
         ref={trigger}
         type="button"
         className="model-picker grasp-model-picker"
-        aria-label="选择模型"
+        aria-label="Select model"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={presence.mounted ? identity : undefined}
@@ -171,7 +171,7 @@ export default function ModelPicker({ models, value, label, open, onOpenChange, 
         }}
       >
         <ModelProviderIcon model={current || value} size={20} />
-        <span className="model-picker-label">{label || current?.name || "模型"}</span>
+        <span className="model-picker-label">{label || current?.name || "Model"}</span>
         <HarnessIcon name="chevron-down" size={12} />
       </button>
       {presence.mounted ? createPortal(
@@ -180,7 +180,7 @@ export default function ModelPicker({ models, value, label, open, onOpenChange, 
           id={identity}
           className="grasp-model-menu"
           role="menu"
-          aria-label="模型"
+          aria-label="Model"
           aria-hidden={!open || undefined}
           inert={!open}
           data-phase={presence.phase}
@@ -190,8 +190,8 @@ export default function ModelPicker({ models, value, label, open, onOpenChange, 
         >
           <label className="grasp-model-search" data-icon-motion-host="">
             <HarnessIcon name="search" size={16} />
-            <input ref={search} type="text" aria-label="搜索模型" placeholder="搜索模型" value={query} onChange={(event) => setQuery(event.target.value)} />
-            {query ? <button type="button" className="model-search-clear" aria-label="清空搜索" onClick={() => { setQuery(""); search.current?.focus(); }}><HarnessIcon name="close" size={13} /></button> : null}
+            <input ref={search} type="text" aria-label="Search models" placeholder="Search models" value={query} onChange={(event) => setQuery(event.target.value)} />
+            {query ? <button type="button" className="model-search-clear" aria-label="Clear search" onClick={() => { setQuery(""); search.current?.focus(); }}><HarnessIcon name="close" size={13} /></button> : null}
           </label>
           <div className="grasp-model-options">
             {filtered.length ? filtered.map((model) => (
@@ -212,7 +212,7 @@ export default function ModelPicker({ models, value, label, open, onOpenChange, 
                 </span>
                 <span className="model-option-check">{model.id === value ? <HarnessIcon name="check" size={14} motion="once" /> : null}</span>
               </button>
-            )) : <p className="model-picker-empty" role="status">没有匹配的模型</p>}
+            )) : <p className="model-picker-empty" role="status">No matching model</p>}
           </div>
         </div>, document.body,
       ) : null}

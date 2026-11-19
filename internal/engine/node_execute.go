@@ -667,17 +667,17 @@ func (e *Engine) executeNode(ctx context.Context, runID string, wf domain.Workfl
 				}
 			}
 			duration := time.Since(started)
-			status, level := "成功", ""
+			status, level := "succeeded", ""
 			if runErr != nil {
-				status, level = "失败", "error"
+				status, level = "failed", "error"
 			}
 			sink(domain.TelemetryEvent{
 				Category: "script", Name: "script.completed", Phase: "finish", Level: level,
-				Message:    fmt.Sprintf("%s 脚本执行%s · %d ms · 输出 %d bytes", scriptLanguageLabel(language), status, duration.Milliseconds(), len(rawOutput)),
+				Message:    fmt.Sprintf("%s script %s · %d ms · %d output bytes", scriptLanguageLabel(language), status, duration.Milliseconds(), len(rawOutput)),
 				Attributes: map[string]any{"language": language, "status": status, "durationMs": duration.Milliseconds(), "outputBytes": len(rawOutput)},
 			})
 			if strings.TrimSpace(rawOutput) == "" {
-				rawOutput = fmt.Sprintf("# 脚本执行结果\n\n- 语言：%s\n- 状态：%s\n- 耗时：%d ms\n- 标准输出：无\n", scriptLanguageLabel(language), status, duration.Milliseconds())
+				rawOutput = fmt.Sprintf("# Script result\n\n- Language: %s\n- Status: %s\n- Duration: %d ms\n- Standard output: none\n", scriptLanguageLabel(language), status, duration.Milliseconds())
 			}
 			return rawOutput, runErr
 		}

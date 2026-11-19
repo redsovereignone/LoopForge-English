@@ -23,23 +23,20 @@ func ApprovalWaitReason(run Run, nodeID string) string {
 	node := wf.Nodes[index]
 	upstream, downstream := approvalNeighbors(wf, index)
 	var b strings.Builder
-	b.WriteString(approvalSOPLabel(wf.Name) + "在这一步设置了人工门禁")
+	b.WriteString(approvalSOPLabel(wf.Name) + " requires approval at this step.")
 	if len(upstream) > 0 {
-		b.WriteString("：" + strings.Join(upstream, "、") + "已完成，需要有权限的成员检查结果后确认")
-	} else {
-		b.WriteString("，需要有权限的成员确认")
+		b.WriteString(" Review the results from " + strings.Join(upstream, ", ") + ".")
 	}
 	if len(downstream) > 0 {
-		b.WriteString("，确认后继续" + strings.Join(downstream, "、"))
+		b.WriteString(" Approval continues to " + strings.Join(downstream, ", ") + ".")
 	} else {
-		b.WriteString("，确认后运行结束")
+		b.WriteString(" Approval completes the run.")
 	}
 	if node.RejectTo != "" {
-		b.WriteString("；不通过可打回到" + approvalNodeLabel(wf, node.RejectTo) + "重做")
+		b.WriteString(" Rejection returns to " + approvalNodeLabel(wf, node.RejectTo) + " for rework.")
 	}
-	b.WriteString("。")
 	if instructions := strings.TrimSpace(node.TaskPrompt); instructions != "" {
-		b.WriteString("确认要求：" + instructions)
+		b.WriteString(" Approval criteria: " + instructions)
 	}
 	return b.String()
 }
@@ -73,18 +70,18 @@ func approvalNodeLabel(wf WorkflowDefinition, id string) string {
 	for _, n := range wf.Nodes {
 		if n.ID == id {
 			if strings.TrimSpace(n.Name) != "" {
-				return "「" + n.Name + "」"
+				return "“" + n.Name + "”"
 			}
 			break
 		}
 	}
-	return "「" + id + "」"
+	return "“" + id + "”"
 }
 
 // approvalSOPLabel names the workflow in the reason, or "该 SOP" when unnamed.
 func approvalSOPLabel(name string) string {
 	if name = strings.TrimSpace(name); name != "" {
-		return "SOP「" + name + "」"
+		return "SOP “" + name + "”"
 	}
-	return "该 SOP"
+	return "This SOP"
 }

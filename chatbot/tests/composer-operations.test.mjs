@@ -36,14 +36,14 @@ const draft = {
   },
 };
 test("TAPD import requires the target project, link and an explicit repository", () => {
-  assert.match(operationValidation(draft), /代码仓库/);
+  assert.match(operationValidation(draft), /repository/i);
   assert.match(
     operationValidation({ ...draft, body: { ...draft.body, url: 123 } }),
-    /链接/,
+    /link/,
   );
   assert.match(
     operationValidation({ ...draft, body: { url: "url" } }),
-    /目标项目/,
+    /target project/i,
   );
   assert.equal(
     operationValidation({
@@ -68,14 +68,14 @@ test("confirmation applies only the reviewed repository change, leaving the orig
   assert.equal(reviewed.body.projectId, "p");
   assert.deepEqual(reviewed.body.repositoryIds, ["r"]);
   assert.deepEqual(draft.body.repositoryIds, []);
-  assert.throws(() => reviewedOperation(draft), /代码仓库/);
+  assert.throws(() => reviewedOperation(draft), /repository/i);
   assert.throws(
     () =>
       reviewedOperation(
         { ...draft, body: { ...draft.body, projectId: "changed" } },
         { expected: draft, bodyPatch: { repositoryIds: ["r"] } },
       ),
-    /已更新/,
+    /updated/,
   );
 });
 test("operation summaries identify the action, real project and target instead of a generic platform operation", () => {
@@ -86,14 +86,14 @@ test("operation summaries identify the action, real project and target instead o
       references: [{ type: "repository", id: "r", name: "后台仓库" }],
     },
   );
-  assert.equal(summary.title, "导入 TAPD 需求");
+  assert.equal(summary.title, "Import TAPD Requirement");
   assert.deepEqual(summary.fields.slice(0, 3), [
-    ["项目", "Payments"],
-    ["TAPD 链接", draft.body.url],
-    ["代码仓库", "后台仓库"],
+    ["Project", "Payments"],
+    ["TAPD Link", draft.body.url],
+    ["Repositories", "后台仓库"],
   ]);
-  assert.equal(actionName("mcp_servers_save"), "保存MCP 服务");
-  assert.equal(actionName("unknown_tool"), "执行 unknown_tool");
+  assert.equal(actionName("mcp_servers_save"), "SaveMCP Service");
+  assert.equal(actionName("unknown_tool"), "Run unknown_tool");
   assert.equal(
     operationError('{"error":"请至少选择一个代码仓库"}'),
     "请至少选择一个代码仓库",
@@ -112,31 +112,31 @@ test("a new project drafted inside another project's chat is not shown as belong
       { projects, projectId: "skillhub" },
     );
     assert.equal(
-      summary.fields.find(([label]) => label === "项目"),
+      summary.fields.find(([label]) => label === "Project"),
       undefined,
     );
     assert.deepEqual(summary.fields.slice(0, 2), [
-      ["名称", "OKR系统"],
-      ["目标", "okr"],
+      ["Name", "OKR系统"],
+      ["Target", "okr"],
     ]);
-    assert.match(summary.effect, /新建一个独立项目/);
+    assert.match(summary.effect, /separate project/);
   }
   assert.match(
     operationSummary(
       { tool: "projects_save", body: { id: "skillhub", name: "SkillHub" } },
       { projects, projectId: "skillhub" },
     ).effect,
-    /修改这个项目/,
+    /settings for this project/i,
   );
   // A new project is bound to the generic backend SOP unless one is chosen;
   // the card says so, so the reply cannot claim "not bound".
   const sopOf = (body, references = []) =>
     operationSummary({ tool: "projects_save", body }, { projects, references, projectId: "skillhub" })
       .fields.find(([label]) => label === "SOP")?.[1];
-  assert.equal(sopOf({ id: "okr", name: "OKR系统" }), "通用后端交付 SOP（默认）");
+  assert.equal(sopOf({ id: "okr", name: "OKR系统" }), "Backend delivery SOP (default)");
   assert.equal(
     sopOf({ id: "okr", name: "OKR系统" }, [{ type: "sop", id: "generic-backend-delivery", name: "通用后端交付 SOP（LoopForge）" }]),
-    "通用后端交付 SOP（LoopForge）（默认）",
+    "通用后端交付 SOP（LoopForge） (default)",
   );
   assert.equal(
     sopOf({ id: "okr", name: "OKR系统", workflowId: "generic-frontend-delivery" }, [{ type: "sop", id: "generic-frontend-delivery", name: "通用前端交付 SOP" }]),
@@ -149,7 +149,7 @@ test("a new project drafted inside another project's chat is not shown as belong
       { tool: "agents_save", body: { id: "a", name: "A" } },
       { projects, projectId: "skillhub" },
     ).fields[0],
-    ["项目", "SkillHub"],
+    ["Project", "SkillHub"],
   );
 });
 test("every write tool's card shows the chat's project only for project resources", () => {
@@ -171,9 +171,9 @@ test("every write tool's card shows the chat's project only for project resource
       const row = operationSummary(
         { tool, body },
         { projects, projectId: "skillhub" },
-      ).fields.find(([label]) => label === "项目");
+      ).fields.find(([label]) => label === "Project");
       if (scope === "global") assert.equal(row, undefined, tool);
-      else assert.deepEqual(row, ["项目", "SkillHub"], tool);
+      else assert.deepEqual(row, ["Project", "SkillHub"], tool);
     }
   }
 });

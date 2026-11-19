@@ -57,7 +57,7 @@ export function download(name, content, type = "text/plain") {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export function CopyButton({ value, label = "复制", className = "" }) {
+export function CopyButton({ value, label = "Copy", className = "" }) {
   const [copied, setCopied] = useState(false);
   async function copy() {
     try {
@@ -81,8 +81,8 @@ export function CopyButton({ value, label = "复制", className = "" }) {
     <button
       className={`icon-button ${className}`}
       type="button"
-      aria-label={copied ? "已复制" : label}
-      title={copied ? "已复制" : label}
+      aria-label={copied ? "Copied" : label}
+      title={copied ? "Copied" : label}
       onClick={copy}
     >
       {copied ? <Check size={15} /> : <Copy size={15} />}
@@ -121,7 +121,7 @@ export function Diagram({ source }) {
         if (current)
           setResult({
             svg: "",
-            error: "图表语法需要调整，原始定义保留在下方。",
+            error: "Chart syntax needs adjustment; original definition is preserved below.",
           });
       }
     })();
@@ -133,7 +133,7 @@ export function Diagram({ source }) {
     <div className="diagram" dangerouslySetInnerHTML={{ __html: result.svg }} />
   ) : (
     <div className="diagram-loading">
-      {result.error || "正在绘制图表…"}
+      {result.error || "Drawing chart…"}
       {result.error ? <pre>{source}</pre> : null}
     </div>
   );
@@ -148,7 +148,7 @@ export function Slides({ source }) {
     <div className="slides">
       <div
         className={`slide ${currentPage === 0 ? "slide-cover" : ""}`}
-        aria-label={`幻灯片 ${currentPage + 1}`}
+        aria-label={`Slide ${currentPage + 1}`}
       >
         <div className="slide-eyebrow">{presentationTitle(source)}</div>
         <Markdown remarkPlugins={[remarkGfm]}>{slides[currentPage]}</Markdown>
@@ -161,7 +161,7 @@ export function Slides({ source }) {
           disabled={!currentPage}
           onClick={() => setPage(currentPage - 1)}
         >
-          上一页
+          Previous page
         </button>
         <span>
           {currentPage + 1} / {slides.length}
@@ -170,7 +170,7 @@ export function Slides({ source }) {
           disabled={currentPage === slides.length - 1}
           onClick={() => setPage(currentPage + 1)}
         >
-          下一页
+          Next page
         </button>
         <button
           className="slide-export"
@@ -181,14 +181,14 @@ export function Slides({ source }) {
             try {
               await exportPresentation(source);
             } catch {
-              setError("PPT 导出失败，请重试；内容已保留。");
+              setError("PPT export failed, please retry; content is preserved.");
             } finally {
               setExporting(false);
             }
           }}
         >
           <Download size={14} />
-          {exporting ? "正在导出…" : "下载 PowerPoint"}
+          {exporting ? "Exporting…" : "Download PowerPoint"}
         </button>
       </div>
       {error ? (
@@ -207,14 +207,14 @@ export function CodeBlock({ language, source }) {
   return (
     <div className="code-block">
       <div className="code-toolbar">
-        <span>{language || "文本"}</span>
+        <span>{language || "Text"}</span>
         <div>
           {visual ? (
             <button onClick={() => setPreview(!preview)}>
-              {preview ? "查看源码" : "预览"}
+              {preview ? "View Source" : "Preview"}
             </button>
           ) : null}
-          <CopyButton value={source} label="复制代码" />
+          <CopyButton value={source} label="Copy Code" />
         </div>
       </div>
       {preview && language === "svg" ? (
@@ -226,7 +226,7 @@ export function CodeBlock({ language, source }) {
         <Diagram source={source} />
       ) : preview && language === "html" ? (
         <iframe
-          title="HTML 产物预览"
+          title="HTML Artifact Preview"
           className="html-preview"
           sandbox="allow-scripts"
           key={source}
@@ -261,7 +261,7 @@ function AgentBrowserLink({ target, open, children }) {
       <button
         type="button"
         className="agent-browser-link"
-        title={`在 Agent 浏览器中打开 ${target}`}
+        title={`Open in Agent Browser ${target}`}
         onClick={() => open(target)}
       >
         {children}
@@ -336,10 +336,10 @@ const markdownComponents = {
   },
   img: ({ src, alt }) =>
     src?.startsWith("/api/assistant/attachments/") ? (
-      <ZoomableImage src={src} alt={alt || "图片"} />
+      <ZoomableImage src={src} alt={alt || "Image"} />
     ) : (
       <span className="unavailable-image">
-        {alt || "图片"} · 请在产物中查看
+        {alt || "Image"} · Please view in the artifact
       </span>
     ),
   table: ({ children }) => (
@@ -378,14 +378,14 @@ export function ImageLightbox({ src, alt, onClose }) {
       className="image-lightbox"
       role="dialog"
       aria-modal="true"
-      aria-label={`查看大图 ${alt || ""}`}
+      aria-label={`View Full Image ${alt || ""}`}
       onClick={onClose}
     >
       <img src={src} alt={alt} onClick={(e) => e.stopPropagation()} />
       <button
         type="button"
         className="icon-button image-lightbox-close"
-        aria-label="关闭大图"
+        aria-label="Close Full Image"
         onClick={onClose}
       >
         <X size={18} />
@@ -403,7 +403,7 @@ export function ZoomableImage({ src, alt, className }) {
         className={className}
         src={src}
         alt={alt}
-        title="双击查看大图"
+        title="Double-click to view full image"
         onDoubleClick={() => setZoom(true)}
       />
       {zoom ? (
@@ -459,7 +459,7 @@ export function Attachment({ attachment, sessionId, onOpen }) {
         // The card shows no caption, so the hover title names the file.
         title={
           image
-            ? `${attachment.name}\n${failed ? "单击在产物栏打开" : "单击在产物栏打开，双击查看大图"}`
+            ? `${attachment.name}\n${failed ? "Click to open in the artifact panel" : "Click to open in the artifact panel, double-click to view full image"}`
             : undefined
         }
         onClick={(e) => {
@@ -468,7 +468,7 @@ export function Attachment({ attachment, sessionId, onOpen }) {
             ...attachment,
             url,
             kind: "attachment",
-            source: "会话附件",
+            source: "Conversation Attachments",
           });
         }}
         onDoubleClick={
@@ -496,18 +496,18 @@ export function Attachment({ attachment, sessionId, onOpen }) {
             {shown === "loading" ? (
               <span className="message-image-placeholder">
                 <Spinner size={22} motion="busy" />
-                <span className="message-image-hidden-label">图片加载中</span>
+                <span className="message-image-hidden-label">Loading image</span>
               </span>
             ) : null}
             {failed ? (
               <span className="message-image-placeholder">
                 <ImageOff size={22} />
-                <span>图片加载失败</span>
+                <span>Could not load image</span>
                 <span
                   className="message-image-retry"
                   role="button"
                   tabIndex={0}
-                  aria-label="重试加载图片"
+                  aria-label="Retry image"
                   onClick={retry}
                   onDoubleClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
@@ -515,7 +515,7 @@ export function Attachment({ attachment, sessionId, onOpen }) {
                   }}
                 >
                   <Refresh size={14} />
-                  <span>重试</span>
+                  <span>Retry</span>
                 </span>
               </span>
             ) : null}
@@ -570,7 +570,7 @@ export function ArtifactPreview({ artifact }) {
         );
         setText(new TextDecoder().decode(bytes));
       } catch {
-        setError("文件读取失败");
+        setError("Could not read file");
       }
       return () => {
         current = false;
@@ -579,7 +579,7 @@ export function ArtifactPreview({ artifact }) {
     if (artifact?.url && readable)
       fetch(artifact.url)
         .then((r) => {
-          if (!r.ok) throw Error("文件读取失败");
+          if (!r.ok) throw Error("Could not read file");
           return r.text();
         })
         .then((value) => {
@@ -615,11 +615,11 @@ export function ArtifactPreview({ artifact }) {
             ) : null}
           </div>
         </div>
-        <div className="artifact-preview-toolbar" aria-label="产物工具栏">
+        <div className="artifact-preview-toolbar" aria-label="Artifact toolbar">
           {canPreview ? (
             <SlidingTabs
               className="artifact-preview-view-options"
-              aria-label="产物显示方式"
+              aria-label="Artifact view"
             >
               <button
                 type="button"
@@ -628,7 +628,7 @@ export function ArtifactPreview({ artifact }) {
                 aria-selected={mode === "preview"}
                 onClick={() => setMode("preview")}
               >
-                预览
+                Preview
               </button>
               <button
                 type="button"
@@ -637,27 +637,27 @@ export function ArtifactPreview({ artifact }) {
                 aria-selected={mode === "source"}
                 onClick={() => setMode("source")}
               >
-                源码
+                Source
               </button>
             </SlidingTabs>
           ) : null}
           <div
             className="artifact-preview-actions"
             role="group"
-            aria-label="产物操作"
+            aria-label="Artifact actions"
           >
             {hasSource ? (
               <CopyButton
                 className="artifact-preview-icon-action"
                 value={source}
-                label="复制正文"
+                label="Copy text"
               />
             ) : null}
             {artifact.url ? (
               <a
                 className="icon-button artifact-preview-icon-action"
-                aria-label="下载文件"
-                title="下载文件"
+                aria-label="Download file"
+                title="Download file"
                 href={artifact.url}
                 download={artifact.name}
               >
@@ -667,8 +667,8 @@ export function ArtifactPreview({ artifact }) {
               <button
                 type="button"
                 className="icon-button artifact-preview-icon-action"
-                aria-label="下载文件"
-                title="下载文件"
+                aria-label="Download file"
+                title="Download file"
                 onClick={() =>
                   ["slides", "ppt"].includes(artifact.kind)
                     ? exportPresentation(source)
@@ -707,7 +707,7 @@ export function ArtifactPreview({ artifact }) {
           <Diagram source={source} />
         ) : kind === "html" ? (
           <iframe
-            title="HTML 产物预览"
+            title="HTML Artifact Preview"
             className="html-preview"
             sandbox="allow-scripts"
             key={source}
@@ -722,11 +722,11 @@ export function ArtifactPreview({ artifact }) {
         ) : ["slides", "ppt"].includes(artifact.kind) ? (
           <Slides source={source} />
         ) : artifact.url && !readable ? (
-          <p className="muted">此类型文件可通过右上角下载查看。</p>
+          <p className="muted">Download this file from the top right to view it.</p>
         ) : isMarkdown ? (
           <RichContent message={source} />
         ) : (
-          <pre className="artifact-source">{source || "正在加载…"}</pre>
+          <pre className="artifact-source">{source || "Loading…"}</pre>
         )}
       </div>
     </article>

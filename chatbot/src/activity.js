@@ -140,8 +140,8 @@ export function mergeActivity(previous = [], events = []) {
         steps.push({
           id: event.id,
           kind: "tool",
-          tool: "工具调用",
-          text: "工具调用失败",
+          tool: "Tool call",
+          text: "Tool call failed",
           failed: true,
           finishedAt: at || "done",
         });
@@ -314,9 +314,9 @@ export function collectSubagents(messages = [], liveSteps = [], liveModel = "") 
     for (const child of step.children || []) {
       if (child.kind !== "tool" || !child.detail) continue;
       let item = null;
-      if (child.tool === "发布产物" && !child.failed) item = { title: child.detail, source: "已发布" };
-      if (child.tool === "交付物")
-        item = { title: child.detail, source: "交付物", missing: !!child.failed, messageIndex };
+      if (["发布产物", "Publish artifact"].includes(child.tool) && !child.failed) item = { title: child.detail, source: "Published" };
+      if (["交付物", "Deliverable"].includes(child.tool))
+        item = { title: child.detail, source: "Deliverable", missing: !!child.failed, messageIndex };
       if (!item) continue;
       agent.published = agent.published.filter((old) => old.source !== item.source || old.title !== item.title);
       agent.published.push(item);
@@ -367,25 +367,25 @@ export function traceBlocks(steps = [], { live = false } = {}) {
 // in order, without counts, e.g. "已运行命令、读取文件". Thinking is named only
 // when the round did nothing else.
 const groupNouns = {
-  运行: "运行命令",
-  读取: "读取文件",
-  编辑: "编辑文件",
-  搜索: "搜索代码",
-  浏览: "浏览网页",
-  查看: "查看文件",
+  Ran: "Run commands",
+  Read: "Read files",
+  Edited: "Edit files",
+  Searched: "Search code",
+  Browsed: "Browse the web",
+  Viewed: "View files",
 };
 export function activityGroupSummary(steps = [], { active = false } = {}) {
   const parts = [];
   for (const step of steps) {
     if (step.kind === "thinking" || step.kind === "status") continue;
-    const label = activityFace(step).done.replace(/^已/, "");
+    const label = activityFace(step).done;
     const part = groupNouns[label] || label;
     if (!parts.includes(part)) parts.push(part);
   }
-  if (!parts.length) return active ? "正在思考" : "已思考";
+  if (!parts.length) return active ? "Thinking" : "Thought";
   const text =
-    parts.length > 3 ? `${parts.slice(0, 3).join("、")}等` : parts.join("、");
-  return active ? `正在${text}` : `已${text}`;
+    parts.length > 3 ? `${parts.slice(0, 3).join(", ")} and others` : parts.join(", ");
+  return active ? `In progress: ${text}` : `Completed: ${text}`;
 }
 // The icon of the most frequent kind in a group.
 export function activityGroupKind(steps = []) {
@@ -457,7 +457,7 @@ export function activityForReply(message, generation, liveSteps = []) {
 }
 export function activityFace(step) {
   if (step.kind === "thinking")
-    return { kind: "thinking", busy: "正在思考", done: "已思考" };
+    return { kind: "thinking", busy: "Thinking", done: "Thought" };
   if (step.kind === "status")
     return { kind: "status", busy: step.text, done: step.text };
   const tool = (step.tool || "")
@@ -465,27 +465,27 @@ export function activityFace(step) {
     .replace(/^agentflow__/, "");
   const name = tool.toLowerCase();
   if (name === "verification")
-    return { kind: "verify", busy: "正在验证", done: "已验证" };
+    return { kind: "verify", busy: "Verifying", done: "Verified" };
   if (/submit_gate_result/.test(name))
-    return { kind: "verify", busy: "正在提交节点结果", done: "已提交节点结果" };
+    return { kind: "verify", busy: "Submitting step result", done: "Step result submitted" };
   if (/workbench_workspace_open/.test(name))
-    return { kind: "workflow", busy: "正在打开工作区", done: "已打开工作区" };
+    return { kind: "workflow", busy: "Opening workspace", done: "Workspace opened" };
   if (/workbench_delivery_register/.test(name))
-    return { kind: "workflow", busy: "正在登记交付", done: "已登记交付" };
+    return { kind: "workflow", busy: "Recording delivery", done: "Delivery recorded" };
   if (/workbench_publish_artifact/.test(name))
-    return { kind: "tool", busy: "正在发布产物", done: "已发布产物" };
+    return { kind: "tool", busy: "Publishing artifact", done: "Artifact published" };
   if (/todo/.test(name))
-    return { kind: "plan", busy: "正在更新计划", done: "已更新计划" };
+    return { kind: "plan", busy: "Updating plan", done: "Plan updated" };
   if (/^(task|agent)$/.test(name)) {
     const who = step.role || step.subagent;
     return who
-      ? { kind: "role", busy: `「${who}」正在处理`, done: `「${who}」已完成` }
-      : { kind: "role", busy: "正在委派子任务", done: "已委派子任务" };
+      ? { kind: "role", busy: `“${who}” is working`, done: `“${who}” finished` }
+      : { kind: "role", busy: "Delegating subtask", done: "Subtask delegated" };
   }
   if (/toolsearch|search_tools|tools_search/.test(name))
-    return { kind: "search", busy: "正在查找工具", done: "已查找工具" };
+    return { kind: "search", busy: "Finding tools", done: "Tools found" };
   if (/tool_schema|lookup_tool_param_schema/.test(name))
-    return { kind: "search", busy: "正在查看工具说明", done: "已查看工具说明" };
+    return { kind: "search", busy: "Reading tool description", done: "Tool description read" };
   const platform = name.match(
     /^(workflows|agents|issues|runs|repositories|rules|skills)_(list|get|save|clone|publish)$/,
   );
@@ -493,19 +493,19 @@ export function activityFace(step) {
     const [, type, action] = platform;
     const noun = {
       workflows: "SOP",
-      agents: "角色",
-      issues: "需求",
-      runs: "运行",
-      repositories: "仓库",
-      rules: "规则",
-      skills: "技能",
+      agents: "Role",
+      issues: "Requirements",
+      runs: "Runs",
+      repositories: "Repository",
+      rules: "Rules",
+      skills: "Skills",
     }[type];
     const verb = {
-      list: ["查看", `${noun}${type === "workflows" ? " " : ""}列表`],
-      get: ["读取", noun],
-      save: ["保存", noun],
-      clone: ["复制", noun],
-      publish: ["发布", noun],
+      list: ["View", `${noun}${type === "workflows" ? " " : ""}List`],
+      get: ["Read", noun],
+      save: ["Save", noun],
+      clone: ["Copy", noun],
+      publish: ["Publish", noun],
     }[action];
     return {
       kind:
@@ -518,30 +518,30 @@ export function activityFace(step) {
               : action === "list"
                 ? "search"
                 : "tool",
-      busy: `正在${verb[0]}${type === "workflows" ? " " : ""}${verb[1]}`,
-      done: `已${verb[0]}${type === "workflows" ? " " : ""}${verb[1]}`,
+      busy: `In progress: ${verb[0]}${type === "workflows" ? " " : ""}${verb[1]}`,
+      done: `Updated: ${verb[0]}${type === "workflows" ? " " : ""}${verb[1]}`,
     };
   }
   if (/bash|shell|command|terminal|^exec/.test(name))
-    return { kind: "command", busy: "正在运行", done: "已运行" };
+    return { kind: "command", busy: "Running", done: "Ran" };
   if (/imagegen|generate.?image|生图|画图/.test(name))
-    return { kind: "image", busy: "正在生成图片", done: "已生成图片" };
+    return { kind: "image", busy: "Generating image", done: "Image generated" };
   if (/browser|fetch|web.?search|navigate/.test(name))
-    return { kind: "web", busy: "正在浏览", done: "已浏览" };
+    return { kind: "web", busy: "Browsing", done: "Browsed" };
   if (/write|edit|patch/.test(name))
-    return { kind: "edit", busy: "正在编辑", done: "已编辑" };
+    return { kind: "edit", busy: "Editing", done: "Edited" };
   if (/read|attachment/.test(name))
-    return { kind: "read", busy: "正在读取", done: "已读取" };
+    return { kind: "read", busy: "Reading ", done: "Read" };
   if (/search|grep|glob|find/.test(name))
-    return { kind: "search", busy: "正在搜索", done: "已搜索" };
+    return { kind: "search", busy: "Searching", done: "Searched" };
   if (/workflow|sop/.test(name))
-    return { kind: "workflow", busy: "正在处理 SOP", done: "已处理 SOP" };
+    return { kind: "workflow", busy: "Processing SOP", done: "Processed SOP" };
   if (/list|tree/.test(name))
-    return { kind: "search", busy: "正在查看", done: "已查看" };
+    return { kind: "search", busy: "Viewing", done: "Viewed" };
   return {
     kind: "tool",
-    busy: "正在调用工具",
-    done: "已调用工具",
+    busy: "Calling tool",
+    done: "Tool called",
   };
 }
 

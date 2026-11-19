@@ -50,7 +50,7 @@ export function useWorkspaceChanges(runId, { active = false, interval = 6000 } =
           setState({
             ...IDLE,
             status: "unavailable",
-            reason: info.reason || "工作区不可用",
+            reason: info.reason || "Workspace unavailable",
             // A reclaimed workspace is the usual state once the work is
             // pushed; the branch on the code host is still where its changes live.
             repositories: info.repositoryDetails || [],

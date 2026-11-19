@@ -24,7 +24,7 @@ export default function HarnessSelect({
   ariaLabel,
   className = "",
   searchable,
-  placeholder = "请选择",
+  placeholder = "Select an option",
 }) {
   const trigger = useRef(null);
   const panel = useRef(null);
@@ -129,7 +129,7 @@ export default function HarnessSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={presence.mounted ? identity : undefined}
-        aria-label={ariaLabel ? `${ariaLabel}：${current?.label || placeholder}` : undefined}
+        aria-label={ariaLabel ? `${ariaLabel}: ${current?.label || placeholder}` : undefined}
         disabled={disabled}
         onClick={() => setOpen(!open)}
         onKeyDown={(event) => {
@@ -163,8 +163,8 @@ export default function HarnessSelect({
                   <input
                     ref={search}
                     type="search"
-                    aria-label="搜索选项"
-                    placeholder="搜索…"
+                    aria-label="Search options"
+                    placeholder="Search…"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                   />
@@ -192,7 +192,7 @@ export default function HarnessSelect({
                     </button>
                   );
                 })}
-                {!visible.length ? <div className="harness-select-empty">没有匹配的选项</div> : null}
+                {!visible.length ? <div className="harness-select-empty">No matching options</div> : null}
               </div>
             </div>,
             document.body,

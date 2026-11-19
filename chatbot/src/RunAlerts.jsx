@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import React, {
   useCallback,
   useEffect,
@@ -102,7 +103,7 @@ export default function RunAlerts({
     if (!settled.current.has(item.key) && !slots.current.has(item.key))
       slots.current.set(item.key, entering++);
   return (
-    <div className="run-alerts" aria-label="运行提醒">
+    <div className="run-alerts" aria-label="Run alert">
       {items.map((item) => {
         const isSettled = settled.current.has(item.key);
         const order = isSettled ? 0 : (slots.current.get(item.key) ?? 0);
@@ -170,7 +171,7 @@ function RunAlert({
       )
     : null;
   const ownerName =
-    owner?.chineseName || owner?.name || owner?.loginName || "运行责任人";
+    owner?.chineseName || owner?.name || owner?.loginName || "Run owner";
   const flag = hint ? `${hint.field}Configured` : "";
   const configured =
     mine && hint && !!(users.find((u) => u.id === user?.id) || user)?.[flag];
@@ -181,12 +182,12 @@ function RunAlert({
   // At most one filled button per card: fixing the credential comes first.
   const retryPrimary = !showFix || fixedSince;
   const tag = busy
-    ? "重试中"
+    ? "Retrying"
     : failed
-      ? "执行失败"
+      ? "Execution failed"
       : item.gate === "approval"
-        ? "人工门禁"
-        : "待确认";
+        ? "Human gate"
+        : "Needs review";
   async function retry() {
     setBusy(true);
     setError("");
@@ -222,15 +223,15 @@ function RunAlert({
         <span className="run-alert-lamp" aria-hidden="true" />
         <div className="run-alert-title">
           <div className="run-alert-title-row">
-            <strong>「{item.nodeName}」</strong>
+            <strong>“{item.nodeName}”</strong>
             <span className="run-alert-tag">{tag}</span>
           </div>
           <span className="run-alert-meta">
-            {run.workflowSnapshot?.name || "SOP 运行"} · <code>{run.id}</code>
+            {run.workflowSnapshot?.name || "SOP run"} · <code>{run.id}</code>
           </span>
         </div>
         <IconButton
-          label="不再提醒"
+          label="Dismiss future alerts"
           className="run-alert-close"
           onClick={onDismiss}
         >
@@ -238,7 +239,7 @@ function RunAlert({
         </IconButton>
       </header>
       <div className="run-alert-body">
-        <RunAlertReason text={item.reason} />
+        <RunAlertReason text={englishMessage(item.reason)} />
         {showFix ? (
           <div className={`run-alert-fix${fixedSince ? " is-ok" : ""}`}>
             <div className="run-alert-fix-title">
@@ -250,12 +251,12 @@ function RunAlert({
               />
               <span>
                 {fixedSince
-                  ? `已检测到你配置了${hint.label}，点「重试节点」继续`
+                  ? `Detected that you have configured${hint.label}, click 'Retry Node' to continue`
                   : configured
-                    ? `你的${hint.label}已配置。如果是失败之后才配的，直接点「重试节点」；否则它可能无效、已过期或权限不足，请按下面步骤重新生成`
+                    ? `Your${hint.label}is configured. If you configured it after the failure, click 'Retry Node' directly; otherwise, it may be invalid, expired, or lack sufficient permissions. Please follow the steps below to regenerate it`
                     : mine
-                      ? `原因：你的${hint.label}未配置或无效`
-                      : `原因：${ownerName}的${hint.label}未配置或无效`}
+                      ? `Reason: Your${hint.label}is not configured or invalid`
+                      : `Reason: ${ownerName}${hint.label}is not configured or invalid`}
               </span>
             </div>
             {!fixedSince ? (
@@ -267,8 +268,8 @@ function RunAlert({
             ) : null}
             {!mine ? (
               <small>
-                这个运行使用责任人 {ownerName}{" "}
-                的个人凭证，你配置自己的不会生效；请把上面的步骤发给 TA。
+                This run uses the personal credentials of the responsible person, {ownerName}{" "}
+                Configuring your own will not take effect; please send the steps above to them.
               </small>
             ) : null}
             {!fixedSince && (mine || guide.url) ? (
@@ -280,7 +281,7 @@ function RunAlert({
                     onClick={() => openCredentialSettings(hint.field)}
                   >
                     <HarnessIcon name="key" size={14} aria-hidden="true" />
-                    去配置 {hint.label}
+                    Configure {hint.label}
                   </button>
                 ) : null}
                 {guide.url ? (
@@ -311,7 +312,7 @@ function RunAlert({
               onClick={retry}
             >
               <HarnessIcon name="refresh" size={14} aria-hidden="true" />
-              {busy ? "正在重试…" : "重试节点"}
+              {busy ? "Retrying…" : "Retry step"}
             </button>
           ) : null}
           {!failed ? (
@@ -321,7 +322,7 @@ function RunAlert({
               onClick={() => openRunPage(run.id)}
             >
               <HarnessIcon name="arrow-right" size={14} aria-hidden="true" />
-              去确认
+              Review
             </button>
           ) : null}
           <button
@@ -330,7 +331,7 @@ function RunAlert({
             onClick={() => onOpenNode(run, item.nodeId)}
           >
             <HarnessIcon name="chat-artifacts" size={14} aria-hidden="true" />
-            查看节点
+            View step
           </button>
           {!readOnly ? (
             <button
@@ -338,7 +339,7 @@ function RunAlert({
               className="run-alert-btn"
               onClick={() => onAsk(item)}
             >
-              <HarnessIcon name="chat" size={14} aria-hidden="true" />让 AI 分析
+              <HarnessIcon name="chat" size={14} aria-hidden="true" />Ask AI to analyze
             </button>
           ) : null}
         </div>
@@ -350,7 +351,7 @@ function RunAlert({
               interactive={false}
               aria-hidden="true"
             />
-            <span>{error}</span>
+            <span>{englishMessage(error)}</span>
           </div>
         ) : null}
       </div>
@@ -404,7 +405,7 @@ function RunAlertReason({ text }) {
             aria-controls={id}
             onClick={() => setOpen((v) => !v)}
           >
-            <span>{open ? "收起" : "展开完整原因"}</span>
+            <span>{open ? "Collapse" : "Show full reason"}</span>
             <HarnessIcon
               name="chevron-down"
               size={12}

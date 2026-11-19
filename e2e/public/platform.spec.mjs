@@ -26,19 +26,18 @@ test('password authentication loads the upstream workspace',async({page,request,
   await expect(page).toHaveURL(/login\.html$/);
 });
 
-test('Chinese/English and light/dark preferences persist across reloads',async({page},info)=>{
+test('English stays active across theme changes and reloads',async({page},info)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await signIn(page);
   await page.locator('.nav[data-view="issues"]').click();
-  await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
-  await page.screenshot({path:info.outputPath('light-zh.png'),fullPage:true});
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
+  await page.screenshot({path:info.outputPath('light-en.png'),fullPage:true});
   await page.locator('#userBadge').click();
   await page.locator('#userProfilePopover [data-theme-pref="dark"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await expect(page.locator('#userProfilePopover [data-theme-pref="dark"]')).toHaveAttribute('aria-checked','true');
   await page.keyboard.press('Escape');
   await page.mouse.move(800,500);
-  await page.locator('#langToggle').click();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('.nav[data-view="issues"]')).toHaveAttribute('aria-label','Requirements');
   await expect(page.locator('.nav[data-view="issues"]')).toHaveAttribute('data-tooltip','Requirements');

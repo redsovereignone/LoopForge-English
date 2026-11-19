@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import React, { useEffect, useRef, useState } from "react";
 import { api, sessionPath } from "./api.js";
 import HarnessIcon from "./HarnessIcon";
@@ -6,35 +7,35 @@ import { CLIInstallAction } from "./cli-install.jsx";
 import "./generation-diagnostics.css";
 
 const phases = {
-  setup: "启动与配置",
-  execution: "CLI 执行",
-  protocol: "结果解析",
-  provider: "模型服务",
-  connection: "连接模型服务",
-  server: "平台服务",
-  orchestration: "对话处理",
+  setup: "Startup and configuration",
+  execution: "CLI execution",
+  protocol: "Result parsing",
+  provider: "Model service",
+  connection: "Connecting to model service",
+  server: "Platform service",
+  orchestration: "Conversation processing",
 };
 const statuses = {
-  running: "执行中",
-  completed: "已完成",
-  failed: "失败",
-  cancelled: "已停止",
-  interrupted: "已中断",
-  unfinished: "未完成",
+  running: "Running",
+  completed: "Completed",
+  failed: "Failed",
+  cancelled: "Stopped",
+  interrupted: "Interrupted",
+  unfinished: "Incomplete",
 };
 const processStates = {
-  not_started: "未启动",
-  running: "运行中",
-  start_failed: "启动失败",
-  exited: "已退出",
-  unknown_after_interruption: "中断后未知",
+  not_started: "Not started",
+  running: "Running",
+  start_failed: "Startup failed",
+  exited: "Exited",
+  unknown_after_interruption: "Unknown after interruption",
 };
 const toolSources = {
-  gateway: "平台网关",
-  cli: "CLI 协议",
+  gateway: "Platform gateway",
+  cli: "CLI protocol",
 };
 const time = (value) =>
-  value ? new Date(value).toLocaleString("zh-CN", { hour12: false }) : "—";
+  value ? new Date(value).toLocaleString("en-US", { hour12: false }) : "—";
 
 async function copyText(text) {
   if (navigator.clipboard?.writeText)
@@ -47,7 +48,7 @@ async function copyText(text) {
   try {
     input.select();
     if (!document.execCommand("copy"))
-      throw new Error("请手动选择诊断内容复制");
+      throw new Error("Select and copy the diagnostic text");
   } finally {
     input.remove();
   }
@@ -92,7 +93,7 @@ export default function GenerationDiagnostics({
       return data;
     } catch (e) {
       if (current.current === identity)
-        setError(e.message || "读取诊断信息失败，请重试");
+        setError(e.message || "Could not read diagnostics. Try again.");
       return null;
     } finally {
       if (current.current === identity) setLoading(false);
@@ -107,27 +108,27 @@ export default function GenerationDiagnostics({
     if (!data) return;
     try {
       await copyText(JSON.stringify(data, null, 2));
-      if (current.current === identity) setNotice("已复制诊断信息");
+      if (current.current === identity) setNotice("Diagnostics copied");
     } catch {
       if (current.current === identity)
-        setError("复制失败，请下载诊断文件或手动复制详情");
+        setError("Copy failed. Download the file or copy the details manually.");
     }
   }
   const shown = failure || report?.failure;
   return (
     <section
       className={`generation-diagnostics${compact ? " compact" : " failure"}`}
-      aria-label={failure ? "本轮失败诊断" : "本轮诊断信息"}
+      aria-label={failure ? "Failure diagnostics" : "Turn diagnostics"}
     >
       {!compact && shown ? (
         <>
           <div className="diagnostic-heading">
             <HarnessIcon name="warning" size={17} aria-hidden="true" />
-            <strong>{shown.message}</strong>
+            <strong>{englishMessage(shown.message)}</strong>
             <code>{shown.code}</code>
           </div>
           {shown.suggestion ? (
-            <p className="diagnostic-suggestion">{shown.suggestion}</p>
+            <p className="diagnostic-suggestion">{englishMessage(shown.suggestion)}</p>
           ) : null}
           <CredentialAction text={shown.message} />
           <CLIInstallAction text={shown.message} onResult={onCLIInstall} />
@@ -146,22 +147,22 @@ export default function GenerationDiagnostics({
               size={14}
               aria-hidden="true"
             />
-            {compact ? "诊断信息" : "查看详情"}
+            {compact ? "Diagnostics" : "View details"}
           </button>
           {!compact || open ? (
             <>
               <button type="button" onClick={copy} disabled={loading}>
                 <HarnessIcon name="copy" size={14} aria-hidden="true" />
-                复制诊断
+                Copy diagnostics
               </button>
               <a href={`${path}?download=1`} download>
                 <HarnessIcon name="download" size={14} aria-hidden="true" />
-                下载诊断
+                Download diagnostics
               </a>
             </>
           ) : null}
           {loading ? (
-            <span role="status">读取中…</span>
+            <span role="status">Reading…</span>
           ) : notice ? (
             <span role="status">{notice}</span>
           ) : null}
@@ -176,38 +177,38 @@ export default function GenerationDiagnostics({
         <div className="diagnostic-details">
           {report.assessment ? (
             <div className="diagnostic-assessment">
-              <strong>{report.assessment.summary}</strong>
+              <strong>{englishMessage(report.assessment.summary)}</strong>
               {report.assessment.evidence?.length ? (
                 <ul className="diagnostic-list">
                   {report.assessment.evidence.map((item, i) => (
-                    <li key={i}>{item}</li>
+                    <li key={i}>{englishMessage(item)}</li>
                   ))}
                 </ul>
               ) : null}
               {report.assessment.unknowns?.length ? (
                 <p className="diagnostic-subnote">
-                  边界说明：{report.assessment.unknowns.join(" ")}
+                  Scope: {report.assessment.unknowns.map(englishMessage).join(" ")}
                 </p>
               ) : null}
               {report.assessment.nextSteps?.length ? (
                 <p className="diagnostic-subnote">
-                  排查建议：{report.assessment.nextSteps.join(" ")}
+                  Suggested checks: {report.assessment.nextSteps.map(englishMessage).join(" ")}
                 </p>
               ) : null}
             </div>
           ) : null}
           <dl className="diagnostic-meta">
-            <dt>诊断编号</dt>
+            <dt>Diagnostic ID</dt>
             <dd>
               <code>{report.generationId}</code>
             </dd>
-            <dt>状态</dt>
+            <dt>Status</dt>
             <dd>{statuses[report.status] || report.status}</dd>
-            <dt>开始时间</dt>
+            <dt>Start time</dt>
             <dd>{time(report.startedAt)}</dd>
             {report.termination ? (
               <>
-                <dt>结束原因</dt>
+                <dt>Exit reason</dt>
                 <dd>
                   <code>{report.termination.code}</code> ·{" "}
                   {report.termination.message}
@@ -216,13 +217,13 @@ export default function GenerationDiagnostics({
             ) : null}
             {shown?.phase ? (
               <>
-                <dt>失败阶段</dt>
+                <dt>Failed stage</dt>
                 <dd>{phases[shown.phase] || shown.phase}</dd>
               </>
             ) : null}
             {report.environment ? (
               <>
-                <dt>运行实例</dt>
+                <dt>Run instance</dt>
                 <dd>
                   <code>{report.environment.instanceId}</code> ·{" "}
                   {report.environment.platformVersion}
@@ -241,18 +242,18 @@ export default function GenerationDiagnostics({
               <div className="diagnostic-attempt" key={attempt.id}>
                 <div className="diagnostic-attempt-heading">
                   <strong>
-                    调用 {attempt.id?.split("/").at(-1) || index + 1} ·{" "}
+                    Calls {attempt.id?.split("/").at(-1) || index + 1} ·{" "}
                     {attempt.engine}
                     {attempt.cliVersion ? ` v${attempt.cliVersion}` : ""}
                   </strong>
                   <span>{attempt.model}</span>
                   <span>{statuses[attempt.status] || attempt.status}</span>
                   {attempt.exitCode != null ? (
-                    <code>退出码 {attempt.exitCode}</code>
+                    <code>Exit code {attempt.exitCode}</code>
                   ) : null}
                 </div>
                 <p className="diagnostic-attempt-meta">
-                  {attempt.resume ? "恢复会话" : "新会话"} ·{" "}
+                  {attempt.resume ? "Restore conversation" : "New conversation"} ·{" "}
                   {phases[attempt.phase] || attempt.phase} ·{" "}
                   {time(attempt.startedAt)}
                   {attempt.endpoint ? ` · ${attempt.endpoint}` : ""}
@@ -260,17 +261,17 @@ export default function GenerationDiagnostics({
                 </p>
                 {proc ? (
                   <p className="diagnostic-attempt-meta">
-                    进程：{processStates[proc.state] || proc.state}
+                    Process: {processStates[proc.state] || proc.state}
                     {proc.pid ? ` · PID ${proc.pid}` : ""}
-                    {proc.signal ? ` · 信号 ${proc.signal}` : ""}
-                    {` · 输出 ${proc.stdoutLines || 0}/${proc.stderrLines || 0} 行`}
-                    {lastOut ? ` · 最近输出 ${time(lastOut)}` : ""}
+                    {proc.signal ? ` · Signal  ${proc.signal}` : ""}
+                    {` · Output  ${proc.stdoutLines || 0}/${proc.stderrLines || 0} Ln `}
+                    {lastOut ? ` · Latest output  ${time(lastOut)}` : ""}
                   </p>
                 ) : null}
                 {attempt.firstError && report.dropped?.protocolEvents > 0 ? (
                   <div className="diagnostic-event">
                     <div>
-                      <strong>首次异常</strong>
+                      <strong>First error</strong>
                       <code>{attempt.firstError.kind}</code>
                       {attempt.firstError.statusCode ? (
                         <span>HTTP {attempt.firstError.statusCode}</span>
@@ -282,7 +283,7 @@ export default function GenerationDiagnostics({
                   </div>
                 ) : null}
                 {attempt.error ? (
-                  <pre className="diagnostic-excerpt">{attempt.error}</pre>
+                  <pre className="diagnostic-excerpt">{englishMessage(attempt.error)}</pre>
                 ) : null}
                 {(attempt.events || []).map((event, i) => (
                   <div className="diagnostic-event" key={i}>
@@ -293,7 +294,7 @@ export default function GenerationDiagnostics({
                       ) : null}
                       {event.code ? <code>{event.code}</code> : null}
                       {event.retryable != null ? (
-                        <span>{event.retryable ? "可重试" : "不可重试"}</span>
+                        <span>{event.retryable ? "Retryable" : "Cannot retry"}</span>
                       ) : null}
                     </div>
                     {event.message ? <pre>{event.message}</pre> : null}
@@ -313,7 +314,7 @@ export default function GenerationDiagnostics({
                 report.dropped?.stderrLines > 0 ? (
                   <details className="diagnostic-stderr">
                     <summary>
-                      CLI 起始输出 · 前 {attempt.firstStderr.length} 行
+                      First CLI output · first {attempt.firstStderr.length} lines
                     </summary>
                     <pre>{attempt.firstStderr.join("\n")}</pre>
                   </details>
@@ -321,7 +322,7 @@ export default function GenerationDiagnostics({
                 {attempt.stderr?.length ? (
                   <details className="diagnostic-stderr">
                     <summary>
-                      CLI 错误输出 · 最近 {attempt.stderr.length} 行
+                      CLI errors · last {attempt.stderr.length} lines
                     </summary>
                     <pre>{attempt.stderr.join("\n")}</pre>
                   </details>
@@ -334,7 +335,7 @@ export default function GenerationDiagnostics({
               className="diagnostic-stderr"
               open={report.tools.some((t) => t.status !== "completed")}
             >
-              <summary>工具与网关调用 · {report.tools.length} 次</summary>
+              <summary>Tool and gateway calls · {report.tools.length}  times</summary>
               <div className="diagnostic-tools">
                 {report.tools.map((tool, i) => (
                   <div className="diagnostic-event" key={`${tool.id}-${i}`}>
@@ -343,10 +344,10 @@ export default function GenerationDiagnostics({
                       <span>{toolSources[tool.source] || tool.source}</span>
                       <span>{statuses[tool.status] || tool.status}</span>
                       {tool.exitCode != null ? (
-                        <code>退出码 {tool.exitCode}</code>
+                        <code>Exit code {tool.exitCode}</code>
                       ) : null}
                     </div>
-                    {tool.error ? <pre>{tool.error}</pre> : null}
+                    {tool.error ? <pre>{englishMessage(tool.error)}</pre> : null}
                     {tool.requestId ? (
                       <p>
                         Request ID <code>{tool.requestId}</code>
@@ -359,7 +360,7 @@ export default function GenerationDiagnostics({
           ) : null}
           {report.timeline?.length ? (
             <details className="diagnostic-stderr">
-              <summary>执行时间线 · {report.timeline.length} 条记录</summary>
+              <summary>Execution timeline · {report.timeline.length}  records</summary>
               <pre>
                 {report.timeline
                   .map(
@@ -372,15 +373,15 @@ export default function GenerationDiagnostics({
           ) : null}
           {report.error &&
           !report.attempts?.some((attempt) => attempt.error) ? (
-            <pre className="diagnostic-excerpt">{report.error}</pre>
+            <pre className="diagnostic-excerpt">{englishMessage(report.error)}</pre>
           ) : null}
           {!report.attempts?.length && !report.error ? (
-            <p className="diagnostic-note">尚未记录 CLI 调用详情。</p>
+            <p className="diagnostic-note">No CLI calls recorded.</p>
           ) : null}
           <p className="diagnostic-note">
-            已脱敏，包含有限的执行现场与错误片段。Request / Trace ID 仅在 CLI
-            或上游实际返回时显示。
-            {report.truncated ? "部分记录已按大小限制截断。" : ""}
+            Sensitive details are redacted. Request and trace IDs appear only when the CLI
+             or provider returns them.
+            {report.truncated ? "Some records were truncated to fit the size limit." : ""}
           </p>
           {report.status === "running" ? (
             <button
@@ -389,7 +390,7 @@ export default function GenerationDiagnostics({
               onClick={load}
               disabled={loading}
             >
-              刷新诊断
+              Refresh diagnostics
             </button>
           ) : null}
         </div>

@@ -64,28 +64,28 @@ test("activity summaries replace internal tool names with readable subjects whil
     tool: "workbench_tool_schema",
     detail: "issues_save",
   };
-  assert.equal(activityFace(schema).done, "已查看工具说明");
+  assert.equal(activityFace(schema).done, "Tool description read");
   assert.equal(activityTarget(schema), "");
   const open = {
     kind: "tool",
     tool: "mcp__agentflow_session__workbench_workspace_open",
     detail: '{"sandboxProfileId":"generic-docker"}',
   };
-  assert.equal(activityFace(open).done, "已打开工作区");
+  assert.equal(activityFace(open).done, "Workspace opened");
   assert.equal(activityTarget(open), "generic-docker");
   const delivery = {
     kind: "tool",
     tool: "workbench_delivery_register",
     detail: '{"urls":["https://github.com/a/b/pull/1"],"title":"修复登录按钮文案"}',
   };
-  assert.equal(activityFace(delivery).done, "已登记交付");
+  assert.equal(activityFace(delivery).done, "Delivery recorded");
   assert.equal(activityTarget(delivery), "修复登录按钮文案");
   const publish = {
     kind: "tool",
     tool: "mcp__agentflow_session__workbench_publish_artifact",
     detail: '{"path":"reports/demo.html"}',
   };
-  assert.equal(activityFace(publish).done, "已发布产物");
+  assert.equal(activityFace(publish).done, "Artifact published");
   assert.equal(activityTarget(publish), "reports/demo.html");
   const read = {
     kind: "tool",
@@ -277,14 +277,14 @@ test("SOP node events fold into one Codex-style trace per turn", async () => {
   assert.equal(first.finishedAt, "2026-10-29T11:43:30Z");
   assert.deepEqual(
     first.steps.map((s) => `${activityFace(s).done} ${activityTarget(s)}`),
-    ["已读取 SKILL.md", "已运行 pwd && ls -la", "已思考 Let me look at the repo."],
+    ["Read SKILL.md", "Ran pwd && ls -la", "Thought Let me look at the repo."],
   );
   assert.equal(first.steps[0].output, "");
   assert.equal(first.steps[1].failed, true);
   assert.equal(first.steps[1].output, "Bash exit 1");
   assert.equal(last.live, true);
   assert.equal(last.steps[0].finishedAt, null);
-  assert.equal(activityFace(last.steps[0]).busy, "正在更新计划");
+  assert.equal(activityFace(last.steps[0]).busy, "Updating plan");
 });
 
 test("tool rounds fold into one summary and only the trailing round stays active", () => {
@@ -300,10 +300,10 @@ test("tool rounds fold into one summary and only the trailing round stays active
   assert.equal(streamingAnswerOpen(steps), false);
   assert.equal(running[1].active, true);
   assert.equal(running[1].steps.length, 4);
-  assert.equal(activityGroupSummary(running[1].steps), "已运行命令、读取文件");
+  assert.equal(activityGroupSummary(running[1].steps), "Completed: Run commands, Read files");
   assert.equal(
     activityGroupSummary(running[1].steps, { active: true }),
-    "正在运行命令、读取文件",
+    "In progress: Run commands, Read files",
   );
   assert.equal(activityGroupKind(running[1].steps), "command");
   // A new paragraph after the round closes it.
@@ -312,7 +312,7 @@ test("tool rounds fold into one summary and only the trailing round stays active
   });
   assert.equal(moved[1].active, false);
   assert.equal(traceBlocks(steps)[0].active, false);
-  assert.equal(activityGroupSummary([steps[1]]), "已思考");
+  assert.equal(activityGroupSummary([steps[1]]), "Thought");
   const many = ["Bash", "Read", "Grep", "Edit", "WebFetch"].map((tool, i) => ({
     id: `m${i}`,
     kind: "tool",
@@ -320,7 +320,7 @@ test("tool rounds fold into one summary and only the trailing round stays active
   }));
   assert.equal(
     activityGroupSummary(many),
-    "已运行命令、读取文件、搜索代码等",
+    "Completed: Run commands, Read files, Search code and others",
   );
 });
 

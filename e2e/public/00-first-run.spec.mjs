@@ -33,7 +33,7 @@ test('the first visitor creates the administrator from the browser',async({page,
   await page.locator('[name="password"]').fill(password());
   await page.locator('[name="confirm"]').fill(password()+'x');
   await page.locator('#loginSubmit').click();
-  await expect(page.locator('#loginError')).toHaveText('两次输入的密码不一致');
+  await expect(page.locator('#loginError')).toHaveText('Passwords do not match');
   await createAccount(page,admin,password());
   await page.screenshot({path:info.outputPath('first-run-home.png')});
   const current=await page.request.get('/api/auth/current').then(r=>r.json());
@@ -59,7 +59,7 @@ test('the home page guides a new account and explains the missing model key',asy
   const notice=frame.locator('.credential-notice');
   await expect(notice).toContainText('CodeBuddy API Key');
   await input.fill('First question after installing');
-  await notice.getByRole('button',{name:'去配置'}).click();
+  await notice.getByRole('button',{name:'Configure'}).click();
   await expect(page.locator('#credentialWizard .credential-pane:not(.is-leaving) input[name="secret"]')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(await openHome(page)).toHaveValue('First question after installing');

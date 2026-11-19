@@ -53,11 +53,11 @@ test("failed and waiting nodes surface with the reason in workflow order", () =>
   );
   assert.equal(
     problems[1].reason,
-    "运行账号没有写权限；需要处理：加为 Developer",
+    "运行账号没有写权限; Action required:加为 Developer",
   );
   assert.equal(
     problems[2].reason,
-    "SOP「通用后端交付 SOP」在这一步设置了人工门禁：「提交 MR」已完成，需要有权限的成员检查结果后确认，确认后运行结束。",
+    "SOP “通用后端交付 SOP” requires approval at this step. Review the results from “提交 MR”. Approval completes the run.",
   );
   assert.deepEqual(problems[0].expected, {
     status: "failed",
@@ -68,7 +68,7 @@ test("failed and waiting nodes surface with the reason in workflow order", () =>
   assert.equal(hint?.field, "gitToken");
   assert.match(
     CREDENTIAL_GUIDES.gitToken.steps.join(""),
-    /Contents 和 Pull requests/,
+    /Contents and Pull requests/,
   );
 });
 
@@ -129,6 +129,6 @@ test("approval reason names upstream, downstream, rework and instructions", asyn
   // Same expectation as TestApprovalWaitReason in internal/domain.
   assert.equal(
     approvalWaitReason(run, "gate"),
-    "SOP「通用后端交付 SOP」在这一步设置了人工门禁：「代码实现」、「测试」已完成，需要有权限的成员检查结果后确认，确认后继续「发布」；不通过可打回到「代码实现」重做。确认要求：检查测试报告和 MR 改动范围",
+    "SOP “通用后端交付 SOP” requires approval at this step. Review the results from “代码实现”, “测试”. Approval continues to “发布”. Rejection returns to “代码实现” for rework. Approval criteria: 检查测试报告和 MR 改动范围",
   );
 });

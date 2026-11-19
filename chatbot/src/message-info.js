@@ -1,6 +1,6 @@
 import { elapsedSeconds, formatElapsed } from "./api.js";
 
-export const NOT_REPORTED = "未上报";
+export const NOT_REPORTED = "Not reported";
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -52,10 +52,10 @@ export const formatTokens = (n) =>
   Math.max(0, Number(n) || 0).toLocaleString("en-US");
 
 const tokenParts = [
-  ["input", "输入", "inputTokens"],
-  ["output", "输出", "outputTokens"],
-  ["cacheRead", "缓存读", "cacheReadTokens"],
-  ["cacheWrite", "缓存写", "cacheWriteTokens"],
+  ["input", "Input", "inputTokens"],
+  ["output", "Output", "outputTokens"],
+  ["cacheRead", "Cache read", "cacheReadTokens"],
+  ["cacheWrite", "Cache write", "cacheWriteTokens"],
 ];
 
 /** Card fields for one saved assistant reply; missing data reads 「未上报」. */
@@ -65,19 +65,19 @@ export function messageInfo(message = {}) {
   const rows = [
     {
       key: "time",
-      label: "时间",
+      label: "Time",
       value: fullTime(message.startedAt || message.createdAt),
     },
     {
       key: "agent",
       label: "Agent",
-      value: String(message.speakerName || "").trim() || "主 Bot",
+      value: String(message.speakerName || "").trim() || "Main Bot",
     },
-    { key: "tool", label: "编码工具", value: "CodeBuddy" },
-    { key: "model", label: "模型", value: model || NOT_REPORTED },
+    { key: "tool", label: "Coding Tool", value: "CodeBuddy" },
+    { key: "model", label: "Model", value: model || NOT_REPORTED },
     {
       key: "elapsed",
-      label: "用时",
+      label: "Duration",
       value: seconds === null ? NOT_REPORTED : formatElapsed(seconds),
     },
   ].map((row) => ({ ...row, missing: row.value === NOT_REPORTED }));

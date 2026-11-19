@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Start LoopForge from the published GHCR image pinned in compose.yaml
-# (default), or build this checkout for development.
+# Start the English edition from the current checkout.
 #
 # Usage:
 #   ./start.sh            install/start in the background (same as -d)
@@ -28,7 +27,7 @@ compose() {
 cmd="${1:--d}"
 shift || true
 case "$cmd" in
-  up|-d|detach) bash scripts/install.sh ;;
+  up|-d|detach) LOOPFORGE_BUILD_FROM_SOURCE=1 bash scripts/install.sh ;;
   dev) LOOPFORGE_BUILD_FROM_SOURCE=1 bash scripts/install.sh ;;
   release)
     [[ -f .env ]] && python3 - <<'PY'
@@ -39,6 +38,10 @@ PY
     COMPOSE_FILE=compose.yaml bash scripts/install.sh
     ;;
   pull)
+    if [[ -f .env ]] && grep -qx 'COMPOSE_FILE=compose.yaml:compose.dev.yaml' .env; then
+      LOOPFORGE_BUILD_FROM_SOURCE=1 bash scripts/install.sh
+      exit
+    fi
     # An empty MIRROR keeps the original refresh. A registry host pulls the pinned
     # ghcr.io tag from that host and tags it back before MySQL is refreshed.
     if [[ -n "${MIRROR:-}" ]]; then
@@ -59,8 +62,7 @@ PY
   down) compose down --remove-orphans ;;
   restart) compose restart platform ;;
   build)
-    echo 'The default start uses the published GHCR image (no local build).' >&2
-    echo 'For a source build: ./start.sh dev' >&2
+    echo 'Run ./start.sh to build and start the English edition from this checkout.' >&2
     exit 1
     ;;
   *)

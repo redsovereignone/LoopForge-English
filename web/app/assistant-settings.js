@@ -27,7 +27,7 @@ function assistantPrefsFormHTML(p){
    </div></section>
   <section class="asst-panel"><header class="asst-panel-head"><h2>自定义规则</h2><p>每轮对话都会带上这些规则，适合写你的习惯和偏好；不会越过审批模式和平台规则。</p></header>
    <label class="asst-rules-label" for="assistantPrefsRules">规则</label>
-   <textarea id="assistantPrefsRules" class="input asst-rules" name="instructions" rows="8" maxlength="${ASSISTANT_RULES_MAX}" placeholder="例如：回复先给结论再给细节；改代码前先说明要改哪些文件；不要自动发起 MR。">${escapeHTML(rules)}</textarea>
+   <textarea id="assistantPrefsRules" class="input asst-rules" name="instructions" rows="8" maxlength="${ASSISTANT_RULES_MAX}" placeholder="For example: give the conclusion first, list the files you plan to edit, and ask before opening a merge request.">${escapeHTML(rules)}</textarea>
    <div class="asst-rules-foot"><span id="assistantPrefsCount" class="asst-count">${rules.length} / ${ASSISTANT_RULES_MAX}</span></div></section>
   <div class="asst-actions"><button type="submit" class="button primary" id="assistantPrefsSave" disabled>${assistantPrefsUI.saving?'保存中…':'保存'}</button></div>
  </fieldset></form>`;

@@ -13,7 +13,7 @@ export async function api(path, options = {}) {
     response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok)
     throw Object.assign(
-      new Error(data?.error || `请求失败（${response.status}）`),
+      new Error(data?.error || `Request failed (${response.status})`),
       { status: response.status },
     );
   return data;
@@ -35,11 +35,11 @@ export function elapsedSeconds(startedAt, finishedAt) {
   return Math.floor((end - start) / 1000);
 }
 export function formatElapsed(seconds) {
-  if (seconds < 1) return "不到1秒";
+  if (seconds < 1) return "Less than 1 second";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const rest = seconds % 60;
-  return `${hours ? `${hours}小时` : ""}${minutes ? `${minutes}分钟` : ""}${rest || (!hours && !minutes) ? `${rest}秒` : ""}`;
+  return `${hours ? `${hours}h` : ""}${minutes ? `${minutes}min` : ""}${rest || (!hours && !minutes) ? `${rest}s` : ""}`;
 }
 export const attachmentURL = (attachment, sessionId) =>
   attachment.id?.startsWith("local-attachment-") &&
@@ -92,7 +92,7 @@ export function collectArtifacts(session) {
       artifacts.push({
         ...attachment,
         kind: "attachment",
-        source: message.role === "assistant" ? "AI 生成" : "上传的文件",
+        source: message.role === "assistant" ? "AI generated" : "Uploaded file",
         url: attachmentURL(attachment, session.id),
         messageIndex,
       });
@@ -106,7 +106,7 @@ export function collectArtifacts(session) {
         kind: asset.kind,
         asset,
         resourceKey: `${asset.kind}:${asset.id}`,
-        source: asset.status === "published" ? "已发布" : "已保存",
+        source: asset.status === "published" ? "Published" : "Saved",
         mimeType: "application/json",
       });
     }
@@ -140,7 +140,7 @@ export function collectArtifacts(session) {
         draft,
         messageIndex,
         draftIndex: index,
-        source: draft.saved ? "已执行" : "待确认",
+        source: draft.saved ? "Executed" : "Needs review",
       });
     }
     // PR/MR links the agent opened with its own git only appear in the reply
@@ -198,13 +198,13 @@ export function collectArtifacts(session) {
         id: `block-${messageIndex}-${index}`,
         name:
           named ||
-          `${{ svg: "图像", mermaid: "流程图", html: "网页", slides: "演示文稿", ppt: "演示文稿" }[language] || "代码"}-${messageIndex + 1}-${index + 1}.${extension}`,
+          `${{ svg: "Image", mermaid: "Diagram", html: "Web page", slides: "Presentation", ppt: "Presentation" }[language] || "Code"}-${messageIndex + 1}-${index + 1}.${extension}`,
         kind: type,
         content: match[2],
         language,
         mimeType: type === "svg" ? "image/svg+xml" : "text/plain",
         messageIndex,
-        source: "AI 生成",
+        source: "AI generated",
       });
     }
   });
@@ -261,15 +261,15 @@ export function canManageProjectRepos(project, user) {
   if (String(user.platformRole || "").toLowerCase() === "admin") return true;
   return Boolean(project.ownerId) && Number(project.ownerId) === Number(user.id);
 }
-export const UNJOINED_PROJECTS_SECTION = "未加入的项目";
+export const UNJOINED_PROJECTS_SECTION = "Project you have not joined";
 // Projects the user can chat in keep their original order; the rest follow
 // under their own section without a per-row explanation.
 export function projectPickerOptions(projects, user, session) {
   const available = [];
   const unjoined = [];
   const effect = {
-    bind: "绑定当前会话到此项目",
-    new: "在此项目新开对话",
+    bind: "Link this conversation to the project",
+    new: "Start a chat in this project",
   };
   for (const p of projects || []) {
     if (canChatInProject(p, user)) {
@@ -290,7 +290,7 @@ export function projectPickerOptions(projects, user, session) {
     }
   }
   return [
-    { id: "", label: "个人对话", description: "不绑定项目", icon: "user" },
+    { id: "", label: "Personal chat", description: "No project", icon: "user" },
     ...available,
     ...unjoined,
   ];
@@ -415,7 +415,7 @@ export function confirmationCaption(message, previous) {
     return (parseReply(previous).drafts || []).some(
       (d) => d.proposal && ["declined", "muted"].includes(d.decision),
     )
-      ? "不走 SOP，让 AI 助手自己做"
+      ? "Skip the SOP and let the assistant handle it"
       : "";
   const match =
     /^已确认并执行 ([a-z_]+)。请核对这条草稿的保存回执，继续完成原始请求；不要重复刚才的写入，下一项需要确认时提交草稿，全部完成时总结实际结果。$/.exec(
@@ -426,5 +426,5 @@ export function confirmationCaption(message, previous) {
     !parseReply(previous).drafts?.some((d) => d.saved && d.tool === match[1])
   )
     return "";
-  return `已确认${actionName(match[1])}，继续处理`;
+  return `Confirmed ${actionName(match[1])}. Continuing`;
 }

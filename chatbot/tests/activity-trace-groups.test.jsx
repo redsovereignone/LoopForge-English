@@ -30,14 +30,14 @@ describe("Codex-style activity trace", () => {
     expect(screen.getByText("先查澄清面板的前端代码。")).toBeVisible();
     // Like Codex, the running round has no title; its steps scroll in a box
     // that follows the newest one.
-    expect(screen.queryByText("正在运行命令")).toBeNull();
+    expect(screen.queryByText("In progress: Run commands")).toBeNull();
     expect(screen.getByText("grep -rn ModelPicker src")).toBeInTheDocument();
-    expect(screen.getByText("正在运行")).toBeInTheDocument();
+    expect(screen.getByText("Running")).toBeInTheDocument();
     expect(
       view.container.querySelector('.execution-scroll[data-follow="true"]'),
     ).not.toBeNull();
     // A finished command that took a while says so in its row.
-    expect(screen.getByText("已在1分钟5秒内运行")).toBeInTheDocument();
+    expect(screen.getByText("Ran in 1min5s")).toBeInTheDocument();
 
     const done = [
       ...steps.slice(0, 2),
@@ -48,15 +48,15 @@ describe("Codex-style activity trace", () => {
       <ReplyTimeline steps={done} startedAt={start} finishedAt={finish} />,
     );
     // A finished reply folds the whole process into its elapsed time.
-    expect(screen.getByText(/已处理 /)).toBeInTheDocument();
+    expect(screen.getByText(/Done /)).toBeInTheDocument();
     expect(screen.queryByText("先查澄清面板的前端代码。")).toBeNull();
     expect(screen.queryByText("grep -rn ModelPicker src")).toBeNull();
 
     // Opening it shows every note and step, each round expanded.
     const user = userEvent.setup();
-    await user.click(screen.getByText(/已处理 /));
+    await user.click(screen.getByText(/Done /));
     expect(screen.getByText("先查澄清面板的前端代码。")).toBeInTheDocument();
-    expect(screen.getByText("已运行命令")).toBeInTheDocument();
+    expect(screen.getByText("Completed: Run commands")).toBeInTheDocument();
     expect(screen.getByText("grep -rn ModelPicker src")).toBeInTheDocument();
     expect(screen.getByText("npm test")).toBeInTheDocument();
     // An opened round scrolls inside a fixed height, without following.
@@ -65,9 +65,9 @@ describe("Codex-style activity trace", () => {
     ).not.toBeNull();
 
     // Folding a round keeps its failures visible.
-    await user.click(screen.getByText("已运行命令"));
+    await user.click(screen.getByText("Completed: Run commands"));
     expect(screen.queryByText("grep -rn ModelPicker src")).toBeNull();
-    expect(screen.getByText("1 步失败")).toBeInTheDocument();
+    expect(screen.getByText("1 steps failed")).toBeInTheDocument();
     expect(screen.getByText("npm test")).toBeInTheDocument();
   });
 
@@ -80,11 +80,11 @@ describe("Codex-style activity trace", () => {
       tool("c", "cat a.js", { finishedAt: null }),
     ];
     render(<ReplyTimeline steps={steps} startedAt={start} live />);
-    expect(screen.getByText("已运行命令")).toBeInTheDocument();
+    expect(screen.getByText("Completed: Run commands")).toBeInTheDocument();
     expect(screen.queryByText("pwd")).toBeNull();
     // A round with one step is shown as that step.
     expect(screen.getByText("cat a.js")).toBeInTheDocument();
-    expect(screen.getByText(/正在处理/)).toBeInTheDocument();
+    expect(screen.getByText(/Working/)).toBeInTheDocument();
   });
 
   test("the elapsed time and its line head the reply, running or finished", () => {
@@ -121,9 +121,9 @@ describe("Codex-style activity trace", () => {
       { id: "r", kind: "tool", tool: "Read", detail: "/tmp/a.js", startedAt: start, finishedAt: finish },
     ];
     render(<ActivityTrace steps={steps} startedAt={start} finishedAt={finish} />);
-    expect(screen.queryByText("已运行命令、读取文件")).toBeNull();
-    await userEvent.setup().click(screen.getByText(/已处理 /));
-    expect(screen.getByText("已运行命令、读取文件")).toBeInTheDocument();
+    expect(screen.queryByText("Completed: Run commands, Read files")).toBeNull();
+    await userEvent.setup().click(screen.getByText(/Done /));
+    expect(screen.getByText("Completed: Run commands, Read files")).toBeInTheDocument();
     expect(screen.getByText("pwd")).toBeInTheDocument();
   });
 
@@ -134,9 +134,9 @@ describe("Codex-style activity trace", () => {
       tool("a", "pwd", { finishedAt: null }),
     ];
     render(<ReplyTimeline steps={steps} startedAt={start} live />);
-    expect(screen.getByText("已思考")).toBeInTheDocument();
+    expect(screen.getByText("Thought")).toBeInTheDocument();
     expect(screen.queryByText("The user picked option A")).toBeNull();
-    await userEvent.setup().click(screen.getByText("已思考"));
+    await userEvent.setup().click(screen.getByText("Thought"));
     expect(screen.getByText("The user picked option A")).toBeInTheDocument();
   });
 });

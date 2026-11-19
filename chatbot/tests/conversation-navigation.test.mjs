@@ -69,7 +69,7 @@ test("only the matching approved node resolves a historical approval draft", () 
   assert.equal(resolved.draft.resolved, true);
   assert.equal(visibleSidebarArtifact(resolved), false);
   assert.equal(artifact.draft.resolved, undefined);
-  assert.equal(actionName("runs_approve"), "批准节点");
+  assert.equal(actionName("runs_approve"), "Approve Node");
 });
 test("files stay at their own publication position and same-named node outputs never cross", () => {
   const files = [
@@ -155,7 +155,7 @@ test("internal resume prompts render as acknowledgements only with a matching sa
   };
   assert.equal(
     confirmationCaption(message, previous),
-    "已确认保存角色，继续处理",
+    "Confirmed Save role. Continuing",
   );
   assert.equal(
     confirmationCaption(message, {
@@ -190,7 +190,7 @@ test("answered SOP proposals render as short acknowledgements", async () => {
   const declined = { role: "user", content: "不走 SOP，这件事由你直接完成。" };
   assert.equal(
     confirmationCaption(declined, reply({ ...dispatch, decision: "declined" })),
-    "不走 SOP，让 AI 助手自己做",
+    "Skip the SOP and let the assistant handle it",
   );
   assert.equal(confirmationCaption(declined, reply(dispatch)), "");
   const expired = {
@@ -213,7 +213,7 @@ test("a project created from another project's chat links to the new project", (
   };
   assert.deepEqual(projectEntryTarget(draft, "skillhub"), {
     href: "/?projectId=okr-system#/collaboration",
-    label: "进入项目「OKR系统」继续对话",
+    label: "Enter project \"OKR系统\" to continue the conversation",
   });
   assert.equal(projectEntryTarget({ ...draft, saved: false }, "skillhub"), null);
   assert.equal(projectEntryTarget(draft, "okr-system"), null);

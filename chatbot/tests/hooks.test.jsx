@@ -177,7 +177,7 @@ describe("conversation hooks", () => {
       act(() => { accepted = result.current.setModel("claude-opus-5"); });
       expect(accepted).toBe(false);
       expect(result.current.model).toBe("kimi-k2.6");
-      expect(result.current.error).toContain("glm-5.1、kimi-k2.6");
+      expect(result.current.error).toContain("glm-5.1, kimi-k2.6");
     } finally {
       apiMock.mockImplementation(original);
     }
@@ -335,7 +335,7 @@ describe("conversation hooks", () => {
       const {result}=renderHook(()=>useChat());
       await waitFor(()=>expect(result.current.ready).toBe(true));
       await act(async()=>expect(await result.current.send({text:"开始"})).toBe(false));
-      expect(result.current.error).toBe("执行机器仍在加载，请稍后发送。");
+      expect(result.current.error).toBe("The runner is still loading. Please send later.");
       expect(writeMock).not.toHaveBeenCalled();
       await act(async()=>{release({runnerId:"mac"});});
       await waitFor(()=>expect(result.current.defaultRunnerId).toBe("mac"));
@@ -433,11 +433,11 @@ describe("conversation hooks", () => {
     try {
       writeMock.mockImplementation((path, body, method) =>
         path.endsWith("/proposals")
-          ? Promise.reject(Object.assign(Error("这条建议已经处理过"), { status: 409 }))
+          ? Promise.reject(Object.assign(Error("This suggestion has already been processed"), { status: 409 }))
           : original(path, body, method),
       );
       apiMock.mockResolvedValueOnce(withDraft());
-      await act(() => expect(result.current.applyDraft(0, 0, { approved: true })).rejects.toThrow("已经处理过"));
+      await act(() => expect(result.current.applyDraft(0, 0, { approved: true })).rejects.toThrow("already been processed"));
       expect(mcpCalls()).toHaveLength(0);
 
       writeMock.mockImplementation((path, body, method) =>
@@ -471,7 +471,7 @@ describe("conversation hooks", () => {
     const latest = withDraft({ ...draft, decision });
     apiMock.mockResolvedValueOnce(latest);
 
-    await act(() => expect(result.current.applyDraft(0, 0, { approved: true })).rejects.toThrow("这条建议已经处理过"));
+    await act(() => expect(result.current.applyDraft(0, 0, { approved: true })).rejects.toThrow("This suggestion has already been processed"));
 
     expect(apiMock).not.toHaveBeenCalledWith("/mcp", expect.anything());
     expect(writeMock).not.toHaveBeenCalled();

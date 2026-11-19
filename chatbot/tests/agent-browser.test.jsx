@@ -118,20 +118,20 @@ describe("AgentBrowser", () => {
       socket.open();
       socket.state(live);
     });
-    expect(screen.getByLabelText("网址")).toHaveValue("file:///workspace/demo.html");
-    expect(screen.getByLabelText("后退")).toBeEnabled();
-    expect(screen.getByLabelText("前进")).toBeDisabled();
-    expect(screen.getByRole("tablist", { name: "浏览器标签页" })).toHaveTextContent("Vite");
-    expect(screen.getByText("正在等待第一帧画面…")).toBeInTheDocument();
+    expect(screen.getByLabelText("URL")).toHaveValue("file:///workspace/demo.html");
+    expect(screen.getByLabelText("Back")).toBeEnabled();
+    expect(screen.getByLabelText("Forward")).toBeDisabled();
+    expect(screen.getByRole("tablist", { name: "Browser tabs" })).toHaveTextContent("Vite");
+    expect(screen.getByText("Waiting for the first frame…")).toBeInTheDocument();
 
     const img = container.querySelector(".agent-browser-screen");
     act(() => socket.onmessage({ data: new Blob(["jpeg"]) }));
     expect(img).toHaveAttribute("src", "blob:test");
     act(() => fireEvent.load(img));
-    expect(screen.queryByText("正在等待第一帧画面…")).not.toBeInTheDocument();
-    expect(screen.getByText("沙箱浏览器 · 实时")).toBeInTheDocument();
+    expect(screen.queryByText("Waiting for the first frame…")).not.toBeInTheDocument();
+    expect(screen.getByText("Sandbox browser · Live")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText("刷新"));
+    fireEvent.click(screen.getByLabelText("Refresh"));
     expect(socket.sent).toContainEqual({ operation: "reload" });
     fireEvent.click(screen.getByText("Vite"));
     expect(socket.sent).toContainEqual({ operation: "activate", targetId: "t2" });
@@ -162,12 +162,12 @@ describe("AgentBrowser", () => {
     expect(handled).toHaveBeenCalledWith("n1");
     const frame = container.querySelector("iframe.agent-browser-frame");
     expect(frame).toHaveAttribute("src", "/devpreview/run-5/5173/admin?tab=2");
-    expect(screen.getByLabelText("网址")).toHaveValue("http://localhost:5173/admin?tab=2");
+    expect(screen.getByLabelText("URL")).toHaveValue("http://localhost:5173/admin?tab=2");
     // No screencast while the page renders natively.
     expect(FakeSocket.instances).toHaveLength(0);
-    fireEvent.click(screen.getByLabelText("在新窗口打开"));
+    fireEvent.click(screen.getByLabelText("Open in a new window"));
     expect(open).toHaveBeenCalledWith(expect.stringContaining("/devpreview/run-5/5173/"), "_blank", "noopener");
-    fireEvent.click(screen.getByLabelText("切换到 Agent 浏览器画面"));
+    fireEvent.click(screen.getByLabelText("Switch to the agent browser"));
     expect(container.querySelector("iframe.agent-browser-frame")).toBeNull();
     expect(lastSocket().url).toContain("/api/runs/run-5/browser/stream");
   });
@@ -179,8 +179,8 @@ describe("AgentBrowser", () => {
     );
     expect(handled).toHaveBeenCalledWith("f1");
     expect(container.querySelector("iframe.agent-browser-frame")).toHaveAttribute("src", "/devpreview/run-6/file/workspace/demo.html");
-    expect(screen.getByLabelText("网址")).toHaveValue("file:///workspace/demo.html");
-    expect(screen.getByText("原生预览 · 工作区文件")).toBeInTheDocument();
+    expect(screen.getByLabelText("URL")).toHaveValue("file:///workspace/demo.html");
+    expect(screen.getByText("Live preview · Workspace files")).toBeInTheDocument();
     expect(FakeSocket.instances).toHaveLength(0);
   });
 
@@ -227,8 +227,8 @@ describe("AgentBrowser", () => {
       socket.state(live);
       socket.error("无权操作该任务的浏览器");
     });
-    expect(screen.getByText("你没有该项目的编辑权限，只能查看画面")).toBeInTheDocument();
-    expect(screen.getByLabelText("刷新")).toBeDisabled();
+    expect(screen.getByText("You need project edit access to control this browser.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Refresh")).toBeDisabled();
     const before = socket.sent.length;
     fireEvent.keyDown(container.querySelector(".agent-browser-ime"), { key: "a", code: "KeyA", keyCode: 65 });
     expect(socket.sent).toHaveLength(before);
@@ -242,9 +242,9 @@ describe("AgentBrowser", () => {
       socket.open();
       socket.state({ available: false, reason: "Agent 浏览器尚未启动" });
     });
-    await user.click(screen.getByRole("button", { name: "启动浏览器" }));
+    await user.click(screen.getByRole("button", { name: "Start browser" }));
     expect(socket.sent).toContainEqual({ operation: "start", ensure: true });
-    expect(screen.getByText("正在启动 Agent 浏览器…")).toBeInTheDocument();
+    expect(screen.getByText("Starting agent browser…")).toBeInTheDocument();
   });
 
   test("stops streaming once unmounted", () => {
@@ -272,8 +272,8 @@ describe("workspace links in replies", () => {
         <RichContent message={reply} />
       </AgentBrowserLinks.Provider>,
     );
-    const links = screen.getAllByTitle(/^在 Agent 浏览器中打开/);
-    expect(links.map((b) => b.title.replace("在 Agent 浏览器中打开 ", ""))).toEqual([
+    const links = screen.getAllByTitle(/^Open in Agent Browser/);
+    expect(links.map((b) => b.title.replace("Open in Agent Browser ", ""))).toEqual([
       "http://localhost:5173/sidebar-demo-2.html",
       "file:///workspace/sidebar-demo-2.html",
       "file:///workspace/demo.html",
@@ -297,7 +297,7 @@ describe("workspace links in replies", () => {
         <RichContent message={"文件地址：\n\n```\nfile:///workspace/repo/demo.html\n```\n"} />
       </AgentBrowserLinks.Provider>,
     );
-    const link = screen.getByTitle("在 Agent 浏览器中打开 file:///workspace/repo/demo.html");
+    const link = screen.getByTitle("Open in Agent Browser file:///workspace/repo/demo.html");
     expect(link.querySelector("code").textContent).toBe("file:///workspace/repo/demo.html");
     await user.click(link);
     expect(open).toHaveBeenCalledWith("file:///workspace/repo/demo.html");
@@ -305,7 +305,7 @@ describe("workspace links in replies", () => {
 
   test("stay plain without a workspace and never render file links", () => {
     render(<RichContent message={reply} />);
-    expect(screen.queryAllByTitle(/^在 Agent 浏览器中打开/)).toHaveLength(0);
+    expect(screen.queryAllByTitle(/^Open in Agent Browser/)).toHaveLength(0);
     expect(screen.getByText("打开 demo").closest("a")).toBeNull();
     expect(document.querySelector('a[href^="file:"]')).toBeNull();
     expect(screen.getByText("http://localhost:5173/sidebar-demo-2.html").tagName).toBe("CODE");
@@ -324,7 +324,7 @@ describe("side panel browser tab", () => {
 
   test("needs a conversation workspace", () => {
     render(panel({ view: "artifacts" }));
-    expect(screen.getByRole("tab", { name: /浏览器/ })).toBeDisabled();
+    expect(screen.getByRole("tab", { name: /Browser/ })).toBeDisabled();
     expect(FakeSocket.instances).toHaveLength(0);
   });
 
@@ -345,7 +345,7 @@ describe("side panel browser tab", () => {
     };
     try {
       const { container } = render(panel(props));
-      expect(screen.getByRole("button", { name: "返回聊天" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Back to chat" })).toBeInTheDocument();
       const frame = container.querySelector("iframe.agent-browser-frame");
       const doc = frame.contentDocument;
       doc.open();
@@ -354,11 +354,11 @@ describe("side panel browser tab", () => {
       act(() => {
         fireEvent.load(frame);
       });
-      fireEvent.click(screen.getByRole("button", { name: "标记元素" }));
+      fireEvent.click(screen.getByRole("button", { name: "Select element" }));
       act(() => {
         doc.querySelector("button").dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
       });
-      fireEvent.click(screen.getByText("加入对话框"));
+      fireEvent.click(screen.getByText("Add to conversation"));
       expect(onAddElement).toHaveBeenCalledWith(expect.objectContaining({ type: "element" }));
       expect(onClose).toHaveBeenCalled();
     } finally {
@@ -369,11 +369,11 @@ describe("side panel browser tab", () => {
   test("shows the workspace browser", async () => {
     const onViewChange = vi.fn();
     const { rerender } = render(panel({ view: "artifacts", workspaceRunId: "run-9", onViewChange }));
-    fireEvent.click(screen.getByRole("tab", { name: /浏览器/ }));
+    fireEvent.click(screen.getByRole("tab", { name: /Browser/ }));
     expect(onViewChange).toHaveBeenCalledWith("browser");
     rerender(panel({ view: "browser", workspaceRunId: "run-9", onViewChange }));
-    expect(screen.getByRole("tab", { name: /浏览器/ })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("complementary", { name: "Agent 浏览器" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Browser/ })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("complementary", { name: "Agent browser" })).toBeInTheDocument();
     expect(lastSocket().url).toContain("/api/runs/run-9/browser/stream");
     rerender(panel({ view: "artifacts", workspaceRunId: "run-9", onViewChange }));
     expect(lastSocket().readyState).toBe(3);

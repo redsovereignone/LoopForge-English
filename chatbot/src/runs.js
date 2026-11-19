@@ -29,19 +29,19 @@ export function runProblems(run) {
       reason =
         (node.error || "").trim() ||
         (gate.reason || "").trim() ||
-        "节点失败但没有记录错误，可以打开节点查看执行过程";
+        "The node failed but no error was recorded. You can open the node to view the execution process";
     else
       reason =
         [gate.reason, gate.actionRequired]
           .map((s) => (s || "").trim())
           .filter(Boolean)
-          .join("；需要处理：") ||
+          .join("; Action required:") ||
         (node.error || "")
           .replace(/^\s*agent requested human confirmation:\s*/i, "")
           .trim() ||
         (def.type === "approval"
           ? approvalWaitReason(run, id)
-          : "等待人工确认");
+          : "Awaiting human approval");
     const waiting = node.status === "waiting_approval";
     out.push({
       key: [run.id, id, node.attempt, node.reworkCount, node.status].join(":"),
@@ -70,9 +70,9 @@ export function approvalWaitReason(run, nodeId) {
   const nodes = wf.nodes || [];
   const edges = wf.edges || [];
   const index = nodes.findIndex((n) => n.id === nodeId);
-  if (index < 0) return "等待人工确认";
+  if (index < 0) return "Awaiting human approval";
   const node = nodes[index];
-  const name = (id) => `「${nodes.find((n) => n.id === id)?.name || id}」`;
+  const name = (id) => `“${nodes.find((n) => n.id === id)?.name || id}”`;
   let upstream = edges
     .filter((e) => e.target === nodeId && e.source)
     .map((e) => name(e.source));
@@ -83,18 +83,14 @@ export function approvalWaitReason(run, nodeId) {
     upstream = index > 0 ? [name(nodes[index - 1].id)] : [];
     downstream = index + 1 < nodes.length ? [name(nodes[index + 1].id)] : [];
   }
-  const sop = (wf.name || "").trim() ? `SOP「${wf.name.trim()}」` : "该 SOP";
-  let text = `${sop}在这一步设置了人工门禁`;
-  text += upstream.length
-    ? `：${upstream.join("、")}已完成，需要有权限的成员检查结果后确认`
-    : "，需要有权限的成员确认";
+  const sop = wf.name?.trim() ? `SOP “${wf.name.trim()}”` : "This SOP";
+  let text = `${sop} requires approval at this step.`;
+  if (upstream.length) text += ` Review the results from ${upstream.join(", ")}.`;
   text += downstream.length
-    ? `，确认后继续${downstream.join("、")}`
-    : "，确认后运行结束";
-  if (node.rejectTo) text += `；不通过可打回到${name(node.rejectTo)}重做`;
-  text += "。";
-  const instructions = (node.taskPrompt || "").trim();
-  if (instructions) text += `确认要求：${instructions}`;
+    ? ` Approval continues to ${downstream.join(", ")}.`
+    : " Approval completes the run.";
+  if (node.rejectTo) text += ` Rejection returns to ${name(node.rejectTo)} for rework.`;
+  if (node.taskPrompt?.trim()) text += ` Approval criteria: ${node.taskPrompt.trim()}`;
   return text;
 }
 export function conversationRunIDs(session) {

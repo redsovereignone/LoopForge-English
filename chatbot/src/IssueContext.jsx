@@ -119,15 +119,15 @@ export default function IssueContext({
             className="context-pill issue-context"
             title={
               chat.session?.shared
-                ? "需求由当前运行关联"
-                : "关联当前会话的主需求；其他 @引用只作用于当前消息"
+                ? "Linked by the current run"
+                : "Link the conversation’s main requirement. Other mentions apply to one message."
             }
             disabled={unavailable}
             onClick={() => setInternalOpen(true)}
           >
             <HarnessIcon name="doc" size={14} />
             <span>
-              {chat.issueId ? issue?.title || chat.issueId : "关联需求"}
+              {chat.issueId ? issue?.title || chat.issueId : "Linked requirements"}
             </span>
           </button>
           {chat.issueId ? (
@@ -136,8 +136,8 @@ export default function IssueContext({
               href={issueHref(chat.issueId, chat.projectId)}
               target="_blank"
               rel="noreferrer"
-              title="打开关联需求"
-              aria-label="打开关联需求"
+              title="Open linked requirement"
+              aria-label="Open linked requirement"
             >
               <HarnessIcon name="preview-expand" size={13} />
             </a>
@@ -145,14 +145,14 @@ export default function IssueContext({
         </>
       ) : null}
       {open ? (
-        <Dialog title="会话主需求" onClose={close}>
+        <Dialog title="Main requirement" onClose={close}>
           <div className="issue-selector">
             <p>
-              选择此会话持续讨论的主需求。关联后每轮读取最新内容，会话的可见范围不变。
+              Link a requirement to read its latest version each turn. Conversation visibility stays the same.
             </p>
             {chat.issueId ? (
               <p>
-                已关联：
+                Linked:{" "}
                 <a
                   href={issueHref(chat.issueId, chat.projectId)}
                   target="_blank"
@@ -164,8 +164,8 @@ export default function IssueContext({
             ) : null}
             <input
               autoFocus
-              aria-label="搜索关联需求"
-              placeholder="搜索当前项目的需求…"
+              aria-label="Search requirements"
+              placeholder="Search this project’s requirements…"
               value={query}
               disabled={unavailable || saving}
               onChange={(e) => setQuery(e.target.value)}
@@ -177,7 +177,7 @@ export default function IssueContext({
                 disabled={unavailable || saving}
                 onClick={() => choose("")}
               >
-                解除关联
+                Unlink
               </button>
             ) : null}
             <div className="issue-options">
@@ -194,13 +194,13 @@ export default function IssueContext({
                     {row.name}
                     <small>{row.id}</small>
                   </span>
-                  {chat.issueId === row.id ? "已关联" : ""}
+                  {chat.issueId === row.id ? "Linked" : ""}
                 </button>
               ))}
             </div>
-            {loading ? <p role="status">正在查找…</p> : null}
+            {loading ? <p role="status">Searching…</p> : null}
             {!loading && !rows.length && !error ? (
-              <p>没有匹配的需求；可先在聊天中创建或导入。</p>
+              <p>No matches. Create or import a requirement in chat.</p>
             ) : null}
             {error ? <p role="alert">{error}</p> : null}
             {next ? (
@@ -209,7 +209,7 @@ export default function IssueContext({
                 disabled={loading || unavailable || saving}
                 onClick={more}
               >
-                加载更多
+                Load more
               </button>
             ) : null}
           </div>

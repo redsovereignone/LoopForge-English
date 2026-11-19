@@ -7,16 +7,16 @@ import { resumeMissed } from "./activity";
 
 export function subagentStatus(agent, live) {
   const last = agent.dispatches.at(-1);
-  if (last?.failed) return { label: "失败", tone: "failed" };
+  if (last?.failed) return { label: "Failed", tone: "failed" };
   if (!last?.finishedAt)
     return live
-      ? { label: "运行中", tone: "running" }
-      : { label: "已中断", tone: "interrupted" };
-  return { label: "已完成", tone: "done" };
+      ? { label: "Running", tone: "running" }
+      : { label: "Interrupted", tone: "interrupted" };
+  return { label: "Completed", tone: "done" };
 }
 
 export function subagentName(agent) {
-  return agent.role || agent.subagent || "子 Agent";
+  return agent.role || agent.subagent || "Subagent";
 }
 
 // The subagent's last paragraph is its report, which also comes back as the
@@ -43,7 +43,7 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
   // not an older file of the same name. Until that reply is saved there is
   // no attachment yet.
   const published = agent.published.map((item) => {
-    const pending = item.source === "交付物" && !item.missing && item.messageIndex == null;
+    const pending = item.source === "Deliverable" && !item.missing && item.messageIndex == null;
     const artifact =
       item.missing || pending
         ? null
@@ -52,24 +52,24 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
             .find(
               (artifact) =>
                 artifact.name === item.title &&
-                (item.source !== "交付物" || artifact.messageIndex === item.messageIndex),
+                (item.source !== "Deliverable" || artifact.messageIndex === item.messageIndex),
             );
     return { ...item, pending, artifact };
   });
   return (
     <section
       className="sop-run-embedded sop-run-panel node-conversation-view subagent-session"
-      aria-label="子 Agent 会话"
+      aria-label="Subagent conversation"
     >
       <div className="sop-panel-scroll">
-        <SlidingTabs className="node-tabs" aria-label="子 Agent 详情">
+        <SlidingTabs className="node-tabs" aria-label="Subagent details">
           <button
             role="tab"
             aria-selected={tab === "conversation"}
             onClick={() => setTab("conversation")}
           >
             <HarnessIcon name="chat" size={14} />
-            会话过程
+            Conversation activity
           </button>
           <button
             role="tab"
@@ -77,7 +77,7 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
             onClick={() => setTab("artifacts")}
           >
             <HarnessIcon name="doc" size={14} />
-            产物 {published.length || ""}
+            Artifacts {published.length || ""}
           </button>
         </SlidingTabs>
         {tab === "conversation" ? (
@@ -90,20 +90,20 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
                   {step.input || step.detail ? (
                     <article
                       className="node-message node-message-user"
-                      aria-label="收到的任务"
+                      aria-label="Assigned task"
                     >
-                      <span className="node-message-sender">AI 助手</span>
+                      <span className="node-message-sender">AI assistant</span>
                       <RichContent message={step.input || step.detail} />
                     </article>
                   ) : null}
                   {agent.models?.[step.id] ? (
-                    <p className="muted subagent-model" aria-label="运行模型">
-                      模型 · {agent.models[step.id]}
+                    <p className="muted subagent-model" aria-label="Model">
+                      Model · {agent.models[step.id]}
                     </p>
                   ) : null}
                   {resumeMissed(step) ? (
                     <p className="muted subagent-resume-missed" role="note">
-                      复用未生效：没有接着 {step.resumed} 做，已新开子 Agent。
+                      Could not resume  {step.resumed} . A new subagent was started.
                     </p>
                   ) : null}
                   {steps.length || running ? (
@@ -118,12 +118,12 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
                   {step.output ? (
                     <article
                       className="node-message node-message-assistant node-result"
-                      aria-label="子 Agent 汇报"
+                      aria-label="Subagent report"
                     >
                       <RichContent message={step.output} />
                     </article>
                   ) : step.failed ? (
-                    <p className="error">这次派发失败了。</p>
+                    <p className="error">Dispatch failed.</p>
                   ) : null}
                 </React.Fragment>
               );
@@ -151,13 +151,13 @@ export function SubagentSession({ agent, live = false, artifacts = [], onOpenArt
                   <HarnessIcon name={missing ? "alert" : "doc"} size={17} />
                   <span>
                     <strong>{title}</strong>
-                    <small>{missing ? "缺少必需交付物" : pending ? "交付物 · 回复完成后可打开" : source}</small>
+                    <small>{missing ? "Required deliverable missing" : pending ? "Deliverable · available after the reply" : source}</small>
                   </span>
                 </div>
               ),
             )}
             {!published.length ? (
-              <p className="muted">这个子 Agent 没有交付物或发布的产物。</p>
+              <p className="muted">No deliverables or published artifacts from this subagent.</p>
             ) : null}
           </div>
         )}

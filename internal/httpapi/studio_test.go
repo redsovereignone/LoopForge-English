@@ -173,7 +173,7 @@ func TestStudioPagesShowShortBuildCommit(t *testing.T) {
 		"vscode.html": {Data: []byte(`<html><body><div id="workbench"></div></body></html>`)},
 	}
 	h := studioFileServer(static)
-	want := `class="loopforge-build" title="镜像版本 60fc455aabbccddeeff001122334455667788990">60fc455</span>`
+	want := `class="loopforge-build" title="Build 60fc455aabbccddeeff001122334455667788990">60fc455</span>`
 	for _, path := range []string{"/", "/login.html", "/vscode.html"} {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))

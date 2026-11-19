@@ -103,7 +103,7 @@ func TestBotBindingLinkSurvivesNotificationRedaction(t *testing.T) {
 		t.Fatal(err)
 	}
 	rendered := domain.NotificationText(reply, 16000)
-	if strings.Contains(rendered, "[redacted]") || !strings.Contains(rendered, "/bot-bind.html#request=") || !strings.Contains(rendered, ")（15 分钟内有效）") {
+	if strings.Contains(rendered, "[redacted]") || !strings.Contains(rendered, "/bot-bind.html#request=") || !strings.Contains(rendered, "). The link expires in 15 minutes.") {
 		t.Fatal("binding URL damaged by reply pipeline", rendered)
 	}
 }
@@ -124,7 +124,7 @@ func TestBotUnbindOnlyRevokesCurrentSender(t *testing.T) {
 		t.Fatal(err)
 	}
 	handled, reply, err := h.message(bot, domain.BotInteraction{SenderID: "unbound-other", Content: "/unbind"})
-	if !handled || err != nil || !strings.Contains(reply, "尚未绑定") {
+	if !handled || err != nil || !strings.Contains(reply, "no linked platform account") {
 		t.Fatal(reply, err)
 	}
 	if _, err = s.BotUserBinding(bot.BotID, "unbind-test"); err != nil {

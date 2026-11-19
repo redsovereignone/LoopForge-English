@@ -13,7 +13,7 @@ export function SidebarSection({
   return (
     <section
       className={`sidebar-project-section ${className}`.trim()}
-      aria-label={`${title}的会话`}
+      aria-label={`${title} conversation`}
     >
       <button
         type="button"

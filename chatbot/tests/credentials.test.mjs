@@ -37,7 +37,7 @@ test("CodeBuddy key links follow the selected network environment", () => {
   assert.match(
     credentialGuide("codeBuddyApiKey", { codeBuddyInternetEnvironment: "china" })
       .link,
-    /国内站/,
+    /China/,
   );
 
   const intl = credentialGuide("codeBuddyApiKey", {});
@@ -46,7 +46,7 @@ test("CodeBuddy key links follow the selected network environment", () => {
     codeBuddyInternetEnvironment: "internal",
   });
   assert.equal(china.url, "https://copilot.tencent.com/profile/");
-  assert.match(china.link, /国内站/);
+  assert.match(china.link, /China/);
   assert.deepEqual(china.steps, CREDENTIAL_GUIDES.codeBuddyApiKey.steps);
   assert.equal(credentialGuide("gitToken", {}), CREDENTIAL_GUIDES.gitToken);
   assert.equal(credentialGuide("unknown", {}), null);
@@ -55,7 +55,7 @@ test("CodeBuddy key links follow the selected network environment", () => {
 test("third-party model keys are flagged before CodeBuddy rejects them", () => {
   assert.equal(codeBuddyKeyWarning(""), "");
   assert.equal(codeBuddyKeyWarning("ck_abc"), "");
-  assert.match(codeBuddyKeyWarning("sk-abc"), /第三方/);
+  assert.match(codeBuddyKeyWarning("sk-abc"), /DeepSeek or OpenAI/);
   assert.match(codeBuddyKeyWarning("abc"), /ck_/);
 });
 

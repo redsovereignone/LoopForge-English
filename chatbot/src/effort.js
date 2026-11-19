@@ -1,14 +1,14 @@
 const levels = {
-  none: { label: "关闭", icon: "sparkles", detail: "不使用额外推理。" },
-  thinking: { label: "开启", icon: "brain", detail: "开启思考模式。" },
-  minimal: { label: "最低", icon: "effort-low", detail: "只做最少推理，优先尽快返回。" },
-  low: { label: "低", icon: "effort-low", detail: "优先响应速度，适合简单问题。" },
-  medium: { label: "中", icon: "effort-medium", detail: "兼顾响应速度与推理深度。" },
-  high: { label: "高", icon: "brain", detail: "更充分地推理，适合复杂问题。" },
-  xhigh: { label: "更高", icon: "search", detail: "投入更多推理时间，适合困难任务。" },
-  max: { label: "最高", icon: "effort-max", detail: "使用模型支持的最高思考强度，耗时可能更长。" },
-  ultra: { label: "极致", icon: "effort-max", detail: "使用极致推理强度，耗时可能更长。" },
-  ultracode: { label: "极致", icon: "effort-max", detail: "使用模型的 ultracode 思考强度，耗时可能更长。" },
+  none: { label: "Close", icon: "sparkles", detail: "Use no additional reasoning." },
+  thinking: { label: "Enable", icon: "brain", detail: "Enable reasoning." },
+  minimal: { label: "Minimal", icon: "effort-low", detail: "Use minimal reasoning for the fastest response." },
+  low: { label: "Low", icon: "effort-low", detail: "Prioritize speed for simple questions." },
+  medium: { label: "Medium", icon: "effort-medium", detail: "Balance response time and reasoning depth." },
+  high: { label: "High", icon: "brain", detail: "Use deeper reasoning for complex questions." },
+  xhigh: { label: "Higher", icon: "search", detail: "Spend more time reasoning through difficult tasks." },
+  max: { label: "Maximum", icon: "effort-max", detail: "Use the highest reasoning effort this model supports. This can take longer." },
+  ultra: { label: "Ultra", icon: "effort-max", detail: "Use ultra reasoning effort. This can take longer." },
+  ultracode: { label: "Ultra", icon: "effort-max", detail: "Use the model’s ultracode reasoning effort. This can take longer." },
 };
 
 export function modelEffort(model, value) {
@@ -17,7 +17,7 @@ export function modelEffort(model, value) {
 
 export function effortOptions(model) {
   return [
-    { id: "", label: "默认", icon: "sparkles", detail: "使用当前模型的默认思考强度。" },
+    { id: "", label: "Default", icon: "sparkles", detail: "Use the model’s default reasoning effort." },
     ...(model?.efforts || []).filter((id) => levels[id]).map((id) => ({ id, ...levels[id] })),
   ];
 }

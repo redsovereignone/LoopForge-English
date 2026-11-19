@@ -1,3 +1,4 @@
+import { englishMessage } from "./english-message";
 import { useEffect, useRef, useState } from "react";
 import { api, write } from "./api.js";
 import HarnessIcon from "./HarnessIcon";
@@ -14,7 +15,7 @@ export function cliInstallHint(text) {
 }
 
 export function cliInstallNotice(label) {
-  return `${label} 已安装，请重新发送。`;
+  return `${label} Installed. Send the message again.`;
 }
 
 function installMemory(engine) {
@@ -45,6 +46,8 @@ export function cliFailureSettles(text) {
   return (
     value === "AI 助手生成失败，请稍后重试" ||
     value === "AI 助手生成失败，具体原因见诊断信息" ||
+    value === "Generation failed. Try again." ||
+    value === "Generation failed. See diagnostics for details." ||
     /（[a-z0-9-]+）没有安装在当前服务器上/.test(value)
   );
 }
@@ -98,7 +101,7 @@ export function CLIInstallAction({ text, onResult }) {
         }
         pending.current = false;
         rememberInstall(hint.engine, false);
-        if (status.status === "failed") setFailure(status.error || "安装失败");
+        if (status.status === "failed") setFailure(status.error || "Installation failed");
         setPhase("ready");
       } catch {
         if (cancelled) return;
@@ -117,7 +120,7 @@ export function CLIInstallAction({ text, onResult }) {
   }, [hint?.engine, hint?.label]);
   if (!hint) return null;
   const installing = phase === "installing";
-  const label = installing ? "自动安装" : `安装 ${hint.label}`;
+  const label = installing ? "Installing automatically" : `Install ${hint.label}`;
   return (
     <span className="credential-action">
       <button
@@ -137,7 +140,7 @@ export function CLIInstallAction({ text, onResult }) {
             .catch((error) => {
               pending.current = false;
               rememberInstall(hint.engine, false);
-              setFailure(error.message || "安装失败");
+              setFailure(error.message || "Installation failed");
               setPhase("ready");
             });
         }}
@@ -145,8 +148,8 @@ export function CLIInstallAction({ text, onResult }) {
         <HarnessIcon name="download" size={13} />
         {label}
       </button>
-      <small>安装在服务器上继续，关闭页面也不会中断。</small>
-      {failure ? <small>{failure}</small> : null}
+      <small>Installation continues on the server if you close this page.</small>
+      {failure ? <small>{englishMessage(failure)}</small> : null}
     </span>
   );
 }

@@ -115,7 +115,7 @@ func (h *botIdentityHandlers) message(bot domain.NotificationBot, item domain.Bo
 	if text == "/unbind" || text == "解除绑定" {
 		binding, err := h.repo.BotUserBinding(bot.BotID, item.SenderID)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return true, "当前企微账号尚未绑定平台账号。发送“绑定账号”可进行关联。", nil
+			return true, "This WeCom account has no linked platform account. Send /bind to link one.", nil
 		}
 		if err != nil {
 			return true, "", err
@@ -123,7 +123,7 @@ func (h *botIdentityHandlers) message(bot domain.NotificationBot, item domain.Bo
 		if err := h.repo.RevokeBotUserBinding(binding.ID, binding.UserID, time.Now().UTC()); err != nil {
 			return true, "", err
 		}
-		return true, "已解除当前企微账号与平台账号的绑定，旧确认码已失效。需要重新关联时，请发送“绑定账号”。", nil
+		return true, "Account unlinked. Previous confirmation codes have expired. Send /bind to link again.", nil
 	}
 
 	if strings.HasPrefix(text, "/bind ") {
@@ -133,14 +133,14 @@ func (h *botIdentityHandlers) message(bot domain.NotificationBot, item domain.Bo
 		}
 		user, ok := h.repo.User(binding.UserID)
 		if !ok {
-			return true, "平台账号不存在，请在个人配置解除后重新绑定。", nil
+			return true, "This platform account no longer exists. Unlink it in personal settings and link again.", nil
 		}
-		return true, "已绑定平台账号「" + user.LoginName + "」。后续操作将使用你的身份、个人凭据和项目权限。请重新发送刚才的请求。", nil
+		return true, "Linked platform account “" + user.LoginName + "”. Future actions use your identity, credentials and project permissions. Send your request again.", nil
 	}
 	if text == "绑定账号" || text == "/bind" {
 		if binding, err := h.repo.BotUserBinding(bot.BotID, item.SenderID); err == nil {
 			if user, ok := h.repo.User(binding.UserID); ok {
-				return true, "当前已绑定「" + user.LoginName + "」。发送 /unbind 或在平台个人配置中解除绑定。", nil
+				return true, "Currently linked to “" + user.LoginName + "”. Send /unbind or unlink the account in personal settings.", nil
 			}
 		}
 	}
@@ -153,12 +153,12 @@ func (h *botIdentityHandlers) message(bot domain.NotificationBot, item domain.Bo
 	}
 	base, err := url.Parse(strings.TrimRight(h.publicURL, "/"))
 	if err != nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" {
-		return true, "请先关联平台账号；平台外部访问地址尚未配置，请联系管理员。", nil
+		return true, "Ask your administrator to configure the public platform address before linking an account.", nil
 	}
 	token, err := h.repo.NewBotBindingChallenge(bot.BotID, item.SenderID, time.Now().UTC())
 	if err != nil {
 		return true, "", err
 	}
 	link := strings.TrimRight(h.publicURL, "/") + "/bot-bind.html#request=" + url.QueryEscape(token)
-	return true, "请先[关联你的平台账号](" + link + ")（15 分钟内有效）。登录确认后，将页面上的 /bind 确认码发回当前 Bot。群里其他人点击链接不会直接完成绑定。", nil
+	return true, "[Link your platform account](" + link + "). The link expires in 15 minutes. Sign in, then send the /bind confirmation code from the page back to this bot. Only the original sender can confirm the link.", nil
 }

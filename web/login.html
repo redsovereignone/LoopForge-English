@@ -1,15 +1,16 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>LoopForge · 登录</title>
+  <title>LoopForge · Sign in</title>
   <script src="/boot-theme.js?v=20261031boot1"></script>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/preferences.css">
   <script src="/boot.js"></script>
   <script src="/i18n-en.js"></script>
+  <script src="/english-messages.js"></script>
   <script src="/i18n.js"></script>
   <script defer src="/login.js"></script>
 </head>
@@ -17,22 +18,21 @@
   <main class="login-card">
     <img src="/images/loopforge-logo.png" alt="" width="56" height="56">
     <h1>LoopForge</h1>
-    <p id="loginSubtitle">登录你的交付工作台</p>
-    <p id="setupNotice" class="login-setup" hidden>这是首次启动。创建的第一个账号将成为平台管理员。</p>
+    <p id="loginSubtitle">Sign in to your delivery workspace</p>
+    <p id="setupNotice" class="login-setup" hidden>This is the first start. The first account you create becomes the platform administrator.</p>
     <form id="loginForm">
-      <label>用户名<input name="login" autocomplete="username" required maxlength="64" autofocus></label>
-      <label>密码<input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72"></label>
-      <label id="confirmField" hidden>确认密码<input name="confirm" type="password" autocomplete="new-password" maxlength="72"></label>
-      <p id="passwordRule" class="login-rule" hidden>密码至少 6 个字符</p>
+      <label>Username<input name="login" autocomplete="username" required maxlength="64" autofocus></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72"></label>
+      <label id="confirmField" hidden>Confirm password<input name="confirm" type="password" autocomplete="new-password" maxlength="72"></label>
+      <p id="passwordRule" class="login-rule" hidden>Use at least 6 characters</p>
       <p id="loginError" role="alert"></p>
-      <button id="loginSubmit" class="button primary" type="submit">登录</button>
+      <button id="loginSubmit" class="button primary" type="submit">Sign in</button>
     </form>
-    <p class="login-help" id="loginSwitch" hidden><span id="switchText">还没有账号？</span> <button type="button" id="switchMode" class="login-link">注册</button></p>
-    <p class="login-help" id="loginContact">请联系部署管理员创建账号。</p>
+    <p class="login-help" id="loginSwitch" hidden><span id="switchText">No account yet?</span> <button type="button" id="switchMode" class="login-link">Sign up</button></p>
+    <p class="login-help" id="loginContact">Ask your deployment administrator to create an account.</p>
     <div class="login-preferences">
-      <button id="loginLang" type="button" data-i18n-skip>中 / EN</button>
-      <button id="loginTheme" type="button">切换主题</button>
-      <a href="https://github.com/Tencent/LoopForge">GitHub ↗</a>
+      <button id="loginTheme" type="button">Switch theme</button>
+      <a href="https://github.com/redsovereignone/LoopForge-English">GitHub ↗</a>
     </div>
   </main>
 </body>

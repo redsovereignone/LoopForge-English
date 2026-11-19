@@ -9,12 +9,12 @@
 const HUNK = /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@ ?(.*)$/;
 
 const STATUS = {
-  A: { code: "A", label: "新增" },
-  M: { code: "M", label: "修改" },
-  D: { code: "D", label: "删除" },
-  R: { code: "R", label: "重命名" },
-  C: { code: "C", label: "复制" },
-  U: { code: "U", label: "冲突" },
+  A: { code: "A", label: "Added" },
+  M: { code: "M", label: "Edit" },
+  D: { code: "D", label: "Delete" },
+  R: { code: "R", label: "Rename" },
+  C: { code: "C", label: "Copy" },
+  U: { code: "U", label: "Conflict" },
 };
 
 export function statusLabel(code) {

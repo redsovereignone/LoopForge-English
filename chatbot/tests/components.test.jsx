@@ -126,17 +126,17 @@ describe("content and panels", () => {
       </>,
     );
     expect(screen.getByText("标题")).toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "下一页" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Next page" })[0]);
     await waitFor(() => expect(screen.getByText("diagram")).toBeInTheDocument());
-    await user.click(screen.getAllByLabelText("复制")[0]);
-    for (const toggle of screen.getAllByRole("button", { name: "查看源码" }).slice(0, 3))
+    await user.click(screen.getAllByLabelText("Copy")[0]);
+    for (const toggle of screen.getAllByRole("button", { name: "View Source" }).slice(0, 3))
       await user.click(toggle);
     fireEvent.doubleClick(screen.getByAltText("示例图"));
-    expect(screen.getByRole("dialog", { name: /查看大图 示例图/ })).toBeInTheDocument();
-    await user.click(screen.getAllByLabelText("关闭大图").at(-1));
-    const sourceTabs = screen.queryAllByRole("tab", { name: "源码" });
+    expect(screen.getByRole("dialog", { name: /View Full Image 示例图/ })).toBeInTheDocument();
+    await user.click(screen.getAllByLabelText("Close Full Image").at(-1));
+    const sourceTabs = screen.queryAllByRole("tab", { name: "Source" });
     if (sourceTabs.length) await user.click(sourceTabs[0]);
-    const downloads = screen.queryAllByLabelText("下载文件");
+    const downloads = screen.queryAllByLabelText("Download file");
     if (downloads.length) await user.click(downloads[0]);
   });
 
@@ -171,7 +171,7 @@ describe("content and panels", () => {
     );
     expect(await screen.findByText("local body")).toBeInTheDocument();
     expect(await screen.findByText("remote body")).toBeInTheDocument();
-    expect(screen.getByText("此类型文件可通过右上角下载查看。")).toBeInTheDocument();
+    expect(screen.getByText("Download this file from the top right to view it.")).toBeInTheDocument();
     globalThis.fetch = originalFetch;
   });
 
@@ -188,10 +188,10 @@ describe("content and panels", () => {
         url: "/api/assistant/attachments/demo?sessionId=s1",
       }} />,
     );
-    const frame = await screen.findByTitle("HTML 产物预览");
+    const frame = await screen.findByTitle("HTML Artifact Preview");
     expect(frame).toHaveAttribute("sandbox", "allow-scripts");
     expect(frame).toHaveAttribute("src", "/chatbot/preview.html");
-    await user.click(screen.getByRole("tab", { name: "源码" }));
+    await user.click(screen.getByRole("tab", { name: "Source" }));
     expect(screen.getByText("<h1>Demo</h1>")).toBeInTheDocument();
     globalThis.fetch = originalFetch;
   });
@@ -297,7 +297,7 @@ describe("content and panels", () => {
     const user = userEvent.setup();
     const existingChat = { ...chat, issueId: "ISSUE-1", linkIssue: vi.fn(async () => true) };
     render(<IssueContext chat={existingChat} open hideTrigger onClose={vi.fn()} />);
-    await user.click(await screen.findByText("解除关联"));
+    await user.click(await screen.findByText("Unlink"));
     expect(existingChat.linkIssue).toHaveBeenCalledWith("");
   });
 
@@ -317,11 +317,11 @@ describe("content and panels", () => {
       </>,
     );
     expect(await screen.findByText("流程一")).toBeInTheDocument();
-    await user.type(screen.getByPlaceholderText("新流程或这次要做的事"), "新任务");
-    await user.click(screen.getByText("派发 SOP"));
+    await user.type(screen.getByPlaceholderText("New workflow or task"), "新任务");
+    await user.click(screen.getByText("Dispatch SOP"));
     await waitFor(() => expect(writeMock).toHaveBeenCalled());
-    await user.type(screen.getByPlaceholderText("新流程或这次要做的事"), "复制流程");
-    await user.click(screen.getByText("创建 SOP"));
+    await user.type(screen.getByPlaceholderText("New workflow or task"), "复制流程");
+    await user.click(screen.getByText("Create SOP"));
     const runRow = await screen.findByRole("button", { name: /交付流程/ });
     await user.click(runRow);
     expect(await screen.findByText("完成任务")).toBeInTheDocument();
@@ -345,7 +345,7 @@ describe("content and panels", () => {
         />
       </div>,
     );
-    await user.type(screen.getByLabelText("搜索产物"), "readme");
+    await user.type(screen.getByLabelText("Search artifacts"), "readme");
     await user.click(screen.getByText("readme.md"));
     expect(setSelected).toHaveBeenCalled();
     rerender(
@@ -363,7 +363,7 @@ describe("content and panels", () => {
         />
       </div>,
     );
-    expect(screen.getByLabelText("SOP 运行过程")).toBeInTheDocument();
+    expect(screen.getByLabelText("SOP run activity")).toBeInTheDocument();
   });
 
   test("renders file artifacts and validates SOP actions without a project", async () => {
@@ -408,9 +408,9 @@ describe("content and panels", () => {
         onClose={vi.fn()}
       />,
     );
-    await user.type(screen.getByPlaceholderText("新流程或这次要做的事"), "任务");
-    await user.click(screen.getByText("派发 SOP"));
-    expect(screen.getByRole("alert")).toHaveTextContent("请先点右上角的项目名称选择或绑定项目");
+    await user.type(screen.getByPlaceholderText("New workflow or task"), "任务");
+    await user.click(screen.getByText("Dispatch SOP"));
+    expect(screen.getByRole("alert")).toHaveTextContent("Select or link a project");
   });
 
   test("renders selected draft and definition previews", async () => {
@@ -496,7 +496,7 @@ describe("content and panels", () => {
         />
       </div>,
     );
-    expect(screen.getByLabelText("会话产物")).toBeInTheDocument();
+    expect(screen.getByLabelText("Conversation artifacts")).toBeInTheDocument();
   });
 
   test("loads repository choices and applies an import draft", async () => {
@@ -526,7 +526,7 @@ describe("content and panels", () => {
       />,
     );
     await user.click(await screen.findByLabelText("仓库一"));
-    const confirm = screen.queryByRole("button", { name: /^确认/ });
+    const confirm = screen.queryByRole("button", { name: /^Approve/ });
     if (confirm && !confirm.disabled) await user.click(confirm);
     expect(screen.getByText("导入前请检查")).toBeInTheDocument();
   });
@@ -551,10 +551,10 @@ describe("content and panels", () => {
     const { rerender } = render(
       <DraftCard artifact={artifact({})} onApply={vi.fn()} onDecide={decide} onPreview={vi.fn()} context={context} />,
     );
-    expect(screen.getByText(/可选的后续工作：后续可以走 SOP/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "不需要" }));
+    expect(screen.getByText(/Possible next steps: 后续可以走 SOP/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "No thanks" }));
     expect(decide).toHaveBeenLastCalledWith(3, 0, "declined");
-    await user.click(screen.getByRole("button", { name: "本会话不再建议" }));
+    await user.click(screen.getByRole("button", { name: "Stop suggesting in this conversation" }));
     expect(decide).toHaveBeenLastCalledWith(3, 0, "muted");
 
     rerender(
@@ -566,7 +566,7 @@ describe("content and panels", () => {
         context={context}
       />,
     );
-    expect(screen.getByRole("button", { name: "让 AI 助手自己做" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Let the assistant handle it" })).toBeInTheDocument();
     expect(screen.queryByRole("timer")).not.toBeInTheDocument();
 
     const expiresAt = new Date(Date.now() + 125_000).toISOString();
@@ -579,7 +579,7 @@ describe("content and panels", () => {
         context={context}
       />,
     );
-    expect(screen.getByRole("timer")).toHaveTextContent(/^2:0[45] 后未确认，AI 助手将直接执行$/);
+    expect(screen.getByRole("timer")).toHaveTextContent(/^2:0[45] until the assistant proceeds automatically$/);
 
     rerender(
       <DraftCard
@@ -592,7 +592,7 @@ describe("content and panels", () => {
         context={context}
       />,
     );
-    expect(screen.getByRole("timer")).toHaveTextContent("已超时，AI 助手即将直接执行");
+    expect(screen.getByRole("timer")).toHaveTextContent("Timed out. The assistant will proceed automatically.");
 
     rerender(
       <DraftCard
@@ -603,17 +603,17 @@ describe("content and panels", () => {
         context={context}
       />,
     );
-    expect(screen.getByRole("button", { name: "已超时，AI 助手直接执行" })).toBeDisabled();
-    expect(screen.queryByRole("button", { name: "建需求并走 SOP" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Timed out. The assistant proceeded automatically." })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Create requirement and run SOP" })).not.toBeInTheDocument();
     expect(screen.queryByRole("timer")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "让 AI 助手自己做" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Let the assistant handle it" })).not.toBeInTheDocument();
 
     rerender(
       <DraftCard artifact={artifact({ decision: "declined" })} onApply={vi.fn()} onDecide={decide} onPreview={vi.fn()} context={context} />,
     );
-    expect(screen.getByText(/未采纳/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "建需求并走 SOP" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "本会话不再建议" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Declined/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create requirement and run SOP" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Stop suggesting in this conversation" })).not.toBeInTheDocument();
   });
 
   test("an SOP proposal card names the SOP route", async () => {
@@ -640,10 +640,10 @@ describe("content and panels", () => {
         context={{ projectId: "p1", projects: [{ id: "p1", name: "项目一" }], references: [] }}
       />,
     );
-    expect(screen.getByText(/建议整件事走 SOP：新功能/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "建需求并走 SOP" }));
+    expect(screen.getByText(/Use an SOP for this task: 新功能/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create requirement and run SOP" }));
     expect(apply).toHaveBeenCalledWith(1, 0, expect.anything());
-    await user.click(screen.getByRole("button", { name: "让 AI 助手自己做" }));
+    await user.click(screen.getByRole("button", { name: "Let the assistant handle it" }));
     expect(decide).toHaveBeenLastCalledWith(1, 0, "declined");
   });
 
@@ -651,10 +651,10 @@ describe("content and panels", () => {
     const user = userEvent.setup();
     render(<SopRunPanel runs={[run]} onClose={vi.fn()} />);
     await user.click(screen.getByText("实现"));
-    expect(await screen.findByText("会话过程")).toBeInTheDocument();
-    await user.click(screen.getByRole("tab", { name: /产物/ }));
+    expect(await screen.findByText("Conversation activity")).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: /Artifacts/ }));
     await user.click(screen.getByText("result.md"));
-    expect(screen.getByText("返回节点产物")).toBeInTheDocument();
+    expect(screen.getByText("Back to step artifacts")).toBeInTheDocument();
   });
 
   test("switches among runs and renders mixed node statuses", async () => {
@@ -678,14 +678,14 @@ describe("content and panels", () => {
       artifacts: [],
     };
     render(<SopRunPanel runs={[run, mixed]} onClose={vi.fn()} embedded />);
-    await user.click(screen.getByLabelText(/^选择会话关联运行：/));
+    await user.click(screen.getByLabelText(/^Select a conversation run: /));
     await user.click(screen.getByRole("option", { name: "混合流程" }));
     expect(screen.getAllByText("混合流程").length).toBeGreaterThan(0);
-    expect(screen.getByText("待执行")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
     await user.click(screen.getByText("运行节点"));
     expect(await screen.findByText("执行混合流程")).toBeInTheDocument();
-    await user.click(screen.getByRole("tab", { name: /产物/ }));
-    expect(screen.getByText("这个节点尚未生成产物。")).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: /Artifacts/ }));
+    expect(screen.getByText("This step has no artifacts yet.")).toBeInTheDocument();
   });
 
   test("shows and operates a failed run alert", async () => {
@@ -702,9 +702,9 @@ describe("content and panels", () => {
         onChanged={vi.fn()}
       />,
     );
-    expect(screen.getByText(/执行失败/)).toBeInTheDocument();
-    await user.click(screen.getByText("重试节点"));
-    await user.click(screen.getByText("让 AI 分析"));
+    expect(screen.getByText(/Execution failed/)).toBeInTheDocument();
+    await user.click(screen.getByText("Retry step"));
+    await user.click(screen.getByText("Ask AI to analyze"));
     expect(onAsk).toHaveBeenCalled();
   });
 
@@ -720,7 +720,7 @@ describe("content and panels", () => {
         onChanged={vi.fn()}
       />,
     );
-    expect(screen.getByRole("link", { name: /国内站创建 Key/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /ChinaCreate key/ })).toHaveAttribute(
       "href",
       "https://copilot.tencent.com/profile/",
     );
@@ -736,7 +736,7 @@ describe("content and panels", () => {
         onChanged={vi.fn()}
       />,
     );
-    expect(screen.getByRole("link", { name: /iOA创建 Key/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /iOACreate key/ })).toHaveAttribute(
       "href",
       "https://tencent.sso.copilot.tencent.com/profile/keys",
     );
@@ -754,8 +754,8 @@ describe("content and panels", () => {
         onChanged={vi.fn()}
       />,
     );
-    expect(screen.getAllByText(/等待人工确认/).length).toBeGreaterThan(0);
-    expect(screen.getByText("去确认")).toBeInTheDocument();
+    expect(screen.getAllByText(/Awaiting human approval/).length).toBeGreaterThan(0);
+    expect(screen.getByText("Review")).toBeInTheDocument();
   });
 
   test("lists a submitted merge request in the artifact panel and opens it on 工蜂", () => {
@@ -782,8 +782,8 @@ describe("content and panels", () => {
         />
       </div>,
     );
-    expect(screen.getByText("合并请求")).toBeInTheDocument();
-    const link = screen.getByTitle("agent-flow !631 · 在代码仓库打开");
+    expect(screen.getByText("Merge request")).toBeInTheDocument();
+    const link = screen.getByTitle("agent-flow !631 · Open in repository");
     expect(link.getAttribute("href")).toBe(mr.url);
     expect(link.getAttribute("target")).toBe("_blank");
   });

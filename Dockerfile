@@ -9,6 +9,7 @@ COPY chatbot/package.json chatbot/package-lock.json chatbot/
 RUN --mount=type=cache,target=/root/.npm npm --prefix chatbot ci --include=dev --no-audit --no-fund
 COPY chatbot/ chatbot/
 COPY web/app/ web/app/
+COPY web/english-messages.js web/english-messages.js
 RUN npm --prefix chatbot run build && test -f web/native-chat/index.html
 FROM --platform=$BUILDPLATFORM golang:1.26.11-bookworm AS build
 ARG TARGETOS

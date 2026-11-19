@@ -16,7 +16,7 @@ test("available projects come first, unjoined ones last, each in API order", () 
     options.map((o) => o.id),
     ["", "a", "c", "b", "d"],
   );
-  assert.equal(options[0].label, "个人对话");
+  assert.equal(options[0].label, "Personal chat");
 });
 
 test("unjoined projects carry the section and no description", () => {
@@ -27,7 +27,7 @@ test("unjoined projects carry the section and no description", () => {
   );
   const b = options.find((o) => o.id === "b");
   assert.equal(b.section, UNJOINED_PROJECTS_SECTION);
-  assert.equal(b.section, "未加入的项目");
+  assert.equal(b.section, "Project you have not joined");
   assert.equal(b.unavailable, true);
   assert.equal(b.description, undefined);
   assert.equal(b.label, "B");
@@ -82,7 +82,7 @@ test("available projects offer binding an unbound session", () => {
   const unbound = projectPickerOptions(projects, user, { id: "s" });
   assert.equal(
     unbound.find((o) => o.id === "a").description,
-    "绑定当前会话到此项目",
+    "Link this conversation to the project",
   );
   assert.equal(unbound.find((o) => o.id === "b").description, undefined);
   const bound = projectPickerOptions(projects, user, {
@@ -95,9 +95,9 @@ test("available projects offer binding an unbound session", () => {
 test("a bound or shared session says another project opens a new chat", () => {
   const projects = [joined("a"), joined("c")];
   const bound = projectPickerOptions(projects, user, { id: "s", projectId: "a" });
-  assert.equal(bound.find((o) => o.id === "c").description, "在此项目新开对话");
+  assert.equal(bound.find((o) => o.id === "c").description, "Start a chat in this project");
   const shared = projectPickerOptions(projects, user, { id: "s", shared: true });
-  assert.equal(shared.find((o) => o.id === "a").description, "在此项目新开对话");
+  assert.equal(shared.find((o) => o.id === "a").description, "Start a chat in this project");
   const draft = projectPickerOptions(projects, user, null);
   assert.equal(draft.find((o) => o.id === "c").description, undefined);
 });

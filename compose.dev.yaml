@@ -3,11 +3,11 @@
 # The fixed local tag keeps source builds from overwriting the pinned GHCR image.
 services:
   platform:
-    image: loopforge-platform:local
+    image: loopforge-english:local
     build:
       context: .
       args:
         LOOPFORGE_BUILD_JOBS: ${LOOPFORGE_BUILD_JOBS:-}
         LOOPFORGE_COMMIT: ${LOOPFORGE_COMMIT:-}
     environment:
-      AGENTFLOW_ISOLATED_IMAGE: loopforge-platform:local
+      AGENTFLOW_ISOLATED_IMAGE: loopforge-english:local

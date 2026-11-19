@@ -17,13 +17,13 @@ describe("conversation environment selection", () => {
     const create = vi.fn(), select = vi.fn();
     render(<SandboxPicker chat={{ projectId: "p", projects: [project], sandboxes,
       sandboxProfileId: "", selectSandbox: select }} onCreate={create} />);
-    const trigger = screen.getByRole("button", { name: /^运行环境/ });
+    const trigger = screen.getByRole("button", { name: /^Environment/ });
     trigger.getBoundingClientRect = () => ({top:500,bottom:528,left:200,right:450,width:250,height:28});
     const user = userEvent.setup();
     await user.click(trigger);
-    const menu = screen.getByRole("listbox", { name: "沙箱" });
+    const menu = screen.getByRole("listbox", { name: "Sandboxes" });
     expect(menu.closest(".select-menu")).toBeInTheDocument();
-    await user.click(screen.getByRole("option", { name: "新增沙箱" }));
+    await user.click(screen.getByRole("option", { name: "Add sandbox" }));
     expect(create).toHaveBeenCalledOnce();
     expect(select).not.toHaveBeenCalled();
   });
@@ -31,7 +31,7 @@ describe("conversation environment selection", () => {
   test("defaults to the agent's choice and lists only accessible containers", () => {
     const options = conversationSandboxOptions(sandboxes, project);
     expect(options.map((o) => o.value)).toEqual(["", "business", "shared"]);
-    expect(options[0].label).toBe("由 Agent 选择");
+    expect(options[0].label).toBe("Agent selects");
     const missing = conversationSandboxOptions(sandboxes, project, "deleted").at(-1);
     expect(missing).toMatchObject({ value: "deleted", disabled: true });
   });
@@ -42,14 +42,14 @@ describe("conversation environment selection", () => {
       sandboxes, sandboxLocked: true, workspaceSandbox: sandboxes[0], selectSandbox: vi.fn(),
     }} />);
     expect(screen.getByText("PHP 业务环境")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^运行环境/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Environment/ })).not.toBeInTheDocument();
   });
 
   test("selection is unavailable while saving or generating", () => {
     render(<SandboxPicker chat={{ projectId: "p", projects: [project], sandboxes,
       sandboxProfileId: "", sandboxBusy: true, selectSandbox: vi.fn(),
     }} />);
-    expect(screen.getByRole("button", { name: /^运行环境/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Environment/ })).toBeDisabled();
   });
 
   test("a project participant can change another creator's conversation environment", async () => {
@@ -57,7 +57,7 @@ describe("conversation environment selection", () => {
     render(<SandboxPicker chat={{ projectId: "p", projects: [project], sandboxes,
       user: { id: 2 }, session: { userId: 1 }, sandboxProfileId: "", selectSandbox: select,
     }} />);
-    const trigger = screen.getByRole("button", { name: /^运行环境/ });
+    const trigger = screen.getByRole("button", { name: /^Environment/ });
     expect(trigger).toBeEnabled();
     trigger.getBoundingClientRect = () => ({top:500,bottom:528,left:200,right:450,width:250,height:28});
     const user = userEvent.setup();

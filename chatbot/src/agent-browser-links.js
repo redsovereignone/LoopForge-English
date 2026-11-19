@@ -97,7 +97,7 @@ const devFile = "file";
 export const devServerOrigin = (port) => (port === devFile ? "file://" : `http://localhost:${port}`);
 
 // devServerLabel names the target in the panel.
-export const devServerLabel = (port) => (port === devFile ? "工作区文件" : `localhost:${port}`);
+export const devServerLabel = (port) => (port === devFile ? "Workspace files" : `localhost:${port}`);
 
 export const devServerPrefix = (runId, port) =>
   `/devpreview/${encodeURIComponent(runId)}/${port}`;

@@ -43,7 +43,7 @@ describe("pickers and activity", () => {
         canManageIssue
       />,
     );
-    await user.click(screen.getByText("需求"));
+    await user.click(screen.getByText("Requirements"));
     expect(await screen.findByText("需求一")).toBeInTheDocument();
     await user.click(screen.getByText("需求一"));
     expect(selected).toHaveBeenCalledWith(expect.objectContaining({ id: "ISSUE-1" }));
@@ -74,9 +74,9 @@ describe("pickers and activity", () => {
         />
       </>,
     );
-    await user.type(screen.getByLabelText("搜索模型"), "模型一");
+    await user.type(screen.getByLabelText("Search models"), "模型一");
     await user.click(screen.getByRole("menuitemradio", { name: /模型一/ }));
-    await user.click(screen.getByRole("menuitemradio", { name: "完全权限" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Full access" }));
     expect(selectModel).toHaveBeenCalledWith("m1");
     expect(selectPermission).toHaveBeenCalledWith("auto");
   });
@@ -113,10 +113,10 @@ describe("pickers and activity", () => {
       { id: "4", kind: "status", text: "连接服务", startedAt: start, finishedAt: finish },
     ];
     render(<ActivityTrace steps={steps} startedAt={start} finishedAt={finish} />);
-    await user.click(screen.getByText(/已处理/));
+    await user.click(screen.getByText(/Done/));
     for (const summary of document.querySelectorAll(".execution-step-title"))
       await user.click(summary);
-    expect(screen.getByLabelText("失败")).toBeInTheDocument();
+    expect(screen.getByLabelText("Failed")).toBeInTheDocument();
   });
 
   test("renders participants, avatars and sidebar section", async () => {

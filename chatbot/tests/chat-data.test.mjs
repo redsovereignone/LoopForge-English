@@ -76,10 +76,10 @@ test("reply duration uses recorded timestamps without inventing missing history 
     elapsedSeconds("2026-10-27T08:00:00Z", "2026-10-27T08:53:09Z"),
     3189,
   );
-  assert.equal(formatElapsed(3189), "53分钟9秒");
-  assert.equal(formatElapsed(3609), "1小时9秒");
-  assert.equal(formatElapsed(60), "1分钟");
-  assert.equal(formatElapsed(0), "不到1秒");
+  assert.equal(formatElapsed(3189), "53min9s");
+  assert.equal(formatElapsed(3609), "1h9s");
+  assert.equal(formatElapsed(60), "1min");
+  assert.equal(formatElapsed(0), "Less than 1 second");
   assert.equal(elapsedSeconds(undefined, "2026-10-27T08:53:09Z"), null);
   assert.equal(
     elapsedSeconds("0001-01-01T00:00:00Z", "2026-10-27T08:53:09Z"),

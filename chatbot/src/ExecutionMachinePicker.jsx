@@ -31,11 +31,11 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
   const loadError = locked ? "" : chat.machineError;
   const label = !known
     ? loadError
-      ? "执行机器加载失败"
-      : "加载执行机器…"
+      ? "Could not load runners"
+      : "Loading runners…"
     : runnerId
       ? machine?.name || runnerId
-      : "LoopForge 云端";
+      : "LoopForge cloud";
   const online =
     known &&
     (runnerId
@@ -44,8 +44,8 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
         ? chat.cloudPool.online > 0
         : true);
   const title = locked
-    ? loadError || `当前会话执行机器：${label}。会话已绑定，后续运行始终使用此机器。`
-    : chat.machineError || "选择执行机器，发送首条消息后固定";
+    ? loadError || `Conversation runner: ${label}. Future runs in this conversation use this runner.`
+    : chat.machineError || "Choose a runner. It is fixed after the first message.";
 
   if (locked)
     return (
@@ -60,18 +60,18 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
     ? [
         {
           id: "",
-          label: "LoopForge 云端",
+          label: "LoopForge cloud",
           icon: "server",
           description:
             chat.cloudPool?.configured && !chat.cloudPool.online
-              ? "暂无在线机器"
-              : "平台自动分配",
+              ? "No runners online"
+              : "Assigned by the platform",
         },
         ...(chat.machines || []).map((row) => ({
           id: row.id,
           label: row.name || row.id,
           icon: "monitor",
-          description: row.status === "online" ? "在线" : "离线，执行前需启动",
+          description: row.status === "online" ? "Online" : "Offline. Start before running.",
         })),
       ]
     : [];
@@ -83,7 +83,7 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
         type="button"
         className="context-pill machine-picker"
         title={title}
-        aria-label={`执行机器：${label}`}
+        aria-label={`Runner: ${label}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-busy={chat.machineSaving || undefined}
@@ -103,7 +103,7 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
       </button>
       <SelectMenu
         open={open}
-        label="会话执行机器"
+        label="Conversation runner"
         value={chat.defaultRunnerId || ""}
         options={options}
         onSelect={(id) => void chat.selectMachine(id)}
@@ -112,15 +112,15 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
         searchable
         emptyText={
           chat.machinesReady
-            ? "没有匹配的执行机器"
+            ? "No matching runners"
             : chat.machineError
-              ? "执行机器加载失败，请重试"
-              : "正在加载执行机器"
+              ? "Could not load runners. Try again."
+              : "Loading runners"
         }
         actions={[
           {
             id: "refresh-machines",
-            label: chat.machineError ? "重新加载" : "刷新机器列表",
+            label: chat.machineError ? "Reload" : "Refresh runners",
             icon: "refresh",
             onSelect: chat.refreshMachines,
           },
@@ -128,7 +128,7 @@ export default function ExecutionMachinePicker({ chat, onManage }) {
             ? [
                 {
                   id: "manage-machines",
-                  label: "管理执行机器",
+                  label: "Manage runners",
                   icon: "settings",
                   onSelect: onManage,
                 },

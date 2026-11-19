@@ -66,7 +66,7 @@ import QuickAccessWizard, {
 
 describe("QuickAccessWizard", () => {
   test("names the shared models an administrator allowed", () => {
-    expect(sharedModelNames(["glm-5.1", "deepseek-v4.1-flash"])).toBe("glm-5.1、Deepseek-V4.1-Flash");
+    expect(sharedModelNames(["glm-5.1", "deepseek-v4.1-flash"])).toBe("glm-5.1, Deepseek-V4.1-Flash");
     expect(sharedModelNames([], "deepseek-v4.1-flash")).toBe("Deepseek-V4.1-Flash");
     expect(sharedModelNames(undefined)).toBe("");
   });
@@ -137,13 +137,13 @@ describe("QuickAccessWizard", () => {
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     await waitFor(() => expect(apiMock).toHaveBeenCalledWith("/api/projects"));
 
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("项目与仓库", { selector: "h3" });
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("默认角色与 SOP", { selector: "h3" });
-    await userAction.click(screen.getByRole("button", { name: "完成接入" }));
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Projects & repositories", { selector: "h3" });
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Default roles and SOP", { selector: "h3" });
+    await userAction.click(screen.getByRole("button", { name: "Complete onboarding" }));
 
-    expect(await screen.findByText("快速接入已完成")).toBeInTheDocument();
+    expect(await screen.findByText("Quick Onboarding completed")).toBeInTheDocument();
     expect(completed).toHaveBeenCalledWith("p1");
   });
 
@@ -154,33 +154,33 @@ describe("QuickAccessWizard", () => {
       render(<QuickAccessWizard open user={{ ...user, gitSshKeyConfigured: true }} projects={[project]} projectId="p1" sponsoredModel="m1" onClose={vi.fn()} onCompleted={vi.fn()} onOpenView={vi.fn()} />);
       await screen.findByRole("dialog");
       await waitFor(() => expect(apiMock).toHaveBeenCalledWith("/api/users/1/git-ssh-keys"));
-      await userAction.click(screen.getByRole("button", { name: "下一步" }));
-      await screen.findByText("项目与仓库", { selector: "h3" });
+      await userAction.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByText("Projects & repositories", { selector: "h3" });
       const address = screen.getByPlaceholderText(/https:\/\/github.com\/owner\/repo/);
       await userAction.type(address, "git@gitlab.example.org:team/repo.git");
-      expect(screen.queryByText(/尚未配置 .* 的 SSH 密钥/)).toBeNull();
+      expect(screen.queryByText(/No SSH key configured for .*/)).toBeNull();
       expect(screen.queryByRole("button", { name: "配置此仓库的 SSH 密钥" })).toBeNull();
       await userAction.clear(address);
       await userAction.type(address, "ssh://git@gitlab.example.org:2222/team/repo.git");
-      expect(screen.getByRole("alert")).toHaveTextContent("尚未配置 gitlab.example.org:2222 的 SSH 密钥");
+      expect(screen.getByRole("alert")).toHaveTextContent("No SSH key configured for gitlab.example.org:2222");
       expect(screen.getByRole("alert").querySelector("button")).toBeNull();
       mockState.sshKeys = [...mockState.sshKeys, { id: "port", name: "Other SSH port", host: "gitlab.example.org:2222" }];
       window.dispatchEvent(new MessageEvent("message", { origin: location.origin, source: window.parent, data: { type: "agentflow-credentials-changed" } }));
-      await waitFor(() => expect(screen.queryByText(/尚未配置 .* 的 SSH 密钥/)).toBeNull());
+      await waitFor(() => expect(screen.queryByText(/No SSH key configured for .*/)).toBeNull());
       expect(address).toHaveValue("ssh://git@gitlab.example.org:2222/team/repo.git");
       await userAction.clear(address);
       await userAction.type(address, "git@gitea.example.org:team/repo.git");
-      expect(screen.getByRole("alert")).toHaveTextContent("尚未配置 gitea.example.org:22 的 SSH 密钥");
+      expect(screen.getByRole("alert")).toHaveTextContent("No SSH key configured for gitea.example.org:22");
       await userAction.clear(address);
       await userAction.type(address, "https://github.com/team/repo");
-      expect(screen.queryByText(/尚未配置 .* 的 SSH 密钥/)).toBeNull();
+      expect(screen.queryByText(/No SSH key configured for .*/)).toBeNull();
       await userAction.clear(address);
       await userAction.type(address, "git@gitea.example.org:team/repo.git");
-      expect(screen.getByRole("alert")).toHaveTextContent("可稍后");
-      await userAction.click(screen.getByRole("button", { name: "下一步" }));
-      await screen.findByText("默认角色与 SOP", { selector: "h3" });
-      await userAction.click(screen.getByRole("button", { name: "完成接入" }));
-      expect(await screen.findByText("快速接入已完成")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Add one later");
+      await userAction.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByText("Default roles and SOP", { selector: "h3" });
+      await userAction.click(screen.getByRole("button", { name: "Complete onboarding" }));
+      expect(await screen.findByText("Quick Onboarding completed")).toBeInTheDocument();
       expect(writeMock).toHaveBeenCalledWith("/api/repositories", expect.objectContaining({ provider: "ssh", cloneUrl: "git@gitea.example.org:team/repo.git" }));
     } finally {
       mockState.sshKeys = null;
@@ -202,15 +202,15 @@ describe("QuickAccessWizard", () => {
       />,
     );
     await screen.findByRole("dialog");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("请先配置 GitHub Git Token、Git SSH 密钥或 CodeBuddy API Key");
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Please configure a GitHub Git Token, Git SSH key, or CodeBuddy API Key first");
     expect(screen.queryByText(/工蜂/)).toBeNull();
-    await userAction.click(screen.getByText("使用访问令牌（高级）"));
+    await userAction.click(screen.getByText("Use Access Token (Advanced)"));
     await userAction.type(
       screen.getByPlaceholderText(/GitHub personal access token/),
       "token-value",
     );
-    await userAction.click(screen.getByRole("button", { name: "校验" }));
+    await userAction.click(screen.getByRole("button", { name: "Checks" }));
     await waitFor(() => expect(writeMock).toHaveBeenCalledWith(
       "/api/users/1/git-http-credentials",
       expect.objectContaining({ host:"github.com", token: "token-value" }),
@@ -237,9 +237,9 @@ describe("QuickAccessWizard", () => {
       />,
     );
     await screen.findByRole("dialog");
-    await userAction.type(screen.getByPlaceholderText("粘贴 CodeBuddy API Key"), "cb-key");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("项目与仓库", { selector: "h3" });
+    await userAction.type(screen.getByPlaceholderText("Paste CodeBuddy API Key"), "cb-key");
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Projects & repositories", { selector: "h3" });
     expect(writeMock).toHaveBeenCalledWith(
       "/api/users/1/credentials",
       { codeBuddyApiKey: "cb-key", codeBuddyInternetEnvironment: "" },
@@ -265,15 +265,15 @@ describe("QuickAccessWizard", () => {
       />,
     );
     await screen.findByRole("dialog");
-    const keyLink = screen.getByRole("link", { name: /获取 API Key/ });
+    const keyLink = screen.getByRole("link", { name: /Get API/ });
     expect(keyLink).toHaveAttribute("href", "https://www.codebuddy.ai/profile/keys");
-    await userAction.click(screen.getByLabelText("CodeBuddy 网络环境"));
-    await userAction.click(screen.getByRole("option", { name: /国内站/ }));
+    await userAction.click(screen.getByLabelText("CodeBuddy network environment"));
+    await userAction.click(screen.getByRole("option", { name: /China/ }));
     expect(keyLink).toHaveAttribute("href", "https://copilot.tencent.com/profile/");
-    await userAction.type(screen.getByPlaceholderText("粘贴 CodeBuddy API Key"), "sk-deepseek");
-    expect(screen.getByText(/第三方模型的 Key/)).toBeInTheDocument();
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("项目与仓库", { selector: "h3" });
+    await userAction.type(screen.getByPlaceholderText("Paste CodeBuddy API Key"), "sk-deepseek");
+    expect(screen.getByText(/DeepSeek or OpenAI/)).toBeInTheDocument();
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Projects & repositories", { selector: "h3" });
     expect(writeMock).toHaveBeenCalledWith(
       "/api/users/1/credentials",
       { codeBuddyApiKey: "sk-deepseek", codeBuddyInternetEnvironment: "internal" },
@@ -299,13 +299,13 @@ describe("QuickAccessWizard", () => {
         />,
       );
       await screen.findByRole("dialog");
-      expect(await screen.findByText(/「china」无法识别/)).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /获取 API Key/ })).toHaveAttribute(
+      expect(await screen.findByText(/china.*recognized/)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /Get API/ })).toHaveAttribute(
         "href",
         "https://copilot.tencent.com/profile/",
       );
-      await userAction.click(screen.getByRole("button", { name: "下一步" }));
-      await screen.findByText("项目与仓库", { selector: "h3" });
+      await userAction.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByText("Projects & repositories", { selector: "h3" });
       expect(writeMock).toHaveBeenCalledWith(
         "/api/users/1/credentials",
         { codeBuddyInternetEnvironment: "internal" },
@@ -336,7 +336,7 @@ describe("QuickAccessWizard", () => {
         />,
       );
       await screen.findByRole("dialog");
-      const keyLink = screen.getByRole("link", { name: /获取 API Key/ });
+      const keyLink = screen.getByRole("link", { name: /Get API/ });
       await waitFor(() =>
         expect(keyLink).toHaveAttribute("href", "https://copilot.tencent.com/profile/"),
       );
@@ -347,8 +347,8 @@ describe("QuickAccessWizard", () => {
         expect(keyLink).toHaveAttribute("href", "https://www.codebuddy.ai/profile/keys"),
       );
       await userAction.type(screen.getByLabelText("CodeBuddy API Key"), "ck_new");
-      await userAction.click(screen.getByRole("button", { name: "下一步" }));
-      await screen.findByText("项目与仓库", { selector: "h3" });
+      await userAction.click(screen.getByRole("button", { name: "Next" }));
+      await screen.findByText("Projects & repositories", { selector: "h3" });
       expect(writeMock).toHaveBeenCalledWith(
         "/api/users/1/credentials",
         { codeBuddyApiKey: "ck_new", codeBuddyInternetEnvironment: "" },
@@ -375,8 +375,8 @@ describe("QuickAccessWizard", () => {
       />,
     );
     await screen.findByRole("dialog");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    expect(await screen.findByText("项目与仓库", { selector: "h3" })).toBeInTheDocument();
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Projects & repositories", { selector: "h3" })).toBeInTheDocument();
     mockState.unconfigured = false;
   });
 
@@ -395,23 +395,23 @@ describe("QuickAccessWizard", () => {
       />,
     );
     await screen.findByRole("dialog");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("项目与仓库", { selector: "h3" });
-    await userAction.click(screen.getByRole("tab", { name: /新建项目/ }));
-    const name = screen.getByPlaceholderText("例如：智能网关");
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Projects & repositories", { selector: "h3" });
+    await userAction.click(screen.getByRole("tab", { name: /New project/ }));
+    const name = screen.getByPlaceholderText("Example: Smart Gateway");
     await userAction.clear(name);
     await userAction.type(name, "新项目");
     await userAction.type(
       screen.getByPlaceholderText("https://github.com/owner/repo"),
       "https://github.com/team/repo",
     );
-    expect(screen.getByText(/已识别仓库/)).toBeInTheDocument();
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("默认角色与 SOP", { selector: "h3" });
-    await userAction.click(screen.getByRole("tab", { name: /默认角色/ }));
-    expect(screen.getByText("需求定型")).toBeInTheDocument();
-    await userAction.click(screen.getByRole("button", { name: "完成接入" }));
-    expect(await screen.findByText("快速接入已完成")).toBeInTheDocument();
+    expect(screen.getByText(/Repository identified/)).toBeInTheDocument();
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Default roles and SOP", { selector: "h3" });
+    await userAction.click(screen.getByRole("tab", { name: /Default Role/ }));
+    expect(screen.getByText("Clarify requirements")).toBeInTheDocument();
+    await userAction.click(screen.getByRole("button", { name: "Complete onboarding" }));
+    expect(await screen.findByText("Quick Onboarding completed")).toBeInTheDocument();
     expect(writeMock).toHaveBeenCalledWith(
       "/api/sandboxes",
       expect.objectContaining({ driver: "local" }),
@@ -451,8 +451,8 @@ describe("QuickAccessWizard repository permission (#122)", () => {
     );
   const openProjectStep = async (userAction) => {
     await screen.findByRole("dialog");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("项目与仓库", { selector: "h3" });
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Projects & repositories", { selector: "h3" });
   };
 
   test("explains on the project step that a member cannot bind the shared project", async () => {
@@ -466,19 +466,19 @@ describe("QuickAccessWizard repository permission (#122)", () => {
     const userAction = userEvent.setup();
     renderWizard();
     await openProjectStep(userAction);
-    expect(screen.getByRole("note")).toHaveTextContent("只有它的 Owner 或平台管理员可以绑定仓库");
+    expect(screen.getByRole("note")).toHaveTextContent("Only its Owner or platform administrators can bind repositories");
     const input = screen.getByPlaceholderText("https://github.com/owner/repo");
     await userAction.type(input, "https://github.com/team/repo");
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
     // Blocked here, not on the last step, and nothing was written.
-    expect(await screen.findByText(/不能为它绑定仓库/)).toBeInTheDocument();
-    expect(screen.queryByText("默认角色与 SOP", { selector: "h3" })).toBeNull();
+    expect(await screen.findByText(/cannot bind a repository/)).toBeInTheDocument();
+    expect(screen.queryByText("Default roles and SOP", { selector: "h3" })).toBeNull();
     expect(writeMock).not.toHaveBeenCalledWith("/api/repositories", expect.anything());
     expect(writeMock).not.toHaveBeenCalledWith("/api/repositories", expect.anything(), expect.anything());
 
     // "Create my own project" keeps the typed repository.
-    await userAction.click(screen.getByRole("button", { name: "新建自己的项目并绑定" }));
-    expect(screen.getByRole("tab", { name: /新建项目/ })).toHaveAttribute("aria-selected", "true");
+    await userAction.click(screen.getByRole("button", { name: "Create your own project and bind" }));
+    expect(screen.getByRole("tab", { name: /New project/ })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByPlaceholderText("https://github.com/owner/repo")).toHaveValue("https://github.com/team/repo");
     expect(screen.queryByRole("note")).toBeNull();
     apiMock.mockReset();
@@ -496,13 +496,13 @@ describe("QuickAccessWizard repository permission (#122)", () => {
     renderWizard();
     await openProjectStep(userAction);
     await userAction.type(screen.getByPlaceholderText("https://github.com/owner/repo"), "https://github.com/team/repo");
-    await userAction.click(screen.getByRole("button", { name: "跳过绑定，继续体验" }));
-    await userAction.click(screen.getByRole("button", { name: "下一步" }));
-    await screen.findByText("默认角色与 SOP", { selector: "h3" });
-    expect(screen.getByText(/使用已有项目「LoopForge 体验项目」/)).toBeInTheDocument();
-    expect(screen.queryByText(/绑定 repo/)).toBeNull();
-    await userAction.click(screen.getByRole("button", { name: "完成接入" }));
-    expect(await screen.findByText("快速接入已完成")).toBeInTheDocument();
+    await userAction.click(screen.getByRole("button", { name: "Skip binding and continue exploring" }));
+    await userAction.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Default roles and SOP", { selector: "h3" });
+    expect(screen.getByText(/Use existing project “LoopForge 体验项目”/)).toBeInTheDocument();
+    expect(screen.queryByText(/Bind repo/)).toBeNull();
+    await userAction.click(screen.getByRole("button", { name: "Complete onboarding" }));
+    expect(await screen.findByText("Quick Onboarding completed")).toBeInTheDocument();
     expect(writeMock.mock.calls.some(([path]) => path === "/api/repositories")).toBe(false);
     apiMock.mockReset();
   });

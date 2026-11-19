@@ -23,7 +23,7 @@ export function reviewedOperation(draft, review = {}) {
     JSON.stringify(canonical(actual)) !==
       JSON.stringify(canonical(review.expected))
   )
-    throw Object.assign(Error("操作内容已更新，请重新核对后再确认。"), {
+    throw Object.assign(Error("Operation content has been updated. Please re-verify before confirming."), {
       draftChanged: true,
     });
   const result =
@@ -43,17 +43,17 @@ export function reviewedOperation(draft, review = {}) {
 }
 
 export function operationValidation(draft) {
-  if (!draft?.tool) return "缺少操作名称，无法执行。";
+  if (!draft?.tool) return "Missing operation name. Cannot execute.";
   if (draft.tool === "issues_import_tapd") {
     if (
       typeof draft.body?.projectId !== "string" ||
       !draft.body.projectId.trim()
     )
-      return "请先指定导入的目标项目。";
+      return "Choose a target project before importing.";
     if (typeof draft.body?.url !== "string" || !draft.body.url.trim())
-      return "缺少 TAPD 需求链接。";
+      return "Missing TAPD requirement link.";
     if (!repositoryIds(draft.body).length)
-      return "请至少选择一个代码仓库后再确认导入。";
+      return "Select at least one repository before confirming the import.";
   }
   return "";
 }
@@ -96,46 +96,46 @@ export function operationSummary(
   const sop = body.workflowId
     ? named("sop", body.workflowId)
     : draft.tool === "projects_save" && !existingProject
-      ? `${references.find((r) => r.type === "sop" && r.id === DEFAULT_PROJECT_WORKFLOW)?.name || "通用后端交付 SOP"}（默认）`
+      ? `${references.find((r) => r.type === "sop" && r.id === DEFAULT_PROJECT_WORKFLOW)?.name || "Backend delivery SOP"} (default)`
       : "";
   const fields = [
     [
-      "项目",
+      "Project",
       project ? projects.find((p) => p.id === project)?.name || project : "",
     ],
-    ["名称", body.name || body.title],
-    ["目标", draft.path?.id || body.id],
-    ["TAPD 链接", body.url],
+    ["Name", body.name || body.title],
+    ["Target", draft.path?.id || body.id],
+    ["TAPD Link", body.url],
     [
-      "代码仓库",
+      "Repositories",
       repositoryIds(body)
         .map((id) => named("repository", id))
-        .join("、"),
+        .join(", "),
     ],
     ["SOP", sop],
-    ["节点", body.nodeId],
-    ["说明", body.description || body.reason],
+    ["Step", body.nodeId],
+    ["Description", body.description || body.reason],
   ].filter(
     ([, value]) => value !== undefined && value !== null && value !== "",
   );
   const effect =
     {
       issues_import_tapd:
-        "从 TAPD 导入需求并关联所选仓库，导入后继续当前对话。",
-      issues_dispatch: "为这条需求派发 SOP，创建新的运行。",
-      runs_start: "启动一次新的 SOP 运行。",
-      runs_approve: "批准此节点，流程将继续执行后续节点。",
-      runs_reject: "退回此节点，流程将按 SOP 的退回路径继续。",
-      issues_clarification_save: "保存澄清结果，并回写需求的外部来源。",
+        "Import requirements from TAPD and associate them with the selected repositories. Continue the current conversation after import.",
+      issues_dispatch: "Dispatch an SOP for this requirement and create a new run.",
+      runs_start: "Start a new SOP run.",
+      runs_approve: "Approve this node. The process will continue to the subsequent nodes.",
+      runs_reject: "Reject this node. The process will continue along the SOP's rejection path.",
+      issues_clarification_save: "Save the clarification results and write back to the requirement's external source.",
       projects_save: existingProject
-        ? "修改这个项目的设置。"
-        : "新建一个独立项目，不归属当前对话所在的项目。",
-    }[draft.tool] || `${actionName(draft.tool)}，使用下方列出的目标与参数。`;
+        ? "Modify the settings for this project."
+        : "Create a separate project outside the current conversation’s project.",
+    }[draft.tool] || `${actionName(draft.tool)}, using the targets and parameters listed below.`;
   return { title: actionName(draft.tool), fields, effect };
 }
 export function operationError(value) {
   const text =
-    value instanceof Error ? value.message : String(value || "操作失败");
+    value instanceof Error ? value.message : String(value || "Operation failed");
   try {
     const data = JSON.parse(text);
     if (typeof data.error === "string") return data.error;

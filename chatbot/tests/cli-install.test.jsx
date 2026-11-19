@@ -36,8 +36,8 @@ test("installs the named CLI and asks to send again", async () => {
       onResult={done}
     />,
   );
-  expect(screen.getByText("安装在服务器上继续，关闭页面也不会中断。")).toBeInTheDocument();
-  const install = await screen.findByRole("button", { name: "安装 OpenCode" });
+  expect(screen.getByText("Installation continues on the server if you close this page.")).toBeInTheDocument();
+  const install = await screen.findByRole("button", { name: "Install OpenCode" });
   await waitFor(() => expect(install).toBeEnabled());
   await userEvent.click(install);
   expect(fetchMock).toHaveBeenCalledWith(
@@ -47,7 +47,7 @@ test("installs the named CLI and asks to send again", async () => {
   expect(JSON.parse(fetchMock.mock.calls.find((call) => call[1]?.method === "POST")[1].body)).toEqual({
     engine: "opencode",
   });
-  expect(done).toHaveBeenCalledWith("OpenCode 已安装，请重新发送。");
+  expect(done).toHaveBeenCalledWith("OpenCode Installed. Send the message again.");
 });
 
 test("stays on automatic install when a reload finds the download still running", async () => {
@@ -58,7 +58,7 @@ test("stays on automatic install when a reload finds the download still running"
   render(
     <CLIInstallAction text="Pi（pi）没有安装在当前服务器上。安装后即可在对话里使用。" />,
   );
-  expect(await screen.findByRole("button", { name: "自动安装" })).toBeDisabled();
+  expect(await screen.findByRole("button", { name: "Installing automatically" })).toBeDisabled();
 });
 
 test("a reload shows automatic install before the status request returns", () => {
@@ -67,7 +67,7 @@ test("a reload shows automatic install before the status request returns", () =>
   render(
     <CLIInstallAction text="OpenCode（opencode）没有安装在当前服务器上。安装后即可在对话里使用。" />,
   );
-  expect(screen.getByRole("button", { name: "自动安装" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Installing automatically" })).toBeDisabled();
 });
 
 test("a finished install replaces the generation failure", async () => {
@@ -82,7 +82,7 @@ test("a finished install replaces the generation failure", async () => {
       onResult={done}
     />,
   );
-  await waitFor(() => expect(done).toHaveBeenCalledWith("OpenCode 已安装，请重新发送。"));
+  await waitFor(() => expect(done).toHaveBeenCalledWith("OpenCode Installed. Send the message again."));
 });
 
 test("keeps the install button when the download fails", async () => {
@@ -97,9 +97,9 @@ test("keeps the install button when the download fails", async () => {
   render(
     <CLIInstallAction text="Pi（pi）没有安装在当前服务器上。安装后即可在对话里使用。" />,
   );
-  const install = await screen.findByRole("button", { name: "安装 Pi" });
+  const install = await screen.findByRole("button", { name: "Install Pi" });
   await waitFor(() => expect(install).toBeEnabled());
   await userEvent.click(install);
   expect(await screen.findByText("安装失败：registry unreachable")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "安装 Pi" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Install Pi" })).toBeEnabled();
 });

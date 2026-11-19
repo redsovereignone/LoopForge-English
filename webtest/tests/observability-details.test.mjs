@@ -241,7 +241,7 @@ test('conversation code changes have their own group, close the Token ring, and 
   assert.equal(app.evaluate(`obsOwnerRows()[0].delivered`), 1);
   const report = app.evaluate(`buildObsReportHTML()`);
   assert.match(report, /对话直接交付/);
-  assert.match(report, /1 个需求/);
+  assert.match(report, /1 requirements?/);
   // Without conversation data the group is not shown.
   app.evaluate(`state.analytics=${JSON.stringify(analytics)};state.obsTab='overview';renderObservability()`);
   assert.doesNotMatch(app.document.querySelector('#obsBody').textContent, /不走 SOP/);
@@ -271,9 +271,9 @@ test('conversation activity cards show counts, collaboration share, periods with
   assert.match(app.evaluate('obsActivityUsageCard(state.analytics.activity,false).value'), /6\.0k/);
   assert.match(app.evaluate('obsActivityUsageCard(state.analytics.activity,true).value'), /4\.5k/);
   const report = app.evaluate('buildObsReportHTML()');
-  assert.match(report, /会话数|创建需求|需求 SOP|多人协作会话/);
+  assert.match(report, /Conversations|Requirements created|Requirement SOPs|Shared conversations/);
   assert.match(report, /66\.7%/);
-  assert.match(report, /协作会话 Token/);
+  assert.match(report, /Shared conversation tokens/);
   assert.match(report, /4\.5k/);
   app.evaluate(`state.obsTrendGrain='month';state.obsPeriodKey='';renderObservability()`);
   assert.equal(app.evaluate('obsPeriodKey()'), '2026-10', 'activity-only periods can be selected without run data');

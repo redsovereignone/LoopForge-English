@@ -12,7 +12,7 @@ function origin() {
 async function fetchJSON(path) {
   const res = await fetch(`${origin()}${path}`, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
   const body = await res.json().catch(() => ({}));
-  if (res.status === 401) throw vscode.FileSystemError.Unavailable('请先登录平台后再打开工作区');
+  if (res.status === 401) throw vscode.FileSystemError.Unavailable("Please log in to the platform before opening the workspace");
   if (res.status === 404) throw vscode.FileSystemError.FileNotFound();
   if (!res.ok) throw vscode.FileSystemError.Unavailable(body.error || `HTTP ${res.status}`);
   return body;
@@ -139,7 +139,7 @@ class AgentFlowFS {
     this._pending = (async () => {
       const info = await this._api(`/api/runs/${encodeURIComponent(this.runId)}/workspace`);
       if (!info.available) {
-        throw workspaceGone(vscode.FileSystemError.Unavailable(info.reason || '工作区不可用'));
+        throw workspaceGone(vscode.FileSystemError.Unavailable(info.reason || "Workspace unavailable"));
       }
       const tree = await this._api(`/api/runs/${encodeURIComponent(this.runId)}/workspace/tree`);
       this._tree = Array.isArray(tree.entries) ? tree.entries : [];
@@ -214,10 +214,10 @@ class AgentFlowFS {
   async writeFile(uri,content,options) {
     if(uriQuery(uri).get('ref'))throw vscode.FileSystemError.NoPermissions();
     const path=uriPath(uri),expected=this._versions.get(path);
-    if(!expected&&!options?.create)throw vscode.FileSystemError.Unavailable('请先读取文件后保存');
+    if(!expected&&!options?.create)throw vscode.FileSystemError.Unavailable("Please read the file before saving");
     const res=await fetch(`${origin()}/api/runs/${encodeURIComponent(this.runId)}/workspace/file`,{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,content:new TextDecoder().decode(content),expectedSha256:expected||"missing"})});
     const body=await res.json().catch(()=>({}));
-    if(!res.ok)throw vscode.FileSystemError.Unavailable(body.error||'保存失败');
+    if(!res.ok)throw vscode.FileSystemError.Unavailable(body.error||"Save failed");
     this._versions.set(path,body.sha256);this.invalidate();
     this._emitter.fire([{type:vscode.FileChangeType.Changed,uri}]);
   }
@@ -531,7 +531,7 @@ function applyRepoChanges(control, runId, changes) {
 async function refreshWorkspace(runId, fs, baseFs, controls, decorations, options = {}) {
   const info = await fetchJSON(`/api/runs/${encodeURIComponent(runId)}/workspace`);
   if (!info.available) {
-    throw workspaceGone(new Error(info.reason || '工作区不可用'));
+    throw workspaceGone(new Error(info.reason || "Workspace unavailable"));
   }
   const changes = Array.isArray(info.changes) ? info.changes : [];
   const force = !!options.force;
@@ -603,7 +603,7 @@ function registerWorkspaceTerminal(context,runId){
     const write=new vscode.EventEmitter(),exit=new vscode.EventEmitter(),decoder=new TextDecoder();
     async function request(operation,extra){
       for(let attempt=0;;attempt++){
-        if(closed&&operation!=='close')throw new Error('终端已关闭');
+        if(closed&&operation!=='close')throw new Error("Terminal closed");
         const res=await fetch(`${origin()}/api/runs/${encodeURIComponent(runId)}/workspace/terminal`,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,id,...extra})});
         const body=await res.json().catch(()=>({}));
         if(res.ok)return body;
@@ -613,7 +613,7 @@ function registerWorkspaceTerminal(context,runId){
           await new Promise(resolve=>setTimeout(resolve,Math.min(1000,125*2**attempt)));
           continue;
         }
-        throw new Error(body.error||`终端连接失败（HTTP ${res.status}）`);
+        throw new Error(body.error||`Terminal connection failed (HTTP ${res.status}）`);
       }
     }
     function rpc(operation,extra={}){
@@ -625,8 +625,8 @@ function registerWorkspaceTerminal(context,runId){
     function fail(err){
       if(closed)return;
       closed=true;clearTimeout(timer);const message=err?.message||String(err);
-      write.fire('\r\n[终端连接失败] '+message+'\r\n请关闭此终端后重新打开。\r\n');
-      vscode.window.showErrorMessage('任务终端：'+message);
+      write.fire("\r\n[Terminal connection failed] "+message+"\r\nClose and reopen this terminal.\r\n");
+      vscode.window.showErrorMessage("Task terminal:"+message);
       closeRemote();
       // This was an API/connection error, not a shell exit. Keep its real
       // reason visible instead of replacing it with VS Code's exit-code toast.
@@ -645,7 +645,7 @@ function registerWorkspaceTerminal(context,runId){
       close:()=>{closed=true;clearTimeout(timer);closeRemote()},
       handleInput:data=>{if(!id||closed)return;inputChain=inputChain.then(async()=>{for(let i=0;i<data.length;i+=4096)await rpc('input',{data:data.slice(i,i+4096)})}).catch(fail)},
       setDimensions:dimensions=>{if(id&&!closed)rpc('resize',{cols:dimensions.columns,rows:dimensions.rows}).catch(fail)}
-    };const term=vscode.window.createTerminal({name:'任务终端',pty});context.subscriptions.push(term,write,exit);term.show();
+    };const term=vscode.window.createTerminal({name:"Task terminal",pty});context.subscriptions.push(term,write,exit);term.show();
   }));
 }
 
@@ -653,7 +653,7 @@ function activate(context) {
   const folder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
   const runId = folder && folder.uri.authority ? decodeURIComponent(folder.uri.authority) : '';
   if (!runId) {
-    vscode.window.showErrorMessage('缺少 Run ID，无法打开 SOP 工作区');
+    vscode.window.showErrorMessage("Missing Run ID, unable to open SOP workspace");
     return;
   }
   registerWorkspaceTerminal(context,runId);
@@ -666,7 +666,7 @@ function activate(context) {
       await refreshWorkspace(runId, fs, baseFs, controls, decorations, { force: true });
     } catch (err) {
       console.error('[agentflow] refresh failed', err);
-      vscode.window.showErrorMessage('刷新工作区失败');
+      vscode.window.showErrorMessage("Failed to refresh workspace");
     }
   }));
   for (const name of (names.length ? names : ['workspace'])) {

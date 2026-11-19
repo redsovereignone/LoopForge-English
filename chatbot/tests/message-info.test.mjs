@@ -27,11 +27,11 @@ test("new replies show model, elapsed time and token totals", () => {
   assert.deepEqual(
     info.rows.map((r) => [r.label, r.value]),
     [
-      ["时间", "2026-10-31 04:04"],
-      ["Agent", "主 Bot"],
-      ["编码工具", "CodeBuddy"],
-      ["模型", "claude-opus-4-5"],
-      ["用时", "1分钟27秒"],
+      ["Time", "2026-10-31 04:04"],
+      ["Agent", "Main Bot"],
+      ["Coding Tool", "CodeBuddy"],
+      ["Model", "claude-opus-4-5"],
+      ["Duration", "1min27s"],
     ],
   );
   assert.equal(info.total, 254233);
@@ -39,10 +39,10 @@ test("new replies show model, elapsed time and token totals", () => {
   assert.deepEqual(
     info.tokens.map((p) => [p.label, p.text, p.zero]),
     [
-      ["输入", "4", false],
-      ["输出", "493", false],
-      ["缓存读", "253,736", false],
-      ["缓存写", "0", true],
+      ["Input", "4", false],
+      ["Output", "493", false],
+      ["Cache read", "253,736", false],
+      ["Cache write", "0", true],
     ],
   );
 });
@@ -70,9 +70,9 @@ test("short replies and malformed values stay readable", () => {
     speakerName: " ",
     usage: { inputTokens: "12", outputTokens: -3 },
   });
-  assert.equal(row(info, "elapsed").value, "不到1秒");
+  assert.equal(row(info, "elapsed").value, "Less than 1 second");
   assert.equal(row(info, "model").value, NOT_REPORTED);
-  assert.equal(row(info, "agent").value, "主 Bot");
+  assert.equal(row(info, "agent").value, "Main Bot");
   assert.equal(info.total, 12);
   assert.equal(fullTime("not a date"), NOT_REPORTED);
   assert.equal(formatTokens(1234567), "1,234,567");
@@ -80,7 +80,7 @@ test("short replies and malformed values stay readable", () => {
     messageInfo()
       .rows.map((r) => r.value)
       .slice(1, 3),
-    ["主 Bot", "CodeBuddy"],
+    ["Main Bot", "CodeBuddy"],
   );
 });
 

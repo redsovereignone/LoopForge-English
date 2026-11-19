@@ -1,3 +1,7 @@
+# LoopForge English
+
+An English-language fork of [Tencent/LoopForge](https://github.com/Tencent/LoopForge) for self-hosted coding-agent workflows.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-en-dark.svg">
@@ -6,10 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Tencent/LoopForge/actions/workflows/platform.yml"><img src="https://img.shields.io/github/actions/workflow/status/Tencent/LoopForge/platform.yml?branch=main&label=CI&style=flat-square" alt="CI"></a>
+  <a href="https://github.com/redsovereignone/LoopForge-English/actions/workflows/platform.yml"><img src="https://img.shields.io/github/actions/workflow/status/redsovereignone/LoopForge-English/platform.yml?branch=main&label=CI&style=flat-square" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-7b61ff?style=flat-square" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/self--hosted-Docker-526ce8?style=flat-square&logo=docker&logoColor=white" alt="Self-hosted with Docker">
-  <a href="https://github.com/Tencent/LoopForge/stargazers"><img src="https://img.shields.io/github/stars/Tencent/LoopForge?style=flat-square&color=f59e0b" alt="GitHub stars"></a>
+  <a href="https://github.com/redsovereignone/LoopForge-English/stargazers"><img src="https://img.shields.io/github/stars/redsovereignone/LoopForge-English?style=flat-square&color=f59e0b" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
@@ -17,7 +21,7 @@
 </p>
 
 <p align="center">
-  <b>English</b> · <a href="README.zh-CN.md">简体中文</a>
+  <b>English edition</b>
 </p>
 
 <p align="center">
@@ -70,25 +74,17 @@ Ask a coding agent to "fix this bug" and the result depends on that run. It migh
 
 ## Quick start
 
-Install **Git** and clone the repository first. The installer checks Docker, Compose, Python 3 and curl and offers to install missing components. Python/curl installation supports apt, dnf and yum on Linux; the Compose plugin supports x86_64/arm64 and verifies the official release SHA-256. macOS needs a working Python 3 and Docker Desktop; Homebrew can install missing components. Ordinary Linux users are supported through Docker group access or sudo. Set `LOOPFORGE_YES=1` to accept installation prompts. Package and image downloads require internet access.
+Install Git, Docker with Buildx, and Docker Compose. The first start builds the English platform and sandbox image from this checkout. It creates a MySQL database and installs the English starter workflows.
 
 ```bash
-git clone https://github.com/Tencent/LoopForge.git
-cd LoopForge
-./start.sh
+git clone https://github.com/redsovereignone/LoopForge-English.git
+cd LoopForge-English
+LOOPFORGE_BIND=127.0.0.1 ./start.sh
 ```
 
-`./start.sh` pulls the GHCR release image pinned in `compose.yaml` without building locally (`bash scripts/install.sh` does the same). It creates the MySQL and platform services, generates configuration and session secrets, and installs the built-in sandboxes, starter SOPs and welcome project. Host Go and Node.js installations are not required. Configure model API keys and GitHub authorization after startup. Use `./start.sh logs`, `stop`, `restart` or `pull` to manage it, and `./start.sh dev` to build the checkout from source.
+Open [LoopForge on this machine](http://127.0.0.1:8090) and create the first administrator account. Configure a model credential in personal settings to use chat. The script-and-approval demo works without one.
 
-If downloads from `ghcr.io` stall, set `MIRROR` to a registry host that can stand in for `ghcr.io`. `./start.sh` pulls from that host and tags the image back to the name pinned in `compose.yaml`. Setting `MIRROR` trusts that host, because the download is tagged with the official name. The GitHub Release records the digest; `docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/tencent/loopforge:<pin>` should show the same digest after `@`. Without `MIRROR`, `./start.sh` still pulls `ghcr.io` directly, and `compose.yaml` stays unchanged. Upgrade with the same variable and `./start.sh pull`. [ghcr.nju.edu.cn](https://doc.nju.edu.cn/books/e1654/page/ghcr) is one such host. A Docker `registry-mirrors` entry such as `https://docker.nju.edu.cn` only accelerates Docker Hub and is not a value for `MIRROR`.
-
-```bash
-MIRROR=ghcr.nju.edu.cn ./start.sh
-```
-
-Open the address printed by the installer and create your account; the first one becomes the administrator. The service listens on `0.0.0.0:8090` by default. On a cloud host, the installer reads the public IP from the provider's metadata service and prints it; allow the port in your security group, or put an HTTPS reverse proxy in front. Restrict access to your own IP until the administrator account exists. The home page's quick-access guide walks you through adding a model key, connecting a repository and choosing an SOP.
-
-For GitLab, Gitea, Gogs and other Git hosts, [set up Git SSH](docs/deployment.md#git-repositories-over-ssh) to check out and push branches with a personal key. PR/MR and Issue automation requires a hosting API token or a separately configured MCP.
+To update, run `git pull --ff-only` and `./start.sh` in the checkout. Run `./start.sh logs` to follow the logs or `./start.sh stop` to stop the services. The database and workspace data persist between builds. When upgrading an upstream installation, keep its existing Compose project name, data directory and volumes.
 
 ### Try it without an API key
 
@@ -182,7 +178,7 @@ Each node declares its artifacts and dependencies, and the engine starts each st
 | **AI scheduled tasks** | Recurring agent tasks with full workspace, SOP and MCP access; a shared market of versioned, parameterized task templates; automatic SOP dispatch for new requirements. |
 | **Insights & cost** | Engineering metrics, business-domain reports with static HTML/SVG export, and token/cost accounting for SOPs and conversations at public list prices. |
 | **Execution environments** | Platform workers, Docker sandboxes, or a connected local execution machine using your own tools and repositories. |
-| **Team-ready** | Password accounts, projects and members, light/dark/system themes, an OpenAPI-described HTTP and MCP API. Management pages are in English and Chinese; the chat workbench is Chinese for now. |
+| **Team-ready** | Password accounts, projects and members, light/dark/system themes, an OpenAPI-described HTTP and MCP API. The console and chat workbench use English. |
 
 <p align="center">
   <img src="docs/assets/readme/sops-en.svg" alt="The Templates page listing the four built-in SOPs: backend delivery, frontend delivery, product proposal and bug fix" width="100%">

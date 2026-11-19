@@ -1,4 +1,3 @@
-document.getElementById('loginLang').onclick = () => window.lfSetLang(window.lfLang() === 'en' ? 'zh' : 'en');
 document.getElementById('loginTheme').onclick = () => {
   const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
   document.documentElement.dataset.theme = next;
@@ -52,5 +51,5 @@ $('loginForm').onsubmit = async event => {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || t('操作失败', 'Request failed'));
     location.replace('/');
-  } catch (err) { error.textContent = err.message; button.disabled = false; }
+  } catch (err) { error.textContent = window.lfEnglishMessage(err.message); button.disabled = false; }
 };

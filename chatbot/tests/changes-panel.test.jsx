@@ -44,21 +44,21 @@ test("lists changed files with status and line counts", () => {
   render(<ChangesPanel changes={changes} />);
   expect(screen.getByText("approvals.js")).toBeInTheDocument();
   expect(screen.getAllByText("web/app")).toHaveLength(2);
-  expect(screen.getByText("个文件")).toBeInTheDocument();
+  expect(screen.getByText("files")).toBeInTheDocument();
   expect(screen.getAllByText("+2").length).toBeGreaterThan(0);
   expect(screen.getAllByText("−1").length).toBeGreaterThan(0);
-  expect(screen.getByText("未跟踪")).toBeInTheDocument();
+  expect(screen.getByText("Untracked")).toBeInTheDocument();
 });
 
 test("opens a file diff and returns to the list", () => {
   const changes = readyChanges();
   render(<ChangesPanel changes={changes} />);
   fireEvent.click(screen.getByText("approvals.js"));
-  expect(screen.getByText("返回改动列表")).toBeInTheDocument();
+  expect(screen.getByText("Back to changes")).toBeInTheDocument();
   expect(screen.getByText("@@ -10,4 +10,5 @@ render()")).toBeInTheDocument();
   expect(screen.getByText("render(state, { batch: true });")).toBeInTheDocument();
   expect(screen.getByText("render(state);")).toBeInTheDocument();
-  fireEvent.click(screen.getByText("返回改动列表"));
+  fireEvent.click(screen.getByText("Back to changes"));
   expect(screen.getByText("new.js")).toBeInTheDocument();
 });
 
@@ -79,7 +79,7 @@ test("loads untracked file content on demand", async () => {
   });
   render(<ChangesPanel changes={changes} />);
   fireEvent.click(screen.getByText("new.js"));
-  expect(await screen.findByText("该文件尚未纳入 git，下面是它的完整内容。")).toBeInTheDocument();
+  expect(await screen.findByText("This file is untracked. Its full contents are shown below.")).toBeInTheDocument();
   expect(changes.loadFile).toHaveBeenCalledTimes(1);
 });
 
@@ -87,8 +87,8 @@ test("shows the empty state and the workspace reason", () => {
   const { rerender } = render(
     <ChangesPanel changes={readyChanges({ files: [], additions: 0, deletions: 0 })} />,
   );
-  expect(screen.getByText("工作区没有未提交改动。")).toBeInTheDocument();
-  expect(screen.getByText("已提交或已推送的改动不计入这里。")).toBeInTheDocument();
+  expect(screen.getByText("No uncommitted changes.")).toBeInTheDocument();
+  expect(screen.getByText("Committed or pushed changes are excluded.")).toBeInTheDocument();
   rerender(
     <ChangesPanel
       changes={readyChanges({
@@ -127,7 +127,7 @@ test("empty state points at the work branch on the code host", () => {
   );
   expect(screen.getByText("feature/fix-20261102-1912")).toBeInTheDocument();
   expect(screen.getByText("main")).toBeInTheDocument();
-  const link = screen.getByRole("link", { name: /在代码仓库查看这个分支的改动/ });
+  const link = screen.getByRole("link", { name: /View branch changes in the repository/ });
   expect(link).toHaveAttribute(
     "href",
     "https://github.com/example/agent-flow/compare/main...feature/fix-20261102-1912",
@@ -169,7 +169,7 @@ test("a reclaimed workspace still points at the work branch on the code host", (
     />,
   );
   expect(screen.getByText("工作区已回收；有保存的快照时可按需恢复")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /在代码仓库查看这个分支的改动/ })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: /View branch changes in the repository/ })).toHaveAttribute(
     "href",
     "https://github.com/example/agent-flow/compare/main...feature/fix-1",
   );

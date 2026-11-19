@@ -79,9 +79,9 @@ describe("element picking in the native preview", () => {
       fireEvent.load(frame);
     });
     // The button sits at the end of the address bar.
-    expect(screen.getByRole("button", { name: "标记元素" }).closest(".agent-browser-address")).not.toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "标记元素" }));
-    expect(screen.getByRole("button", { name: "标记元素" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Select element" }).closest(".agent-browser-address")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Select element" }));
+    expect(screen.getByRole("button", { name: "Select element" })).toHaveAttribute("aria-pressed", "true");
     expect(doc.querySelector("style[data-af-pick]")).not.toBeNull();
     const button = doc.querySelector("button");
     const pageClick = vi.fn();
@@ -96,27 +96,27 @@ describe("element picking in the native preview", () => {
     // The page never sees clicks made while picking.
     expect(pageClick).not.toHaveBeenCalled();
     expect(doc.querySelector("style[data-af-pick]")).toBeNull();
-    expect(screen.getByRole("dialog", { name: "选中的元素" })).toHaveTextContent("button.primary 「提交」");
-    fireEvent.click(screen.getByText("加入对话框"));
+    expect(screen.getByRole("dialog", { name: "Selected element" })).toHaveTextContent("button.primary 「提交」");
+    fireEvent.click(screen.getByText("Add to conversation"));
     expect(add).toHaveBeenCalledTimes(1);
     expect(add.mock.calls[0][0]).toMatchObject({
       type: "element",
       name: "button.primary 「提交」",
       element: { tag: "button", selector: "button.primary", text: "提交" },
     });
-    expect(screen.queryByRole("dialog", { name: "选中的元素" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "Selected element" })).toBeNull();
 
     // Escape leaves picking mode.
-    fireEvent.click(screen.getByRole("button", { name: "标记元素" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select element" }));
     act(() => {
       doc.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     });
-    expect(screen.getByRole("button", { name: "标记元素" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Select element" })).toHaveAttribute("aria-pressed", "false");
   });
 
   test("offers picking only when the composer can take elements", () => {
     render(<AgentBrowser runId="run-8" request={{ id: "p2", url: "http://localhost:5173/" }} />);
-    expect(screen.queryByRole("button", { name: "标记元素" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Select element" })).toBeNull();
   });
 });
 
@@ -174,8 +174,8 @@ describe("element picking on the Agent browser screencast", () => {
     stage.getBoundingClientRect = rect(0, 0, 640, 500);
     img.getBoundingClientRect = rect(0, 10, 640, 400);
 
-    expect(screen.getByRole("button", { name: "标记元素" }).closest(".agent-browser-address")).not.toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "标记元素" }));
+    expect(screen.getByRole("button", { name: "Select element" }).closest(".agent-browser-address")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Select element" }));
     const capture = screen.getByTestId("agent-browser-pick-capture");
     const before = socket.sent.length;
     fireEvent.pointerMove(capture, { clientX: 160, clientY: 110 });
@@ -189,21 +189,21 @@ describe("element picking on the Agent browser screencast", () => {
     expect(outline.querySelector(".agent-browser-pick-size")).toHaveTextContent("100×20");
 
     fireEvent.click(capture, { clientX: 160, clientY: 110 });
-    await waitFor(() => expect(screen.getByRole("button", { name: /加入对话框/ })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: /Add to conversation/ })).toBeEnabled());
     expect(inspections.at(-1)).toMatchObject({ detail: true });
     // Hovering and picking never reach the page as input.
     expect(socket.sent.slice(before).filter((m) => m.operation === "input")).toHaveLength(0);
-    fireEvent.click(screen.getByRole("button", { name: /加入对话框/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Add to conversation/ }));
     expect(add).toHaveBeenCalledWith(
       expect.objectContaining({ type: "element", name: "button#save 「保存」", element: expect.objectContaining({ selector: "#save" }) }),
     );
-    expect(screen.queryByRole("dialog", { name: "选中的元素" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "Selected element" })).toBeNull();
 
     // Escape leaves picking before the screencast forwards it to the page.
-    fireEvent.click(screen.getByRole("button", { name: "标记元素" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select element" }));
     const sent = socket.sent.length;
     fireEvent.keyDown(container.querySelector(".agent-browser-ime"), { key: "Escape", code: "Escape", keyCode: 27 });
-    expect(screen.getByRole("button", { name: "标记元素" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Select element" })).toHaveAttribute("aria-pressed", "false");
     expect(socket.sent).toHaveLength(sent);
   });
 

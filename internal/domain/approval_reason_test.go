@@ -16,7 +16,7 @@ func TestApprovalWaitReason(t *testing.T) {
 		Edges: []WorkflowEdge{{Source: "impl", Target: "gate"}, {Source: "test", Target: "gate"}, {Source: "gate", Target: "release"}},
 	}}
 	got := ApprovalWaitReason(run, "gate")
-	want := "SOP「通用后端交付 SOP」在这一步设置了人工门禁：「代码实现」、「测试」已完成，需要有权限的成员检查结果后确认，确认后继续「发布」；不通过可打回到「代码实现」重做。确认要求：检查测试报告和 MR 改动范围"
+	want := "SOP “通用后端交付 SOP” requires approval at this step. Review the results from “代码实现”, “测试”. Approval continues to “发布”. Rejection returns to “代码实现” for rework. Approval criteria: 检查测试报告和 MR 改动范围"
 	if got != want {
 		t.Fatalf("got  %s\nwant %s", got, want)
 	}
@@ -24,7 +24,7 @@ func TestApprovalWaitReason(t *testing.T) {
 	run.WorkflowSnapshot.Edges = nil
 	run.WorkflowSnapshot.Nodes[2].TaskPrompt = ""
 	run.WorkflowSnapshot.Nodes[2].RejectTo = ""
-	if got := ApprovalWaitReason(run, "gate"); !strings.Contains(got, "「测试」已完成") || !strings.Contains(got, "确认后继续「发布」") || strings.Contains(got, "确认要求") {
+	if got := ApprovalWaitReason(run, "gate"); !strings.Contains(got, "Review the results from “测试”") || !strings.Contains(got, "Approval continues to “发布”") || strings.Contains(got, "Approval criteria") {
 		t.Fatalf("list-order fallback: %s", got)
 	}
 	if ApprovalWaitReason(run, "missing") != "" {
@@ -36,7 +36,7 @@ func TestApprovalWaitReasonFallbacks(t *testing.T) {
 	run := Run{WorkflowSnapshot: WorkflowDefinition{
 		Nodes: []WorkflowNode{{ID: "gate", Type: "approval"}},
 	}}
-	want := "该 SOP在这一步设置了人工门禁，需要有权限的成员确认，确认后运行结束。"
+	want := "This SOP requires approval at this step. Approval completes the run."
 	if got := ApprovalWaitReason(run, "gate"); got != want {
 		t.Fatalf("got  %s\nwant %s", got, want)
 	}
@@ -45,7 +45,7 @@ func TestApprovalWaitReasonFallbacks(t *testing.T) {
 		Name:  "  ",
 		Nodes: []WorkflowNode{{ID: "gate", RejectTo: "ghost"}, {ID: "next", Name: "  "}},
 	}
-	want = "该 SOP在这一步设置了人工门禁，需要有权限的成员确认，确认后继续「next」；不通过可打回到「ghost」重做。"
+	want = "This SOP requires approval at this step. Approval continues to “next”. Rejection returns to “ghost” for rework."
 	if got := ApprovalWaitReason(run, "gate"); got != want {
 		t.Fatalf("got  %s\nwant %s", got, want)
 	}
@@ -57,10 +57,10 @@ func TestApprovalNeighborsIgnoresEmptyEdgeEnds(t *testing.T) {
 		Edges: []WorkflowEdge{{Source: "", Target: "gate"}, {Source: "gate", Target: ""}, {Source: "a", Target: "gate"}},
 	}
 	up, down := approvalNeighbors(wf, 1)
-	if strings.Join(up, ",") != "「甲」" || len(down) != 0 {
+	if strings.Join(up, ",") != "“甲”" || len(down) != 0 {
 		t.Fatalf("up=%v down=%v", up, down)
 	}
-	if got := approvalSOPLabel(" 交付 "); got != "SOP「交付」" {
+	if got := approvalSOPLabel(" 交付 "); got != "SOP “交付”" {
 		t.Fatalf("sop label: %s", got)
 	}
 }

@@ -95,8 +95,8 @@ test("changeState reads porcelain index and worktree columns", () => {
   assert.equal(changeState({ index: " ", worktree: "D" }).code, "D");
   assert.equal(changeState({ index: "R", worktree: " " }).code, "R");
   assert.equal(changeState({ index: "U", worktree: "U" }).code, "U");
-  assert.equal(statusLabel("A"), "新增");
-  assert.equal(statusLabel("Z"), "修改");
+  assert.equal(statusLabel("A"), "Added");
+  assert.equal(statusLabel("Z"), "Edit");
 });
 
 test("pathParts splits the directory from the file name", () => {

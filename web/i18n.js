@@ -1,28 +1,21 @@
-// Runtime UI translation. The app renders Chinese copy directly; in English
-// mode this layer rewrites text nodes and a few attributes as they appear,
-// using the zh→en dictionary in i18n-en.js. Chinese mode is a no-op.
+// Render the legacy console in English, including views added after navigation.
 (() => {
-  const root = document.documentElement;
-  const lang = root.dataset.lang === 'en' ? 'en' : 'zh';
-  window.lfLang = () => lang;
-  window.lfSetLang = next => {
-    localStorage.setItem('loopforge.lang', next === 'en' ? 'en' : 'zh');
-    location.reload();
-  };
-  window.lfT = (zh, en) => (lang === 'en' ? en : zh);
-  if (lang !== 'en') return;
+  window.lfLang = () => 'en';
+  window.lfT = (source, english) => english ?? source;
 
   const dict = window.LF_I18N_EN || {};
+  const extra = window.LF_I18N_EXTRA || {};
   const HAN = /[\u3400-\u9fff\u300c\u300d\uff0c\u3002\uff1a\uff08\uff09\u3001\uff1b\uff01\uff1f]/;
   const SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'CODE', 'PRE', 'NOSCRIPT']);
-  const SKIP_SEL = '[data-i18n-skip],.monaco-editor,.xterm,.log-line,.run-log,.markdown-body,[contenteditable="true"]';
-  // User-authored text only gets whole-string dictionary hits, never fragment
-  // rewrites, so a sentence typed by a person is not turned into mixed prose.
-  const DATA_SEL = '[data-i18n-data],.ai-user-bubble,.ai-think-body,.collab-process-body,.collab-list-item,.issue-title-cell b,#issueDetailTitle,.detail-desc,.comment-row p';
+  const SKIP_SEL = '[data-i18n-skip],.monaco-editor,.xterm,.log-line,.run-log,.markdown-body,[contenteditable="true"],[data-i18n-data],.ai-user-bubble,.issue-title-cell b,#issueDetailTitle,.detail-desc,.comment-row p';
+  // Mixed activity rows may contain platform labels and free-form text.
+  const DATA_SEL = '.ai-think-body,.collab-process-body,.collab-list-item';
   const ATTRS = ['placeholder', 'title', 'aria-label', 'data-tip', 'data-tooltip'];
   const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const fragments = Object.keys(dict).filter(k => k.length > 1).sort((a, b) => b.length - a.length);
   const fragmentRE = fragments.length ? new RegExp('(?<![\\u3400-\\u9fff])(?:' + fragments.map(escape).join('|') + ')(?![\\u3400-\\u9fff])', 'g') : null;
+  const additions = Object.keys(extra).filter(k => k.length > 1).sort((a, b) => b.length - a.length);
+  const extraFragments = additions.length ? new RegExp(additions.map(escape).join('|'), 'g') : null;
   const sentences = fragments.filter(k => k.length >= 6 && HAN.test(k));
   const sentenceRE = sentences.length ? new RegExp(sentences.map(escape).join('|'), 'g') : null;
   const punct = [[/，/g, ', '], [/。/g, '. '], [/：/g, ': '], [/；/g, '; '], [/、/g, ', '], [/！/g, '! '], [/？/g, '? '], [/（/g, ' ('], [/）/g, ') '], [/「|」/g, '"'], [/『|』/g, '"']];
@@ -57,14 +50,19 @@
     if (!text || !HAN.test(text)) return text;
     const hit = cache.get(text);
     if (hit !== undefined) return hit;
+    const diagnostic = window.lfEnglishMessage?.(text);
+    if (diagnostic !== undefined && diagnostic !== text) return diagnostic;
     const trimmed = text.trim();
     let out;
     if (Object.prototype.hasOwnProperty.call(dict, trimmed)) {
       out = text.replace(trimmed, dict[trimmed]);
+    } else if (Object.hasOwn(extra, trimmed)) {
+      out = text.replace(trimmed, () => extra[trimmed]);
     } else {
       out = fragmentRE ? text.replace(fragmentRE, m => dict[m]) : text;
       if (sentenceRE && HAN.test(out)) out = out.replace(sentenceRE, m => dict[m]);
       for (const [re, rep] of patterns) out = out.replace(re, rep);
+      if (extraFragments && /[\u3400-\u9fff]/.test(out)) out = out.replace(extraFragments, m => extra[m]);
     }
     if (out !== text) {
       for (const [re, rep] of punct) out = out.replace(re, rep);

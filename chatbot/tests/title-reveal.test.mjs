@@ -24,8 +24,8 @@ test("titles split by code point so emoji and full-width marks stay whole and sp
 });
 
 test("an empty title reveals the placeholder", () => {
-  assert.equal(titleRevealTiming("").chars.join(""), "新对话");
-  assert.equal(titleRevealTiming(undefined).chars.join(""), "新对话");
+  assert.equal(titleRevealTiming("").chars.join(""), "New chat");
+  assert.equal(titleRevealTiming(undefined).chars.join(""), "New chat");
   assert.equal(titleRevealTiming("一").total, 260);
 });
 

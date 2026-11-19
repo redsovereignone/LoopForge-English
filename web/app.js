@@ -1041,7 +1041,6 @@ function bind(){
   };
   $$('.canvas-view-toggle [data-flow-view]').forEach(btn=>btn.onclick=()=>setFlowView(btn.dataset.flowView));
   const refreshRunnersBtn=$('#refreshRunners');if(refreshRunnersBtn)refreshRunnersBtn.onclick=()=>refreshRunners();
-  $('#langToggle').onclick=()=>window.lfSetLang(window.lfLang()==='en'?'zh':'en');
   $('#themeToggle').onclick=toggleTheme;renderThemeToggle();
   const profileWrap = $('#userProfileWrap');
   const userBadge = $('#userBadge');

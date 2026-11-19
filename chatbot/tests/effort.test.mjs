@@ -22,9 +22,9 @@ test("effort levels none, minimal and ultra are offered when the model lists the
 test("models with a thinking switch show default, off and on", () => {
   const model = { efforts: ["none", "thinking"] };
   assert.deepEqual(effortOptions(model).map(({ id, label }) => [id, label]), [
-    ["", "默认"],
-    ["none", "关闭"],
-    ["thinking", "开启"],
+    ["", "Default"],
+    ["none", "Close"],
+    ["thinking", "Enable"],
   ]);
   assert.equal(modelEffort(model, "thinking"), "thinking");
 });

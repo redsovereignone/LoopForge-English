@@ -159,7 +159,7 @@ function assetSkillLatest(src){return typeof skillhubLatestFor==='function'?skil
 function assetSkillSourceRowsHTML(a){
   const src=assetSkillSource(a);if(!src)return '';
   const latest=assetSkillLatest(src),homepage=/^https?:\/\//i.test(src.homepage||'')?src.homepage:'';
-  const date=v=>{const d=new Date(v);return v&&!Number.isNaN(d.getTime())?d.toLocaleDateString('zh-CN'):'—'};
+  const date=v=>{const d=new Date(v);return v&&!Number.isNaN(d.getTime())?d.toLocaleDateString('en-US'):'—'};
   return `<dt>来源</dt><dd>${homepage?`<a href="${escapeHTML(homepage)}" target="_blank" rel="noopener noreferrer">SkillHub · ${escapeHTML(src.slug)}</a>`:`SkillHub · ${escapeHTML(src.slug)}`}</dd><dt>版本</dt><dd>v${escapeHTML(src.version)}${latest&&latest!==src.version?` · 最新 v${escapeHTML(latest)}`:''}</dd><dt>安装于</dt><dd>${escapeHTML(date(src.installedAt))}</dd>${src.updatedAt&&src.updatedAt!==src.installedAt?`<dt>更新于</dt><dd>${escapeHTML(date(src.updatedAt))}</dd>`:''}`;
 }
 function assetSkillSourceActionHTML(a){

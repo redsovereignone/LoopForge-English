@@ -25,8 +25,8 @@ export const engineModels = (models, engine) =>
 // Mirrors assistantEngineMissingKey in internal/httpapi/assistant_engines.go;
 // credentialHint turns it into a "去配置" button.
 export function engineMissingKeyMessage(engine) {
-  if (engine.id === defaultEngine) return "请先在个人配置中配置自己的 CodeBuddy API Key";
-  return `请先在个人配置中配置 ${engine.name} API Key 后再使用 ${engine.name} 模型`;
+  if (engine.id === defaultEngine) return "Set your own CodeBuddy API key in Personal settings first";
+  return `Please configure your ${engine.name} API Key in personal settings before use ${engine.name} Model`;
 }
 
 // CLIs a session Executor can name when the reply was saved before model prefixes.
@@ -61,7 +61,7 @@ export function conversationEngine(messages, models = [], legacyExecutor = "") {
 }
 
 export function engineDetail(engine, models) {
-  if (!engine.configured) return `未配置 ${engine.name} API Key，选择后去个人配置填写`;
+  if (!engine.configured) return `Not configured ${engine.name} API Key. After selecting, go to personal settings to fill it in`;
   const count = engineModels(models, engine.id).length;
-  return count ? `${count} 个可用模型` : "暂无可用模型";
+  return count ? `${count} available models` : "No available models";
 }

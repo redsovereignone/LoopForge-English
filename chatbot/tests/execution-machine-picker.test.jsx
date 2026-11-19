@@ -21,7 +21,7 @@ function fixture(overrides = {}) {
 }
 
 async function openPicker() {
-  const trigger = screen.getByRole("button", { name: /^执行机器：/ });
+  const trigger = screen.getByRole("button", { name: /^Runner: / });
   trigger.getBoundingClientRect = () => ({
     top: 500,
     bottom: 528,
@@ -39,7 +39,7 @@ describe("execution machine picker", () => {
   test("an existing empty cloud draft still offers machine selection", async () => {
     render(<ExecutionMachinePicker chat={fixture({session:{id:"draft",messages:[],executionTarget:{pool:"cloud"}}})} />);
     const { user } = await openPicker();
-    await user.click(screen.getByRole("option", { name: /测试 Linux 离线/ }));
+    await user.click(screen.getByRole("option", { name: /测试 Linux Offline/ }));
   });
   test("shows the real personal default, searches bound machines and persists the choice", async () => {
     const chat = fixture();
@@ -54,14 +54,14 @@ describe("execution machine picker", () => {
     );
     await user.type(screen.getByRole("combobox"), "Linux");
     expect(
-      screen.queryByRole("option", { name: /LoopForge 云端/ }),
+      screen.queryByRole("option", { name: /LoopForge cloud/ }),
     ).not.toBeInTheDocument();
     await user.clear(screen.getByRole("combobox"));
     await user.type(screen.getByRole("combobox"), "没有这台机器");
-    expect(screen.getByText("没有匹配的执行机器")).toBeInTheDocument();
+    expect(screen.getByText("No matching runners")).toBeInTheDocument();
     await user.clear(screen.getByRole("combobox"));
     await user.type(screen.getByRole("combobox"), "Linux");
-    await user.click(screen.getByRole("option", { name: /测试 Linux 离线/ }));
+    await user.click(screen.getByRole("option", { name: /测试 Linux Offline/ }));
     expect(chat.selectMachine).toHaveBeenCalledWith("linux");
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
@@ -71,10 +71,10 @@ describe("execution machine picker", () => {
       manage = vi.fn();
     render(<ExecutionMachinePicker chat={chat} onManage={manage} />);
     const { user } = await openPicker();
-    await user.click(screen.getByRole("option", { name: /LoopForge 云端/ }));
+    await user.click(screen.getByRole("option", { name: /LoopForge cloud/ }));
     expect(chat.selectMachine).toHaveBeenCalledWith("");
     await openPicker();
-    await user.click(screen.getByRole("option", { name: "管理执行机器" }));
+    await user.click(screen.getByRole("option", { name: "Manage runners" }));
     expect(manage).toHaveBeenCalledOnce();
   });
 
@@ -94,7 +94,7 @@ describe("execution machine picker", () => {
     expect(screen.getByText("开发 Mac")).toBeInTheDocument();
     expect(screen.queryByText("测试 Linux")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /^执行机器：/ }),
+      screen.queryByRole("button", { name: /^Runner: / }),
     ).not.toBeInTheDocument();
   });
 
@@ -111,7 +111,7 @@ describe("execution machine picker", () => {
         })}
       />,
     );
-    expect(screen.getByText("LoopForge 云端")).toBeInTheDocument();
+    expect(screen.getByText("LoopForge cloud")).toBeInTheDocument();
     expect(screen.queryByText("开发 Mac")).not.toBeInTheDocument();
   });
 
@@ -120,7 +120,7 @@ describe("execution machine picker", () => {
     (flag) => {
       render(<ExecutionMachinePicker chat={fixture({ [flag]: true })} />);
       expect(
-        screen.getByRole("button", { name: /^执行机器：/ }),
+        screen.getByRole("button", { name: /^Runner: / }),
       ).toBeDisabled();
     },
   );
@@ -129,11 +129,11 @@ describe("execution machine picker", () => {
     const chat = fixture({ machinesReady: false, machineError: "连接失败" });
     render(<ExecutionMachinePicker chat={chat} />);
     const { user, trigger } = await openPicker();
-    expect(trigger).toHaveTextContent("执行机器加载失败");
+    expect(trigger).toHaveTextContent("Could not load runners");
     expect(
-      screen.queryByRole("option", { name: /LoopForge 云端/ }),
+      screen.queryByRole("option", { name: /LoopForge cloud/ }),
     ).not.toBeInTheDocument();
-    await user.click(screen.getByRole("option", { name: "重新加载" }));
+    await user.click(screen.getByRole("option", { name: "Reload" }));
     expect(chat.refreshMachines).toHaveBeenCalledTimes(2);
   });
 
